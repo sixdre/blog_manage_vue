@@ -23,20 +23,40 @@
 				</el-select>
 			</el-form-item>
 			<el-form-item label="封面" class="uploadItem">
-				<el-upload class="avatar-uploader" action="http://localhost:7893/api/upload/addFile" :show-file-list="false" name="file" accept="image/*" :on-progress="handleUploadProgress" :on-success="handleUploadSuccess" :before-upload="beforeUpload">
+				<el-upload class="avatar-uploader" 
+					ref="upload"
+					action="http://localhost:7893/api/upload/addFile" 
+					:show-file-list="false" 
+					name="file" 
+					accept="image/*" 
+					:on-progress="handleUploadProgress" 
+					:on-success="handleUploadSuccess" 
+					:before-upload="beforeUpload">
 					<img v-if="form.img" :src="form.img" class="avatar">
 					<i v-else class="el-icon-plus avatar-uploader-icon"></i>
 				</el-upload>
 				<!-- <el-progress :percentage="percentage"></el-progress> -->
 			</el-form-item>
-			<el-form-item label="内容" prop="content" style="width:1250px;height:350px;" required>
-				<!-- <el-input type="textarea" v-model="form.content" placeholder="请输入内容"></el-input>  -->
+			<div class="content" style="height:400px;">
+				<label for="">内容</label>
+				<div class="quill_wrapper">
+					<quill-editor v-model="form.content"
+							ref="myQuillEditor"
+							:options="editorOption"
+							style="height:300px;">
+					</quill-editor>
+				</div>
+			</div>
+		
+			<!-- <el-form-item label="内容" prop="content" style="width:1250px;height:350px;" required>
 				<quill-editor v-model="form.content"
 						ref="myQuillEditor"
 						:options="editorOption"
 						style="height:300px;">
 				</quill-editor>
-			</el-form-item>
+			
+			
+			</el-form-item> -->
 			<el-form-item>
 				<el-button type="primary" @click="onSubmit">发布</el-button>
 			</el-form-item>
@@ -58,11 +78,11 @@ export default {
 	data() {
 		return {
 			form: {
-				title: '',
-				abstract: '',
+				title: '111',
+				abstract: 'test abstract',
 				category: '',
 				tags: [],
-				content: '',
+				content: '1111111',
 				img:''
 			},
 			editorOption: {
@@ -98,11 +118,6 @@ export default {
 			'categories',
 			'tags',
 		]),
-
-		// avatar(){
-		//     // return '../../../static/avatar.jpeg'
-		//     return this.$store.state.user.avatar
-		// }
 	},
 	created() {
 		if (!this.categories.length) {
@@ -130,10 +145,6 @@ export default {
 			this.percentage = event.percent
 		},
 		beforeUpload(file) {
-			
-			// var img = new Image();  
-			// img.src = URL.createObjectURL(file);
-			// console.log(img.width)
 			const isLt2M = file.size / 1024 / 1024 < 2;
 			if (!isLt2M) {
 				this.$message.error('上传图片大小不能超过 2MB!');
@@ -150,10 +161,11 @@ export default {
 							message: res.data.message,
 							type: 'success'
 						});
+						this.$refs['upload'].clearFiles()
 						this.$refs['form'].resetFields()
 						this.form.img = ''
 					} else {
-						this.$message.error(res.data.msg);
+						this.$message.error(res.data.message);
 					}
 				} else {
 					return false;
@@ -196,5 +208,27 @@ export default {
 	height: 160px;
 	display: block;
 
+}
+.content{
+	label{
+		width: 80px;
+		text-align: right;
+		vertical-align: middle;
+		float: left;
+		font-size: 14px;
+		color: #606266;
+		line-height: 40px;
+		padding: 0 12px 0 0;
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
+		&:before{
+			content: '*';
+			color: #f56c6c;
+			margin-right: 4px;
+		}
+	}
+	.quill_wrapper{
+		margin-left: 80px;
+	}
 }
 </style>

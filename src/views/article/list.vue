@@ -9,7 +9,7 @@
 					<el-input v-model="searchForm.title" placeholder="标题"></el-input>
 				</el-form-item>
 				<el-form-item label="状态">
-					<el-select v-model="searchForm.flag" placeholder="状态" @change="onSearch">
+					<el-select v-model="searchForm.flag" placeholder="状态">
 						<el-option label="全部" value="3"></el-option>
 						<el-option label="有效" value="2"></el-option>
 						<el-option label="草稿" value="1"></el-option>
@@ -18,6 +18,7 @@
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" icon="el-icon-search" size="small" @click="onSearch">查询</el-button>
+					<el-button type="primary" icon="el-icon-refresh" size="small" @click="onRefresh"></el-button>
 				</el-form-item>
 			</el-form>
 		</div>
@@ -73,6 +74,7 @@
 				 layout="total, prev, pager, next"
 				 background
 				 @current-change="pageChange" 
+				 :current-page.sync="pageParams.page"
 				 :page-size="pageParams.limit" 
 				 :total="pageParams.count" style="float:right;">
 			</el-pagination>
@@ -127,6 +129,17 @@ export default{
 		onSearch(){
 			this.pageParams.page=1;
 			this.getArticleList();
+		},
+		onRefresh(){
+			this.searchForm={
+				title:'',
+				flag:'3'
+			}
+			this.pageParams={
+				limit:5,
+				page:1,
+				count:null,
+			}
 		},
 		removeMulti(){
 			let ids = this.checkRows.map(item => item._id).toString();

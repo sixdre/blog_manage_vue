@@ -16,7 +16,7 @@ let imgBaseUrl = setting.imgBaseUrl;
 if (process.env.NODE_ENV == 'development') {
 	
 }else if(process.env.NODE_ENV == 'production'){
-	baseUrl = 'http://47.93.52.132:3000'
+	baseUrl = 'http://47.93.52.132:3003'
 }
 
 export default{

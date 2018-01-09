@@ -31,6 +31,9 @@
                 <el-form-item label="菜单图标" prop="icon">
 					<el-input v-model="form.icon" ></el-input>
 				</el-form-item>
+                <el-form-item label="排序" prop="sort">
+                    <el-input-number v-model="form.sort" controls-position="right" :min="1" :max="100"></el-input-number>
+				</el-form-item>
                   <el-form-item label="是否隐藏" prop="hidden">
 					<el-radio-group v-model="form.hidden">
                         <el-radio :label="false">否</el-radio>
@@ -57,9 +60,11 @@ export default{
                 name:'',
                 path:'',
                 pid:0,
+                sort:1,
                 icon:'',
                 hidden:0
-			},
+            },
+            menuId:'',
             menuList:[],
             addFormVisible:false,
             isEdit:false,
@@ -93,6 +98,7 @@ export default{
 				name:'',
                 path:'',
                 pid:0,
+                sort:1,
                 icon:'',
                 hidden:false
 			}
@@ -100,10 +106,11 @@ export default{
         handleEditDialog(data){
             this.isEdit = true;
             this.addFormVisible = true;
-            this.form.id = data.id;
+            this.menuId = data._id;
             this.form.name=data.name;
             this.form.path=data.path;
             this.form.icon=data.icon;
+            this.form.sort=data.sort; 
             this.form.hidden=data.hidden;
         },
         //创建菜单
@@ -131,7 +138,7 @@ export default{
         updateMenu(){
             this.$refs['form'].validate(async (valid) => {
 				if (valid) {
-					let res = await this.$Api.updateMenu(this.form)
+					let res = await this.$Api.updateMenu(this.menuId,this.form)
                     if(res.data.code==1){
                         this.$message({
                             showClose: true,
@@ -169,7 +176,7 @@ export default{
                     h('el-button',{attrs:{type:"text",style:'font-size:12px;padding:0 20px;'},on:{
                         click:($event)=>{
                             this.handleAddDialog();
-                            this.form.pid = data.id;
+                            this.form.pid = data._id;
                         }
                     }},'添加'),
                     h('el-button',{attrs:{type:"text",style:'font-size:12px;padding:0 20px;'},on:{
@@ -182,7 +189,7 @@ export default{
                             this.$confirm('确定删除吗?', '提示', {
                                 type: 'warning'
                             }).then(() => {
-                               this.removeMenu(data.id);
+                               this.removeMenu(data._id);
                             }).catch(() => {
 
                             });

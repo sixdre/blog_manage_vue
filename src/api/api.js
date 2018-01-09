@@ -1,5 +1,5 @@
 import $http from '@/services/http'
-
+import $config from '@/config/env'
 export default {
     /**
      * 登录
@@ -32,7 +32,25 @@ export default {
     getTagList() {
         return $http.get('/api/tags');
     },
-
+    getFileList(params) {
+         return $http.get('/api/allFiles',{params});
+    },
+    upload(formData,callback) {
+        let config = {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }
+        return $http({
+            method: 'post', url: '/api/upload/addFile', data: formData, config, onUploadProgress: function (progressEvent) {
+                if (progressEvent.lengthComputable) {
+                    callback(progressEvent)
+                }
+        } });
+    },
+    download(id) {
+        window.location.href = $config.baseUrl+"/api/download?id=" + id;
+    },
 
 
 
