@@ -54,16 +54,6 @@
                     }else{
                         this.$router.push('/')
                     }
-                    if(username=='benbenwll'){
-                        setTimeout(()=>{
-                            this.$notify({
-                                title: '提示',
-                                showClose: false,
-                                message: '欢迎前端勺子访问本网站!',
-                                type: 'success'
-                            });
-                        })
-                    }
                 }else{
                     this.$message.error(res.data.msg);
                 }

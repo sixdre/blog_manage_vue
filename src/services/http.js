@@ -5,7 +5,7 @@ import router from '@/router'
 import { Message  } from 'element-ui'
 
 // axios 配置
-axios.defaults.timeout = 5000
+axios.defaults.timeout = 30000
 axios.defaults.baseURL = $config.baseUrl;
 
 // http request 拦截器

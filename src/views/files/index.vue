@@ -23,7 +23,7 @@
 						<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
 						<!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> -->
 					</el-upload>
-					<el-progress :percentage="percentage"></el-progress>
+					<el-progress :percentage="percentage" :show-text="false"></el-progress>
 				</el-form-item>
 			</el-form>
 		</div>
@@ -53,7 +53,7 @@
 				<el-table-column width="150">
 					<template slot-scope="scope">
 						<el-button type="primary" size="mini" icon="el-icon-view"></el-button>
-						<el-button type="primary" size="mini" icon="el-icon-download" @click="download(scope.row._id)"></el-button>
+						<el-button type="primary" size="mini" icon="el-icon-download" @click="download(scope.row)"></el-button>
 						<!-- <i class="el-icon-view"></i>
 						<i class="el-icon-download"></i> -->
 						
@@ -149,8 +149,8 @@ export default {
 			}
 			// this.$refs.upload.submit();
 		},
-		download(id){
-			this.$Api.download(id);
+		download(item){
+			window.location.href = item.filepath;
 		},
 		handleProgress(event){
 			this.percentage = event.percent

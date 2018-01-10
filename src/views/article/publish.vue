@@ -163,6 +163,7 @@ export default {
 						});
 						this.$refs['upload'].clearFiles()
 						this.$refs['form'].resetFields()
+						this.form.content = ''
 						this.form.img = ''
 					} else {
 						this.$message.error(res.data.message);

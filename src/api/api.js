@@ -48,31 +48,6 @@ export default {
                 }
         } });
     },
-    download(id) {
-        window.location.href = $config.baseUrl+"/api/download?id=" + id;
-    },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     //创建权限
     createPermission(data) {
         return $http.post('/api/permission', data);
