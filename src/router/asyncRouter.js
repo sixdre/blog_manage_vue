@@ -77,6 +77,14 @@ const asyncRouter = [
             permission:[]
         },
 		component: r => require.ensure([], () => r(require('@/views/files/index')), 'files'),
+    },
+    {
+		path: '/tags',
+        name: 'tags',
+        meta:{
+            permission:[]
+        },
+		component: r => require.ensure([], () => r(require('@/views/tags/index')), 'tags'),
     }
     
 ]

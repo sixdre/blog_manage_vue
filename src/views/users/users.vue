@@ -18,7 +18,7 @@
 				</el-table-column>
 				<el-table-column prop="username" label="用户名称">
 					<template slot-scope="scope">
-						<el-badge v-if="scope.row.roleSuper" is-dot style="margin-top:5px;">
+						<el-badge v-if="scope.row.isAdmin" is-dot style="margin-top:5px;">
 							{{scope.row.username}}
 						</el-badge>
 						<span v-else>{{scope.row.username}}</span>
@@ -216,9 +216,7 @@ export default{
 		},
 		//删除用户
 		removeUser(id){
-			this.$confirm('确定删除吗?', '提示', {
-				type: 'warning',
-			}).then(async () => {
+			this.$removeDialog(async ()=>{
 				let res = await this.$Api.removeUser(id);
 				if(res.data.code===1){
 					this.$message({
@@ -230,13 +228,11 @@ export default{
 				}else{
 					this.$message.error(res.data.msg);
 				}
-			}).catch(() => {
-
-			});
+			})
 		},
 		//批量删除用户
 		removeUserMulti(){
-			let ids = this.selectUsers.map(item => item.id).toString();
+			let ids = this.selectUsers.map(item => item._id).toString();
 			this.removeUser(ids);
 		},
 		//创建用户

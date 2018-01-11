@@ -30,20 +30,13 @@
 				</el-table-column>
 				<el-table-column prop="title" label="标题">
 				</el-table-column>
-				<el-table-column label="分类">
-					<template slot-scope="scope">
-						{{scope.row.category.name}}
-					</template>
+				<el-table-column prop="category.name" label="分类">
 				</el-table-column>
-				<el-table-column label="浏览量">
-					<template slot-scope="scope">
-						{{scope.row.nums.pv}}
-					</template>
+				<el-table-column prop="nums.pv" label="浏览量" sortable>
 				</el-table-column>
 				<el-table-column label="封面">
 					<template slot-scope="scope">
 						<img v-if="scope.row.img" width="80" :src="scope.row.img" alt="">
-					
 					</template>
 				</el-table-column>
 				<el-table-column label="状态">
@@ -53,7 +46,7 @@
 						<el-tag type="warning" disable-transitions v-if="scope.row.status===0">已删除</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column prop="create_time" label="发布时间" >
+				<el-table-column prop="create_time" label="发布时间" sortable>
 					<template slot-scope="scope">
 						{{scope.row.create_time | moment}}
 					</template>
@@ -147,9 +140,7 @@ export default{
 		},
 		//删除当前记录
 		handleDel(id) {
-			this.$confirm('确认删除该记录吗?', '提示', {
-				type: 'warning'
-			}).then(async () => {
+			this.$removeDialog(async ()=>{
 				let res = await this.$Api.removeArticle(id);
 				if(res.data.code==1){
 					this.$message({
@@ -160,9 +151,7 @@ export default{
 				}else{
 					this.$message.error(res.data.message);
 				}
-			}).catch(() => {
-
-			});
+			})
 		},
 	}
 }

@@ -10,7 +10,7 @@
 			<el-form-item label="简介" prop="abstract" style="width:500px">
 				<el-input v-model="form.abstract" placeholder="请输入简介"></el-input>
 			</el-form-item>
-			<el-form-item label="类型" prop="category" style="width:500px" required>
+			<el-form-item label="分类" prop="category" style="width:500px" required>
 				<el-select v-model="form.category" placeholder="请选择类型" style="width:300px">
 					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item._id">
 					</el-option>
@@ -40,7 +40,7 @@
 			<div class="content" style="height:400px;">
 				<label for="">内容</label>
 				<div class="quill_wrapper">
-					<quill-editor v-model="form.content"
+					<quill-editor v-model="form.tagcontent"
 							ref="myQuillEditor"
 							:options="editorOption"
 							style="height:300px;">
@@ -82,7 +82,7 @@ export default {
 				abstract: 'test abstract',
 				category: '',
 				tags: [],
-				content: '1111111',
+				tagcontent: '1111111',
 				img:''
 			},
 			editorOption: {
@@ -109,7 +109,7 @@ export default {
 				title: [{ required: true, message: '请输入文章标题' }],
 				category: [{ required: true, message: '请选择文章类型' }],
 				tags: [{ type: 'array', required: true, message: '请选择文章标签' }],
-				content: [{ required: true, message: '请输入文章内容' }]
+				tagcontent: [{ required: true, message: '请输入文章内容' }]
 			},
 		}
 	},
@@ -163,7 +163,7 @@ export default {
 						});
 						this.$refs['upload'].clearFiles()
 						this.$refs['form'].resetFields()
-						this.form.content = ''
+						this.form.tagcontent = ''
 						this.form.img = ''
 					} else {
 						this.$message.error(res.data.message);

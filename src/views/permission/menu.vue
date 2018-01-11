@@ -3,7 +3,7 @@
         <el-card>
             <div slot="header" class="clearfix">
                 <span>菜单列表</span>
-                <el-button style="float: right; padding: 3px 0" @click="handleAddDialog" type="text">创建一级菜单</el-button>
+                <el-button style="float: right; padding: 3px 0" @click="handleAddDialog" type="text">创建菜单</el-button>
             </div>
             <el-tree :data="menuList"
                 default-expand-all 
@@ -31,10 +31,21 @@
                 <el-form-item label="菜单图标" prop="icon">
 					<el-input v-model="form.icon" ></el-input>
 				</el-form-item>
+                <el-form-item label="所属父级" prop="pid" >
+                    <el-select v-model="form.pid" placeholder="请选择">
+                        <el-option
+                        v-for="item in parents"
+                        :key="item.name"
+                        :label="item.name"
+                        :value="item._id">
+                        </el-option>
+                    </el-select>
+				</el-form-item>
                 <el-form-item label="排序" prop="sort">
                     <el-input-number v-model="form.sort" controls-position="right" :min="1" :max="100"></el-input-number>
 				</el-form-item>
-                  <el-form-item label="是否隐藏" prop="hidden">
+                
+                <el-form-item label="是否隐藏" prop="hidden">
 					<el-radio-group v-model="form.hidden">
                         <el-radio :label="false">否</el-radio>
                         <el-radio :label="true">是</el-radio>
@@ -59,13 +70,14 @@ export default{
             form:{
                 name:'',
                 path:'',
-                pid:0,
+                pid:'0',
                 sort:1,
                 icon:'',
                 hidden:0
             },
             menuId:'',
             menuList:[],
+            parents:[],
             addFormVisible:false,
             isEdit:false,
             defaultProps: {
@@ -90,6 +102,7 @@ export default{
         async getMenus(){
             let res = await this.$Api.getMenuList()
             this.menuList = res.data.data;
+            this.parents = res.data.parents;
         },
         handleAddDialog(){
             this.isEdit = false;
@@ -97,7 +110,7 @@ export default{
 			this.form={
 				name:'',
                 path:'',
-                pid:0,
+                pid:'0',
                 sort:1,
                 icon:'',
                 hidden:false
@@ -107,6 +120,7 @@ export default{
             this.isEdit = true;
             this.addFormVisible = true;
             this.menuId = data._id;
+            this.form.pid=data.pid; 
             this.form.name=data.name;
             this.form.path=data.path;
             this.form.icon=data.icon;

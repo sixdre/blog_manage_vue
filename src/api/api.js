@@ -28,9 +28,25 @@ export default {
     getCategoryList() {
         return $http.get('/api/categories');
     },
+    //添加分类
+    createCategory(name) {
+         return $http.post('/api/categories',{name});
+    },
+    //删除分类
+    removeCategory(id) {
+        return $http.delete('/api/categories/'+id);
+    },
     //获取标签列表
     getTagList() {
         return $http.get('/api/tags');
+    },
+    //添加标签
+    createTag(name) {
+         return $http.post('/api/tags',{name});
+    },
+    //删除标签
+    removeTag(id) {
+        return $http.delete('/api/tags/'+id);
     },
     getFileList(params) {
          return $http.get('/api/allFiles',{params});

@@ -55,7 +55,7 @@
                         this.$router.push('/')
                     }
                 }else{
-                    this.$message.error(res.data.msg);
+                    this.$message.error(res.data.message);
                 }
             },
             
