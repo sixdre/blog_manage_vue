@@ -11,11 +11,11 @@
       <tbody>
         <tr v-for="(item,index) in dataList" :key="index">
           <td>
-            <el-input :autofocus="true"  v-model="item.path"  v-if="editIndex===index"></el-input>
+            <input class="el-input__inner" v-focus  v-model="item.path"  v-if="editIndex===index"></input>
             <span v-else>{{item.path}}</span>
           </td>
           <td>
-             <el-input   v-model="item.value"  v-if="editIndex===index"></el-input>
+             <el-input v-model="item.value"  v-if="editIndex===index"></el-input>
              <span v-else>{{item.value}}</span>
           </td>
           <td>

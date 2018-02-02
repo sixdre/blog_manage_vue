@@ -11,14 +11,14 @@
 				<el-input v-model="form.abstract" placeholder="请输入简介"></el-input>
 			</el-form-item>
 			<el-form-item label="分类" prop="category" style="width:500px" required>
-				<el-select v-model="form.category" placeholder="请选择类型" style="width:300px">
-					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item._id">
+				<el-select @change="changeCategory" v-model="form.category" allow-create filterable default-first-option placeholder="请选择类型" style="width:300px">
+					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
 			</el-form-item>
 			<el-form-item label="标签" prop="tags" style="width:500px" required>
-				<el-select v-model="form.tags" multiple placeholder="请选择标签" style="width:300px">
-					<el-option v-for="item in tags" :key="item._id" :label="item.name" :value="item._id">
+				<el-select @change="changeTag" v-model="form.tags" allow-create filterable default-first-option multiple placeholder="请选择标签" style="width:300px">
+					<el-option v-for="item in tags" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
 			</el-form-item>
@@ -86,6 +86,7 @@ export default {
 				img:''
 			},
 			editorOption: {
+				theme: 'snow', 
 				modules: {
 					toolbar: [
 						['bold', 'italic', 'underline', 'strike'],
@@ -132,6 +133,21 @@ export default {
 			'getCategories',
 			'getTags'
 		]),
+		changeTag(val){
+			if(val.length){
+				var lastTag = val[val.length-1];
+				if(lastTag.length>10){
+					this.$message.error('请输入不得超过10个字符');
+					val.pop()
+				}
+			}
+		},
+		changeCategory(val){
+			if(val.length>10){
+				this.$message.error('请输入不得超过10个字符');
+				this.form.category = '';
+			}
+		},
 		handleUploadSuccess(res, file) {
 			if(res.code==1){
 				this.form.img = res.url;
@@ -152,26 +168,28 @@ export default {
 			return isLt2M;
 		},
 		onSubmit() {
-			this.$refs['form'].validate(async (valid) => {
-				if (valid) {
-					let res = await this.$Api.createArticle(this.form);
-					if (res.data.code === 1) {
-						this.$message({
-							showClose: true,
-							message: res.data.message,
-							type: 'success'
-						});
-						this.$refs['upload'].clearFiles()
-						this.$refs['form'].resetFields()
-						this.form.tagcontent = ''
-						this.form.img = ''
-					} else {
-						this.$message.error(res.data.message);
-					}
-				} else {
-					return false;
-				}
-			})
+			console.log(this.form)
+			//this.$Api.createArticle(this.form);
+			// this.$refs['form'].validate(async (valid) => {
+			// 	if (valid) {
+			// 		let res = await this.$Api.createArticle(this.form);
+			// 		if (res.data.code === 1) {
+			// 			this.$message({
+			// 				showClose: true,
+			// 				message: res.data.message,
+			// 				type: 'success'
+			// 			});
+			// 			this.$refs['upload'].clearFiles()
+			// 			this.$refs['form'].resetFields()
+			// 			this.form.tagcontent = ''
+			// 			this.form.img = ''
+			// 		} else {
+			// 			this.$message.error(res.data.message);
+			// 		}
+			// 	} else {
+			// 		return false;
+			// 	}
+			// })
 		}
 	}
 }
