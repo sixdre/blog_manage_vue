@@ -47,7 +47,7 @@
 					</quill-editor>
 				</div>
 			</div>
-		
+			
 			<!-- <el-form-item label="内容" prop="content" style="width:1250px;height:350px;" required>
 				<quill-editor v-model="form.content"
 						ref="myQuillEditor"
@@ -57,6 +57,15 @@
 			
 			
 			</el-form-item> -->
+			<el-form-item label="是否私有" prop="is_private" style="width:500px">
+				<el-tooltip :content="privateTip" placement="top">
+					<el-switch
+						v-model="form.is_private"
+						active-color="#13ce66">
+					</el-switch>
+				</el-tooltip>
+			</el-form-item>
+
 			<el-form-item>
 				<el-button type="primary" @click="onSubmit">发布</el-button>
 			</el-form-item>
@@ -81,6 +90,7 @@ export default {
 				title: '111',
 				abstract: 'test abstract',
 				category: '',
+				is_private:false,
 				tags: [],
 				tagcontent: '1111111',
 				img:''
@@ -119,6 +129,13 @@ export default {
 			'categories',
 			'tags',
 		]),
+		privateTip(){
+			if(this.form.is_private){
+				return '只本人可见'
+			}else{
+				return '公开'
+			}
+		}
 	},
 	created() {
 		if (!this.categories.length) {
@@ -170,26 +187,26 @@ export default {
 		onSubmit() {
 			console.log(this.form)
 			//this.$Api.createArticle(this.form);
-			// this.$refs['form'].validate(async (valid) => {
-			// 	if (valid) {
-			// 		let res = await this.$Api.createArticle(this.form);
-			// 		if (res.data.code === 1) {
-			// 			this.$message({
-			// 				showClose: true,
-			// 				message: res.data.message,
-			// 				type: 'success'
-			// 			});
-			// 			this.$refs['upload'].clearFiles()
-			// 			this.$refs['form'].resetFields()
-			// 			this.form.tagcontent = ''
-			// 			this.form.img = ''
-			// 		} else {
-			// 			this.$message.error(res.data.message);
-			// 		}
-			// 	} else {
-			// 		return false;
-			// 	}
-			// })
+			this.$refs['form'].validate(async (valid) => {
+				if (valid) {
+					let res = await this.$Api.createArticle(this.form);
+					if (res.data.code === 1) {
+						this.$message({
+							showClose: true,
+							message: res.data.message,
+							type: 'success'
+						});
+						this.$refs['upload'].clearFiles()
+						this.$refs['form'].resetFields()
+						this.form.tagcontent = ''
+						this.form.img = ''
+					} else {
+						this.$message.error(res.data.message);
+					}
+				} else {
+					return false;
+				}
+			})
 		}
 	}
 }

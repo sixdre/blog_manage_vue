@@ -16,6 +16,12 @@ export default {
   getRole() {
     return sessionStorage.getItem(setting.role)
   },
+  setAvatar(data) {
+    localStorage.setItem(setting.avatar, data)
+  },
+  getAvatar() {
+    return localStorage.getItem(setting.avatar)
+  },
   authenticated () {
     var t = sessionStorage.getItem(setting.userToken)
     return t && t.length > 0

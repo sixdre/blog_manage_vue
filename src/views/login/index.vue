@@ -47,7 +47,8 @@
                 if(res.data.code===1){
                     this.$store.commit('user/setName',username);
                     this.$store.commit('user/setToken', res.data.token);
-                    this.$store.commit('user/setRole', res.data.role.name);
+                    this.$store.commit('user/setRole', res.data.userInfo.role);
+                    this.$store.commit('user/setAvatar', res.data.userInfo.avatar);
                     let backUrl = this.$route.query.redirect;
                     if(backUrl){
                         this.$router.push(backUrl)
