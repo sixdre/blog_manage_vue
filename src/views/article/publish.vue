@@ -10,14 +10,14 @@
 			<el-form-item label="简介" prop="abstract" style="width:500px">
 				<el-input v-model="form.abstract" placeholder="请输入简介"></el-input>
 			</el-form-item>
-			<el-form-item label="分类" prop="category" style="width:500px" required>
-				<el-select @change="changeCategory" v-model="form.category" allow-create filterable default-first-option placeholder="请选择类型" style="width:300px">
+			<el-form-item label="分类" prop="category" style="width:500px">
+				<el-select @change="changeCategory" v-model="form.categoryName" allow-create filterable default-first-option placeholder="请选择类型" style="width:300px">
 					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="标签" prop="tags" style="width:500px" required>
-				<el-select @change="changeTag" v-model="form.tags" allow-create filterable default-first-option multiple placeholder="请选择标签" style="width:300px">
+			<el-form-item label="标签" prop="tags" style="width:500px">
+				<el-select @change="changeTag" v-model="form.tagNames" allow-create filterable default-first-option multiple placeholder="请选择标签" style="width:300px">
 					<el-option v-for="item in tags" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
@@ -57,6 +57,14 @@
 			
 			
 			</el-form-item> -->
+			<el-form-item label="允许评论" prop="allow_comment" style="width:500px">
+				<el-tooltip :content="commentTip" placement="top">
+					<el-switch
+						v-model="form.allow_comment"
+						active-color="#13ce66">
+					</el-switch>
+				</el-tooltip>
+			</el-form-item>
 			<el-form-item label="是否私有" prop="is_private" style="width:500px">
 				<el-tooltip :content="privateTip" placement="top">
 					<el-switch
@@ -67,7 +75,11 @@
 			</el-form-item>
 
 			<el-form-item>
-				<el-button type="primary" @click="onSubmit">发布</el-button>
+				<div  v-if="isUpdate" >
+					<el-button type="default" @click="onCancel">取消</el-button>
+					<el-button type="primary" @click="onUpdate">更新</el-button> 
+				</div>
+				<el-button v-else type="primary" @click="onSubmit">发布</el-button>
 			</el-form-item>
 		</el-form>
 	</section>
@@ -86,12 +98,14 @@ export default {
 	},
 	data() {
 		return {
+			articleId:'',
 			form: {
 				title: '111',
 				abstract: 'test abstract',
-				category: '',
+				categoryName: '',
 				is_private:false,
-				tags: [],
+				allow_comment:true,
+				tagNames: [],
 				tagcontent: '1111111',
 				img:''
 			},
@@ -118,8 +132,8 @@ export default {
 			percentage:0,
 			rules: {
 				title: [{ required: true, message: '请输入文章标题' }],
-				category: [{ required: true, message: '请选择文章类型' }],
-				tags: [{ type: 'array', required: true, message: '请选择文章标签' }],
+				// category: [{ required: true, message: '请选择文章类型' }],
+				// tags: [{ type: 'array', required: true, message: '请选择文章标签' }],
 				tagcontent: [{ required: true, message: '请输入文章内容' }]
 			},
 		}
@@ -129,15 +143,41 @@ export default {
 			'categories',
 			'tags',
 		]),
+		isUpdate(){
+			return this.articleId&&this.articleId.length===24;
+		},
 		privateTip(){
 			if(this.form.is_private){
 				return '只本人可见'
 			}else{
 				return '公开'
 			}
+		},
+		commentTip(){
+			if(this.form.allow_comment){
+				return '允许'
+			}else{
+				return '不允许'
+			}
 		}
 	},
 	created() {
+		let id = this.$route.query.id;
+		if(id){
+			this.$Api.getArticleInfo(id).then(res=>{
+				if(res.data.code===1){
+					this.articleId = res.data.data._id;
+					this.form.title = res.data.data.title;
+					this.form.categoryName = res.data.data.category.name;
+					this.form.tagNames = res.data.data.tagNames;
+					this.form.img = res.data.data.img;
+					this.form.abstract = res.data.data.abstract;
+					this.form.tagcontent = res.data.data.tagcontent;
+					this.form.is_private = res.data.data.is_private;
+					this.form.allow_comment = res.data.data.allow_comment;
+				}
+			})
+		}
 		if (!this.categories.length) {
 			this.getCategories();
 		}
@@ -184,9 +224,10 @@ export default {
 			}
 			return isLt2M;
 		},
+		onCancel(){
+			this.$router.push('/article/list');
+		},
 		onSubmit() {
-			console.log(this.form)
-			//this.$Api.createArticle(this.form);
 			this.$refs['form'].validate(async (valid) => {
 				if (valid) {
 					let res = await this.$Api.createArticle(this.form);
@@ -200,6 +241,27 @@ export default {
 						this.$refs['form'].resetFields()
 						this.form.tagcontent = ''
 						this.form.img = ''
+					} else {
+						this.$message.error(res.data.message);
+					}
+				} else {
+					return false;
+				}
+			})
+		},
+		onUpdate(){
+			this.$refs['form'].validate(async (valid) => {
+				if (valid) {
+					let res = await this.$Api.updateArticle(this.articleId,this.form);
+					if (res.data.code === 1) {
+						this.$message({
+							showClose: true,
+							message: res.data.message,
+							type: 'success'
+						});
+						setTimeout(()=>{
+							this.$router.push('/article/list');
+						},1000)
 					} else {
 						this.$message.error(res.data.message);
 					}

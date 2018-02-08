@@ -15,9 +15,17 @@ export default {
     getArticleList(params) {
          return $http.get('/api/articles',{params});
     },
+    //获取文章详情
+    getArticleInfo(id) {
+        return $http.get('/api/articles/'+id);
+    },
     //发表文章
     createArticle(data) {
         return $http.post('/api/articles', {article: data});
+    },
+    //更新文章
+    updateArticle(id,data) {
+        return $http.put('/api/articles/'+id, {article: data});
     },
     //删除文章
     removeArticle(id) {

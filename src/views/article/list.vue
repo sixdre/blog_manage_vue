@@ -53,7 +53,7 @@
 				</el-table-column>
 				<el-table-column label="操作" width="150">
 					<template slot-scope="scope">
-						<a :href="'http://localhost:7893/api/articles/'+scope.row._id" target="_blank">查看</a>
+						<router-link :to="{path: '/article/publish',query:{id:scope.row._id}}">查看</router-link>
 						<el-button type="danger" size="small" @click="handleDel(scope.row._id)">删除</el-button>
 					</template>
 				</el-table-column>
