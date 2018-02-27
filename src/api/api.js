@@ -5,7 +5,7 @@ export default {
      * 登录
      */
     login(username, password) {
-        return $http.post('/api/admin_login', { username: username, password: password });
+        return $http.post('/api/login', { username: username, password: password });
     },
     //获取登录用户信息
     getUserInfo() {
@@ -13,7 +13,7 @@ export default {
     },
     //获取文章列表
     getArticleList(params) {
-         return $http.get('/api/articles',{params});
+         return $http.get('/api/users/info/articles',{params});
     },
     //获取文章详情
     getArticleInfo(id) {
