@@ -26,18 +26,13 @@
 			<el-table :data="articles"  style="width: 100%;" @selection-change="selsChange">
 				<el-table-column type="selection" width="55">
 				</el-table-column>
-				<el-table-column type="index" width="60" label="排序">
+				<el-table-column prop="author.username" label="作者"  width="80">
 				</el-table-column>
 				<el-table-column prop="title" label="标题">
 				</el-table-column>
 				<el-table-column prop="category.name" label="分类">
 				</el-table-column>
 				<el-table-column prop="nums.pv" label="浏览量" sortable>
-				</el-table-column>
-				<el-table-column label="封面">
-					<template slot-scope="scope">
-						<img v-if="scope.row.img" width="80" :src="scope.row.img" alt="">
-					</template>
 				</el-table-column>
 				<el-table-column label="状态">
 					<template slot-scope="scope">
