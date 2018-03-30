@@ -28,6 +28,14 @@ const asyncRouter = [
         component: r => require.ensure([], () => r(require('@/views/article/list')), 'article'),
     },
     {
+		path: '/tags',
+        name: 'tags',
+        meta:{
+            permission:[]
+        },
+		component: r => require.ensure([], () => r(require('@/views/article/tags')), 'tags'),
+    },
+    {
 		path: '/permission',
         meta:{
             permission:[]
@@ -39,28 +47,28 @@ const asyncRouter = [
         meta:{
             permission:[]
         },
-		component: r => require.ensure([], () => r(require('@/views/permission/menu')), 'permission'),
+		component: r => require.ensure([], () => r(require('@/views/system/permission/menu')), 'permission'),
     },
     {
 		path: '/permission/list',
         meta:{
             permission:[]
         },
-		component: r => require.ensure([], () => r(require('@/views/permission/list')), 'permission'),
+		component: r => require.ensure([], () => r(require('@/views/system/permission/list')), 'permission'),
     },
     {
 		path: '/permission/role',
         meta:{
             permission:[]
         },
-		component: r => require.ensure([], () => r(require('@/views/permission/role')), 'role'),
+		component: r => require.ensure([], () => r(require('@/views/system/permission/role')), 'role'),
     },
     {
 		path: '/permission/allot',
         meta:{
             permission:[]
         },
-		component: r => require.ensure([], () => r(require('@/views/permission/allot')), 'permission'),
+		component: r => require.ensure([], () => r(require('@/views/system/permission/allot')), 'permission'),
     },
     {
 		path: '/users',
@@ -68,7 +76,7 @@ const asyncRouter = [
         meta:{
             permission:[]
         },
-		component: r => require.ensure([], () => r(require('@/views/users/users')), 'users'),
+		component: r => require.ensure([], () => r(require('@/views/system/users/users')), 'users'),
     },
     {
 		path: '/files',
@@ -76,15 +84,7 @@ const asyncRouter = [
         meta:{
             permission:[]
         },
-		component: r => require.ensure([], () => r(require('@/views/files/index')), 'files'),
-    },
-    {
-		path: '/tags',
-        name: 'tags',
-        meta:{
-            permission:[]
-        },
-		component: r => require.ensure([], () => r(require('@/views/tags/index')), 'tags'),
+		component: r => require.ensure([], () => r(require('@/views/system/files/index')), 'files'),
     },
      {
 		path: '/chat',

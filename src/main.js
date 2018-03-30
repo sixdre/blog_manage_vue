@@ -9,8 +9,13 @@ import api from './api/api'
 import store from './store'
 import ElementUI,{MessageBox} from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'
-import './filter/time'
+import { formValidate, hasPermission ,timeFormat } from '@/utils';
 
+Vue.filter('moment',timeFormat)
+
+Vue.use(ElementUI);
+Vue.use(formValidate);  //表单验证
+Vue.use(hasPermission)  //按钮权限
 
 Vue.use(ElementUI);
 
@@ -32,49 +37,10 @@ function removeDialog(title, cb1, cb2) {
     });
 }
 
+
 Vue.config.productionTip = false;
 Vue.prototype.$Api= api
 Vue.prototype.$removeDialog = removeDialog;
-
-Vue.directive('focus', {
-  // 当被绑定的元素插入到 DOM 中时……
-    inserted: function (el) {
-    // 聚焦元素
-    el.focus()
-  }
-})
-
-const hasPermission = {
-    // eslint-disable-next-line
-    //use example   v-if="hasPermission('post,/api/users')"
-    install (Vue, options){
-        Vue.mixin({
-            methods:{
-                hasPermission(data) {
-                    let per = data.split(','),
-                        method = per[0],
-                        url = per[1],
-                        flag = false,
-                        permissionList = this.$store.state.permission.resources;
-                    permissionList.forEach(function(s) {
-                        if (s.type == method&&s.resource == url) {
-                            flag = true;
-                            return;
-                        }
-                    })
-                    return flag;
-                }
-            }
-        })
-    }
-}
-
-
-Vue.use(hasPermission)
-
-
-
-
 
 new Vue({
   el: '#app',
