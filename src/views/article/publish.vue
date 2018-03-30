@@ -3,21 +3,26 @@
 		<div class="section_breadcrumb">
 			<strong class="title">文章发布</strong>
 		</div>
+		
 		<el-form ref="form" :model="form" :rules="rules" label-width="80px">
 			<el-form-item label="标题" prop="title" style="width:500px" required>
 				<el-input v-model="form.title" placeholder="请输入标题"></el-input>
 			</el-form-item>
-			<el-form-item label="简介" prop="abstract" style="width:500px">
-				<el-input v-model="form.abstract" placeholder="请输入简介"></el-input>
-			</el-form-item>
-			<el-form-item label="分类" prop="category" style="width:500px">
-				<el-select @change="changeCategory" v-model="form.categoryName" allow-create filterable default-first-option placeholder="请选择类型" style="width:300px">
+			<el-form-item label="分类" prop="categoryName" required style="width:500px">
+				<el-select @change="changeCategory" v-model="form.categoryName" allow-create filterable default-first-option placeholder="请选择文章的分类" style="width:300px">
 					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
 			</el-form-item>
+			<div class="content" style="margin-bottom:20px;">
+				<label for="">内容</label>
+				<x-editor :content.sync="form.content" ref="mdEditor"></x-editor>
+			</div>
+			<el-form-item label="简介" prop="abstract" style="width:600px">
+				<el-input type="textarea" :rows="3"  v-model="form.abstract" placeholder="选取文章的摘要"></el-input>
+			</el-form-item>
 			<el-form-item label="标签" prop="tags" style="width:500px">
-				<el-select @change="changeTag" v-model="form.tagNames" allow-create filterable default-first-option multiple placeholder="请选择标签" style="width:300px">
+				<el-select @change="changeTag" v-model="form.tagNames" allow-create filterable default-first-option multiple placeholder="选择标签(最多不超过3个)" style="width:300px">
 					<el-option v-for="item in tags" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
@@ -37,26 +42,7 @@
 				</el-upload>
 				<!-- <el-progress :percentage="percentage"></el-progress> -->
 			</el-form-item>
-			<div class="content" style="height:400px;">
-				<label for="">内容</label>
-				<div class="quill_wrapper">
-					<quill-editor v-model="form.tagcontent"
-							ref="myQuillEditor"
-							:options="editorOption"
-							style="height:300px;">
-					</quill-editor>
-				</div>
-			</div>
 			
-			<!-- <el-form-item label="内容" prop="content" style="width:1250px;height:350px;" required>
-				<quill-editor v-model="form.content"
-						ref="myQuillEditor"
-						:options="editorOption"
-						style="height:300px;">
-				</quill-editor>
-			
-			
-			</el-form-item> -->
 			<el-form-item label="允许评论" prop="allow_comment" style="width:500px">
 				<el-tooltip :content="commentTip" placement="top">
 					<el-switch
@@ -86,55 +72,26 @@
 </template>
 
 <script>
-import 'quill/dist/quill.core.css'
-import 'quill/dist/quill.snow.css'
-import 'quill/dist/quill.bubble.css'
-
-import { quillEditor } from 'vue-quill-editor'
+import xEditor from '@/components/editor'
 import { mapGetters, mapActions } from 'vuex';
 export default {
 	components: {
-		quillEditor
+		xEditor
 	},
 	data() {
 		return {
 			articleId:'',
 			form: {
-				title: '111',
-				abstract: 'test abstract',
-				categoryName: '',
 				is_private:false,
 				allow_comment:true,
 				tagNames: [],
-				tagcontent: '1111111',
-				img:''
-			},
-			editorOption: {
-				theme: 'snow', 
-				modules: {
-					toolbar: [
-						['bold', 'italic', 'underline', 'strike'],
-						['blockquote', 'code-block'],
-						[{ 'header': 1 }, { 'header': 2 }],
-						[{ 'list': 'ordered' }, { 'list': 'bullet' }],
-						[{ 'indent': '-1' }, { 'indent': '+1' }],
-						[{ 'direction': 'rtl' }],
-						[{ 'size': ['small', false, 'large', 'huge'] }],
-						[{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-						[{ 'color': [] }, { 'background': [] }],
-						[{ 'align': [] }],
-						['clean'],
-						['link', 'image', 'video']
-					]
-				},
-				placeholder: '输入文章内容',
+				content: '',
 			},
 			percentage:0,
 			rules: {
 				title: [{ required: true, message: '请输入文章标题' }],
-				// category: [{ required: true, message: '请选择文章类型' }],
-				// tags: [{ type: 'array', required: true, message: '请选择文章标签' }],
-				tagcontent: [{ required: true, message: '请输入文章内容' }]
+				categoryName: [{ required: true, message: '请选择文章分类' }],
+				content: [{ required: true, message: '请输入文章内容' }]
 			},
 		}
 	},
@@ -172,7 +129,7 @@ export default {
 					this.form.tagNames = res.data.data.tagNames;
 					this.form.img = res.data.data.img;
 					this.form.abstract = res.data.data.abstract;
-					this.form.tagcontent = res.data.data.tagcontent;
+					this.form.content = res.data.data.content;
 					this.form.is_private = res.data.data.is_private;
 					this.form.allow_comment = res.data.data.allow_comment;
 				}
@@ -192,9 +149,14 @@ export default {
 		]),
 		changeTag(val){
 			if(val.length){
-				var lastTag = val[val.length-1];
-				if(lastTag.length>10){
-					this.$message.error('请输入不得超过10个字符');
+				if(val.length<4){
+					var lastTag = val[val.length-1];
+					if(lastTag.length>10){
+						this.$message.error('请输入不得超过10个字符');
+						val.pop()
+					}
+				}else{
+					this.$message.error('最多只能选择3个标签');
 					val.pop()
 				}
 			}
@@ -228,6 +190,10 @@ export default {
 			this.$router.push('/article/list');
 		},
 		onSubmit() {
+			if(!this.form.content.length){
+				this.$message.error('请输入文章内容');
+				return
+			}
 			this.$refs['form'].validate(async (valid) => {
 				if (valid) {
 					let res = await this.$Api.createArticle(this.form);
@@ -239,8 +205,6 @@ export default {
 						});
 						this.$refs['upload'].clearFiles()
 						this.$refs['form'].resetFields()
-						this.form.tagcontent = ''
-						this.form.img = ''
 					} else {
 						this.$message.error(res.data.message);
 					}
@@ -261,7 +225,7 @@ export default {
 						});
 						setTimeout(()=>{
 							this.$router.push('/article/list');
-						},1000)
+						},500)
 					} else {
 						this.$message.error(res.data.message);
 					}

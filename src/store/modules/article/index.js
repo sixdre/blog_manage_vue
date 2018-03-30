@@ -18,28 +18,32 @@ const mutations = {
 }
 
 const actions = {
-   
-    getCategories({ commit }) {
-        return new Promise((resolve, reject) =>{
-            Api.getCategoryList().then((res) => {
-                // 存储权限列表
-                commit('setCategories', res.data.data);
-                resolve(res.data.data)
-            }).catch(() => {
-                reject()
-            })
+    getCategories({ state, commit }) {
+        return new Promise((resolve, reject) => {
+            // if (!state.categories.length) {
+                 Api.getCategoryList().then((res) => {
+                    // 存储权限列表
+                    commit('setCategories', res.data.data);
+                    resolve(res.data.data)
+                }).catch(() => {
+                    reject()
+                })
+            // }
+           
         })
     },
 
-    getTags({ commit }) {
-        return new Promise((resolve, reject) =>{
-            Api.getTagList().then((res) => {
-                // 存储权限列表
-                commit('setTags', res.data.data);
-                resolve(res.data.data)
-            }).catch(() => {
-                reject()
-            })
+    getTags({ state,commit }) {
+        return new Promise((resolve, reject) => {
+            // if (!state.tags.length) {
+                Api.getTagList().then((res) => {
+                    // 存储权限列表
+                    commit('setTags', res.data.data);
+                    resolve(res.data.data)
+                }).catch(() => {
+                    reject()
+                })
+            // } 
         })
     },
 

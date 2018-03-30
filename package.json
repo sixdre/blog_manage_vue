@@ -16,6 +16,7 @@
     "axios": "^0.16.2",
     "echarts": "^3.8.5",
     "element-ui": "^2.0.8",
+    "mditor": "^1.3.3",
     "moment": "^2.20.0",
     "nprogress": "^0.2.0",
     "vue": "^2.5.3",
