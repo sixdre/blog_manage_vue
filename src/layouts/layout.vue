@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container class="main_layout">
     <el-header>
       <header-component></header-component>
     </el-header>
@@ -7,9 +7,13 @@
       <el-aside style="width:auto;">
         <aside-component></aside-component>
       </el-aside>
-      <el-main>
-        <router-view></router-view>
-      </el-main>
+      <el-container>
+          <el-main>
+              <transition name="fade" mode="out-in">
+                  <router-view></router-view>
+              </transition>
+          </el-main>
+      </el-container>
     </el-container>
   </el-container>
 </template>
@@ -28,6 +32,10 @@ export default {
 </script>
 
 <style>
+.main_layout{
+  position: relative;
+  height: 100%;
+}
 .el-header,
 .el-footer {
   background-color: #242f42;

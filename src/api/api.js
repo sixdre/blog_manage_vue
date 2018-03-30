@@ -68,7 +68,9 @@ export default {
         return $http({
             method: 'post', url: '/api/upload/addFile', data: formData, config, onUploadProgress: function (progressEvent) {
                 if (progressEvent.lengthComputable) {
-                    callback(progressEvent)
+                    if (callback && typeof callback == 'function') {
+                        callback(progressEvent)
+                    }
                 }
         } });
     },

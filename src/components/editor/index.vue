@@ -1,8 +1,12 @@
 <template>
-    <textarea name="content" id="markDown_editor" ref="markDown_editor"/>
+	<div v-loading="loading" element-loading-text="文件上传中" element-loading-background="rgba(0, 0, 0, 0.5)">
+		 <textarea name="content" id="markDown_editor" ref="markDown_editor"/>
+	</div>
 </template>
 
 <script>
+import { Loading } from 'element-ui';
+import $ from 'jquery'
 import "mditor/dist/js/mditor.js"
 import "mditor/dist/css/mditor.css"
 export default {
@@ -11,7 +15,8 @@ export default {
     },
     data(){
         return {
-            mditor:null
+			mditor:null,
+			loading:false
         }
     },
 	mounted(){
@@ -23,6 +28,28 @@ export default {
 
     },
     methods:{
+		async uploadImg(file) {
+			if (file == null) {
+				return;
+			}
+			this.loading = true;
+			var name = file.name || 'screenshot.png';
+            name = name.replace(/\.(?:jpg|gif|png)$/i, ''); // clear ext
+            name = name.replace(/\W+/g, '_'); // clear unvalid chars
+			var formData = new FormData();
+			formData.append('file',file,name);
+			let res = await this.$Api.upload(formData);
+			if(res.data.code==1){
+				this.mditor.editor.insertBeforeText('![' + name + '](' + res.data.url + ")\n");
+				this.loading = false;
+				this.$message.success(res.data.message);
+			}else{
+				this.$message.error(res.data.message);
+			}
+		},
+		clear(){
+			this.mditor.value = "";
+		},
 		ready(){
 			var ctx = this;		
 			let e = this.$refs['markDown_editor'];
@@ -30,8 +57,20 @@ export default {
 			mditor.on('ready',()=>{
 				mditor.height = '550px';
 				var helpBtn = mditor.toolbar.getItem("help");	//帮助按钮点击
+				var imgBtn = mditor.toolbar.getItem('image');   //图片按钮点击
 				helpBtn.handler = function () {
 					return ;
+				};
+				imgBtn.handler = function () {
+					var accept = {
+						image: 'image/png, image/gif, image/jpg, image/jpeg',
+					};
+					var $file = $('<input type="file" accept="' + accept.image + '">');
+					$file.click();
+					$file.on('change', function () {
+						var file = this.files[0];
+						ctx.uploadImg(file);
+					});
 				};
 				mditor.value = ctx.content;
 				mditor.on('changed', function(){

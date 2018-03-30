@@ -9,7 +9,7 @@
 				<el-input v-model="form.title" placeholder="请输入标题"></el-input>
 			</el-form-item>
 			<el-form-item label="分类" prop="categoryName" required style="width:500px">
-				<el-select @change="changeCategory" v-model="form.categoryName" allow-create filterable default-first-option placeholder="请选择文章的分类" style="width:300px">
+				<el-select @change="changeCategory" v-model="form.categoryName" allow-create filterable placeholder="请选择文章的分类" style="width:300px">
 					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
@@ -85,6 +85,7 @@ export default {
 				is_private:false,
 				allow_comment:true,
 				tagNames: [],
+				categoryName:'',
 				content: '',
 			},
 			percentage:0,
@@ -204,7 +205,8 @@ export default {
 							type: 'success'
 						});
 						this.$refs['upload'].clearFiles()
-						this.$refs['form'].resetFields()
+						this.$refs['form'].resetFields();
+						this.$refs['mdEditor'].clear()
 					} else {
 						this.$message.error(res.data.message);
 					}
