@@ -13,7 +13,7 @@ export default {
     },
     //获取文章列表
     getArticleList(params) {
-         return $http.get('/api/users/info/articles',{params});
+         return $http.get('/api/articles/me',{params});
     },
     //获取文章详情
     getArticleInfo(id) {

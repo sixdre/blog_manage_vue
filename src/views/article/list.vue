@@ -9,7 +9,7 @@
 					<el-input v-model="searchForm.title" placeholder="标题"></el-input>
 				</el-form-item>
 				<el-form-item label="状态">
-					<el-select v-model="searchForm.flag" placeholder="状态">
+					<el-select v-model="searchForm.flag" clearable placeholder="状态">
 						<el-option label="全部" value="3"></el-option>
 						<el-option label="有效" value="2"></el-option>
 						<el-option label="草稿" value="1"></el-option>
@@ -26,22 +26,23 @@
 			<el-table :data="articles"  style="width: 100%;" @selection-change="selsChange">
 				<el-table-column type="selection" width="55">
 				</el-table-column>
-				<el-table-column prop="author.username" label="作者"  width="80">
+				<el-table-column prop="author.username" label="作者"  width="120">
 				</el-table-column>
-				<el-table-column prop="title" label="标题">
+				<el-table-column prop="title" label="标题" show-overflow-tooltip>
 				</el-table-column>
-				<el-table-column prop="category.name" label="分类">
+				<el-table-column prop="category.name" label="分类"  width="120">
 				</el-table-column>
-				<el-table-column prop="nums.pv" label="浏览量" sortable>
-				</el-table-column>
-				<el-table-column label="状态">
+				<el-table-column label="状态" width="120">
 					<template slot-scope="scope">
 						<el-tag type="success" disable-transitions v-if="scope.row.status===2">有效</el-tag>
 						<el-tag type="info" disable-transitions v-if="scope.row.status===1">草稿</el-tag>
 						<el-tag type="warning" disable-transitions v-if="scope.row.status===0">已删除</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column prop="create_time" label="发布时间" sortable>
+				<el-table-column prop="nums.pv" label="浏览量" sortable width="120">
+				</el-table-column>
+				
+				<el-table-column prop="create_time" label="发布时间" sortable  width="200">
 					<template slot-scope="scope">
 						{{scope.row.create_time | moment}}
 					</template>
@@ -80,7 +81,7 @@ export default{
 		return {
 			searchForm:{
 				title:'',
-				flag:'3'
+				flag:''
 			},
 			pageParams:{
 				limit:5,
@@ -128,6 +129,7 @@ export default{
 				page:1,
 				count:null,
 			}
+			this.getArticleList();
 		},
 		removeMulti(){
 			let ids = this.checkRows.map(item => item._id).toString();

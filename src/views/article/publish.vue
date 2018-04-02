@@ -21,8 +21,8 @@
 			<el-form-item label="简介" prop="abstract" style="width:600px">
 				<el-input type="textarea" :rows="3"  v-model="form.abstract" placeholder="选取文章的摘要"></el-input>
 			</el-form-item>
-			<el-form-item label="标签" prop="tags" style="width:500px">
-				<el-select @change="changeTag" v-model="form.tagNames" allow-create filterable default-first-option multiple placeholder="选择标签(最多不超过3个)" style="width:300px">
+			<el-form-item label="标签" prop="tags" style="width:600px">
+				<el-select  @change="changeTag" v-model="form.tagNames" :multiple-limit="3" allow-create filterable default-first-option multiple placeholder="选择标签(最多不超过3个)" style="width:300px">
 					<el-option v-for="item in tags" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
@@ -59,7 +59,18 @@
 					</el-switch>
 				</el-tooltip>
 			</el-form-item>
-
+			<el-form-item label="置顶" prop="top" style="width:500px">
+				<el-switch
+					v-model="form.top"
+					active-color="#13ce66">
+				</el-switch>
+			</el-form-item>
+			<el-form-item label="精华" prop="good" style="width:500px">
+				<el-switch
+					v-model="form.good"
+					active-color="#13ce66">
+				</el-switch>
+			</el-form-item>
 			<el-form-item>
 				<div  v-if="isUpdate" >
 					<el-button type="default" @click="onCancel">取消</el-button>
@@ -82,11 +93,13 @@ export default {
 		return {
 			articleId:'',
 			form: {
-				is_private:false,
-				allow_comment:true,
 				tagNames: [],
 				categoryName:'',
 				content: '',
+				is_private:false,
+				allow_comment:true,
+				top:false,
+				good:false
 			},
 			percentage:0,
 			rules: {
@@ -133,6 +146,8 @@ export default {
 					this.form.content = res.data.data.content;
 					this.form.is_private = res.data.data.is_private;
 					this.form.allow_comment = res.data.data.allow_comment;
+					this.form.top = res.data.data.top;
+					this.form.good = res.data.data.good;
 				}
 			})
 		}

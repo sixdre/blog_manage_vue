@@ -28,10 +28,10 @@
 			</el-form>
 		</div>
 		<div class="table_container">
-			<el-table :data="fileData"  style="width: 100%;" >
+			<el-table :data="fileData"  style="width: 100%;" height="460">
 				<el-table-column type="index" width="60" label="排序">
 				</el-table-column>
-				<el-table-column prop="filename" width="200" label="文件名称">
+				<el-table-column prop="filename" width="200" show-overflow-tooltip label="文件名称">
 				</el-table-column>
 				<el-table-column prop="filetype" width="150" label="文件类型">
 				</el-table-column>
@@ -62,17 +62,17 @@
 			</el-table>
 		</div>
 
-				<!--工具条-->
-		<el-col :span="24" class="toolbar">
-			<el-pagination 
-				 layout="total, prev, pager, next"
-				 background
-				 @current-change="pageChange" 
-				 :current-page.sync="pageParams.page"
-				 :page-size="pageParams.limit" 
-				 :total="pageParams.count" style="float:right;">
+		<!--工具条-->
+		<div class="toolbar clear">
+			<el-pagination layout="total, sizes,prev, pager, next,jumper"
+			 background @current-change="pageChange" 
+			  @size-change="pageSizeChange"
+			 :current-page.sync="pageParams.page" 
+			 :page-sizes="[10, 20, 50, 100]"
+			 :page-size="pageParams.limit" :total="pageParams.count" style="float:right;">
 			</el-pagination>
-		</el-col>	
+		</div>
+
 	</section>
 </template>
 
@@ -80,9 +80,7 @@
 export default {
 	data() {
 		return {
-			searchForm:{
-				filename:''
-			},
+			searchForm:{},
 			pageParams:{
 				limit:5,
 				page:1,
@@ -94,7 +92,7 @@ export default {
 		}
 	},
 	created(){
-		this.getFileList()
+		this.getData()
 	},
 	methods: { 
 		handleFileSize(size){
@@ -106,16 +104,21 @@ export default {
 			}
 		},
 		onSearch(){
-
+			this.getData()
 		},
 		pageChange(val){
 			this.pageParams.page = val;
-			this.getFileList();
+			this.getData();
 		},
-		async getFileList(){
+		pageSizeChange(val){
+			this.pageParams.limit = val;
+			this.getData();
+		},
+		async getData(){
 			let params = {
 				page:this.pageParams.page,
-				limit:this.pageParams.limit
+				limit:this.pageParams.limit,
+				filename:this.searchForm.filename
 			}
 			let res = await this.$Api.getFileList(params);
 			this.fileData = res.data.data;
@@ -143,7 +146,7 @@ export default {
 				this.$refs.upload.clearFiles();
 				this.percentage = 0;
 				this.pageParams.page = 1;
-				this.getFileList();
+				this.getData();
 			}else{
 				this.$message.error(res.data.message);
 			}

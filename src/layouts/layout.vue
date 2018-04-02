@@ -33,8 +33,9 @@ export default {
 
 <style>
 .main_layout{
-  position: relative;
+  position: absolute;
   height: 100%;
+  width: 100%;
 }
 .el-header,
 .el-footer {
