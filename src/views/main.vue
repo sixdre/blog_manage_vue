@@ -1,68 +1,143 @@
 <template>
-  <div>
-    <table>
-      <thead>
-        <tr>
-          <th>路径</th>
-          <th>值</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item,index) in dataList" :key="index">
-          <td>
-            <input class="el-input__inner" v-focus  v-model="item.path"  v-if="editIndex===index"></input>
-            <span v-else>{{item.path}}</span>
-          </td>
-          <td>
-             <el-input v-model="item.value"  v-if="editIndex===index"></el-input>
-             <span v-else>{{item.value}}</span>
-          </td>
-          <td>
-            <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleEdit(item,index)"></el-button>
-            <el-button type="primary" icon="el-icon-delete" size="mini"></el-button>
-            <el-button size="mini" round v-if="editIndex===index" @click="handleEditSave(item)">保存</el-button>
-            <el-button size="mini" round v-if="editIndex===index" @click="handleEditCancel">取消</el-button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+	<section class="section">
+        <div style="width:800px;height:500px" ref="chart1"></div>
+
+        <div style="width:800px;height:500px" ref="chart2"></div>
+	</section>
 </template>
 
 <script>
+
+import echarts from 'echarts';
+var barOption = {
+    title: {
+        text: '文章标签',
+        x: 'center'
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'shadow',
+            label: {
+                show: true
+            }
+        },
+        formatter: "{b} : {c}"
+    },
+    toolbox: {
+        show: false,
+        feature: {
+            dataView: { show: true, readOnly: false },
+            magicType: { show: true, type: ['line', 'bar'] },
+            restore: { show: true },
+            saveAsImage: { show: true }
+        }
+    },
+    xAxis: [
+        {
+            type: 'category',
+            data: []
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+        }
+    ],
+    series: [
+        {
+            name: '文章数',
+            type: 'bar',
+            itemStyle: {
+                normal: {
+                    color: '#ffb057'
+                }
+            },
+            data: [],
+        }
+    ]
+};
+var pieOption = {
+    title : {
+        text: '',
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{b} : {c} ({d}%)"
+    },
+    series : [
+        {
+            name: '统计',
+            type: 'pie',
+            radius : '55%',
+            data:[
+               
+            ],
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+};
+
+function initChart(dom){
+    return echarts.init(dom)
+}
+
+
 export default {
-  data() {
-    return {
-      dataList:[{
-        path:'/www',
-        value:'目录一'
-      },{
-        path:'/root',
-        value:'主目录'
-      }],
-      editIndex:'', //用于保存当前修改值得索引
-      editValue:''   //用于临时存储当前修改值
-    }
-  },
-  methods:{
-    handleEdit(item,index){
-      this.editIndex = index;
-      this.editValue = JSON.parse(JSON.stringify(item));
-      console.log(this.dataList)
+	data() {
+		return {
+			
+		}
+	},
+	created(){
+
     },
-    //保存修改
-    handleEditSave(item){
-      alert(JSON.stringify(item))
-      this.editIndex = '';
+    mounted(){
+        this.$nextTick(()=>{
+             this.getData()
+        })
     },
-    //修改取消操作
-    handleEditCancel(){
-       this.dataList[this.editIndex] = this.editValue;
-       this.editIndex = '';
-       this.editValue = '';
-      
-    }
-  }
+	methods: { 
+        setCategoryData(data){
+            let op = JSON.parse(JSON.stringify(pieOption));
+            op.title.text = '文章类型统计';
+			op.series[0].data = data.map(item=>{
+                return {
+                    name:item.name,
+                    value:item.count
+                }
+            });
+			return op;
+        },
+        setTagData(data){
+            let op = JSON.parse(JSON.stringify(barOption));
+            op.title.text = '文章标签';
+            op.xAxis[0].data = data.map(item=>item.name);
+			op.series[0].data = data.map(item=>item.count);
+			return op;
+		},
+        async getData(){
+            let res = await this.$Api.graph();
+            if (res.data.code === 1) {
+                let categoryData = res.data.data.cateGroup;
+                let tagData = res.data.data.tagGroup;
+                initChart(this.$refs.chart1).setOption(this.setCategoryData(categoryData));
+                initChart(this.$refs.chart2).setOption(this.setTagData(tagData));
+            }else{
+                this.$message.error(res.data.message);
+            }
+        }
+	}
 }
 </script>
+
+<style lang="less" scoped>
+
+</style>

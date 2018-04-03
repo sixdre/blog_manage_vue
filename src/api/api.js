@@ -1,6 +1,12 @@
 import $http from '@/services/http'
 import $config from '@/config/env'
 export default {
+
+    //首页统计
+    graph() {
+        return $http.get('/api/graph');
+    },    
+
     /**
      * 登录
      */
@@ -13,7 +19,7 @@ export default {
     },
     //获取文章列表
     getArticleList(params) {
-         return $http.get('/api/articles/me',{params});
+         return $http.get('/api/articles',{params});
     },
     //获取文章详情
     getArticleInfo(id) {

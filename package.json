@@ -13,6 +13,7 @@
     "test": "npm run unit && npm run e2e"
   },
   "dependencies": {
+    "@antv/g2": "^3.0.5-beta.6",
     "axios": "^0.16.2",
     "echarts": "^3.8.5",
     "element-ui": "^2.0.8",

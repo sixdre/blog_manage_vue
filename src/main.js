@@ -9,38 +9,39 @@ import api from './api/api'
 import store from './store'
 import ElementUI,{MessageBox} from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'
-import { formValidate, hasPermission ,timeFormat } from '@/utils';
+import { formValidate, timeFormat } from '@/utils';
+import common from '@/mixin'
 
-Vue.filter('moment',timeFormat)
-
+let MyPlugin = {
+    install (Vue, options){
+        Vue.prototype.$Api= api;
+        Vue.prototype.$removeDialog = function(title, cb1, cb2){
+            if (typeof title == 'function') {
+                cb1 = title
+                title = '确认删除该记录吗?';
+            } 
+            MessageBox.confirm(title, '提示', {
+                type: 'warning',
+            }).then(() => {
+                if (cb1&& typeof cb1=='function') {
+                    cb1();
+                }
+            }).catch(() => {
+                if (cb2&& typeof cb2=='function') {
+                    cb2();
+                }
+            });
+        };
+        Vue.prototype.form_rules = formValidate;
+        Vue.filter('moment',timeFormat);
+        Vue.mixin(common);
+    }
+};
 Vue.use(ElementUI);
-Vue.use(formValidate);  //表单验证
-Vue.use(hasPermission)  //按钮权限
-
-Vue.use(ElementUI);
-
-function removeDialog(title, cb1, cb2) {
-    if (typeof title == 'function') {
-        cb1 = title
-        title = '确认删除该记录吗?';
-    } 
-    MessageBox.confirm(title, '提示', {
-        type: 'warning',
-    }).then(() => {
-        if (cb1&& typeof cb1=='function') {
-            cb1();
-        }
-    }).catch(() => {
-        if (cb2&& typeof cb2=='function') {
-            cb2();
-        }
-    });
-}
-
+Vue.use(MyPlugin)  //插件(公共方法)
 
 Vue.config.productionTip = false;
-Vue.prototype.$Api= api
-Vue.prototype.$removeDialog = removeDialog;
+
 
 new Vue({
   el: '#app',

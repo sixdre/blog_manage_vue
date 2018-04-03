@@ -23,7 +23,7 @@
 			</el-form>
 		</div>
 		<div class="table_container">
-			<el-table :data="articles"  style="width: 100%;" @selection-change="selsChange">
+			<el-table :data="tableDatas"  style="width: 100%;" height="460" @selection-change="selsChange">
 				<el-table-column type="selection" width="55">
 				</el-table-column>
 				<el-table-column prop="author.username" label="作者"  width="120">
@@ -50,7 +50,7 @@
 				<el-table-column label="操作" width="150">
 					<template slot-scope="scope">
 						<router-link :to="{path: '/article/publish',query:{id:scope.row._id}}">查看</router-link>
-						<el-button type="danger" size="small" @click="handleDel(scope.row._id)">删除</el-button>
+						<el-button type="danger" size="small" @click="handleRemove(scope.row._id)">删除</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -58,10 +58,11 @@
 
 			<!--工具条-->
 		<el-col :span="24" class="toolbar">
-			<el-button size="small" @click="removeMulti" :disabled="!checkRows.length">批量删除</el-button>
+			<el-button size="small" @click="onRemoveMulti" :disabled="!selectRows.length">批量删除</el-button>
 			<el-pagination 
-				 layout="total, prev, pager, next"
+				 layout="total, sizes,prev, pager, next,jumper"
 				 background
+				 @size-change="pageSizeChange"
 				 @current-change="pageChange" 
 				 :current-page.sync="pageParams.page"
 				 :page-size="pageParams.limit" 
@@ -79,76 +80,32 @@
 export default{
 	data(){
 		return {
-			searchForm:{
-				title:'',
-				flag:''
-			},
-			pageParams:{
-				limit:5,
-				page:1,
-				count:null,
-			},
-			articles:[],
-			checkRows:[]
+			listApi:'getArticleList',
+			removeApi: 'removeArticle',		//删除api
+			tableDatas:[]
 		}
 	},
 	created(){
-		this.getArticleList()
+		this.renderTable()
 	},
 	methods:{
-		async getArticleList(){
-			let params = {
-				title:this.searchForm.title,
-				page:this.pageParams.page,
-				limit:this.pageParams.limit,
-				flag:this.searchForm.flag
+		async renderTable(){
+			let res = await this.getTableDatas();
+			if (res.data.code === 1) {
+				this.pageParams.count = res.data.total;
+				this.tableDatas = res.data.data;
+			} else {
+				this.$message.error(res.data.message);
 			}
-			let res = await this.$Api.getArticleList(params);
-			this.pageParams.count = res.data.total;
-			this.articles = res.data.data;
-		},
-		selsChange(val) {
-			this.checkRows = val;
-		},
-		pageChange(val){
-			this.pageParams.page = val;
-			this.getArticleList();
-		},
-		//查询
-		onSearch(){
-			this.pageParams.page=1;
-			this.getArticleList();
 		},
 		onRefresh(){
-			this.searchForm={
-				title:'',
-				flag:'3'
-			}
+			this.searchForm={}
 			this.pageParams={
 				limit:5,
 				page:1,
 				count:null,
 			}
-			this.getArticleList();
-		},
-		removeMulti(){
-			let ids = this.checkRows.map(item => item._id).toString();
-			this.handleDel(ids)
-		},
-		//删除当前记录
-		handleDel(id) {
-			this.$removeDialog(async ()=>{
-				let res = await this.$Api.removeArticle(id);
-				if(res.data.code==1){
-					this.$message({
-						message: res.data.message,
-						type: 'success'
-					});
-					this.getArticleList();
-				}else{
-					this.$message.error(res.data.message);
-				}
-			})
+			this.renderTable();
 		},
 	}
 }
