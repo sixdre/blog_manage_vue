@@ -28,7 +28,7 @@
 			</el-form>
 		</div>
 		<div class="table_container">
-			<el-table :data="fileData"  style="width: 100%;" height="460">
+			<el-table :data="tableDatas"  style="width: 100%;" height="460">
 				<el-table-column type="index" width="60" label="排序">
 				</el-table-column>
 				<el-table-column prop="filename" width="200" show-overflow-tooltip label="文件名称">
@@ -62,16 +62,19 @@
 			</el-table>
 		</div>
 
-		<!--工具条-->
-		<div class="toolbar clear">
-			<el-pagination layout="total, sizes,prev, pager, next,jumper"
-			 background @current-change="pageChange" 
-			  @size-change="pageSizeChange"
-			 :current-page.sync="pageParams.page" 
-			 :page-sizes="[10, 20, 50, 100]"
-			 :page-size="pageParams.limit" :total="pageParams.count" style="float:right;">
+			<!--工具条-->
+		<el-col :span="24" class="toolbar">
+			<el-pagination 
+				 layout="total, sizes,prev, pager, next,jumper"
+				 background
+				 @size-change="pageSizeChange"
+				 @current-change="pageChange" 
+				 :current-page.sync="pageParams.page"
+				 :page-size="pageParams.limit" 
+				 :total="pageParams.count" style="float:right;">
 			</el-pagination>
-		</div>
+		</el-col>	
+	
 
 	</section>
 </template>
@@ -80,21 +83,25 @@
 export default {
 	data() {
 		return {
-			searchForm:{},
-			pageParams:{
-				limit:5,
-				page:1,
-				count:null,
-			},
-			fileData:[],
 			fileList:[],
+			listApi:'getFileList',
+			removeApi: 'removeArticle',		//删除api
 			percentage:0
 		}
 	},
 	created(){
-		this.getData()
+		this.renderTable()
 	},
 	methods: { 
+		async renderTable(){
+			let res = await this.getTableDatas();
+			if (res.data.code === 1) {
+				this.pageParams.count = res.data.total;
+				this.tableDatas = res.data.data;
+			} else {
+				this.$message.error(res.data.message);
+			}
+		},
 		handleFileSize(size){
 			let kb = size/1024;
 			if(kb<1024){
@@ -102,27 +109,6 @@ export default {
 			}else{
 				return (kb/1024).toFixed(2)+'MB'
 			}
-		},
-		onSearch(){
-			this.getData()
-		},
-		pageChange(val){
-			this.pageParams.page = val;
-			this.getData();
-		},
-		pageSizeChange(val){
-			this.pageParams.limit = val;
-			this.getData();
-		},
-		async getData(){
-			let params = {
-				page:this.pageParams.page,
-				limit:this.pageParams.limit,
-				filename:this.searchForm.filename
-			}
-			let res = await this.$Api.getFileList(params);
-			this.fileData = res.data.data;
-			this.pageParams.count = res.data.count;
 		},
 		async submitUpload() {
 			var formData = new FormData();
@@ -146,7 +132,7 @@ export default {
 				this.$refs.upload.clearFiles();
 				this.percentage = 0;
 				this.pageParams.page = 1;
-				this.getData();
+				this.renderTable();
 			}else{
 				this.$message.error(res.data.message);
 			}

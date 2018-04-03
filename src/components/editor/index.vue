@@ -101,8 +101,7 @@ export default {
 					console.log('paste',event.clipboardData.types);
 				});
 				mditor.on('head-dblclick',function(){	//双击头部
-					// ctx.renderContent()
-					// console.log('head-dblclick');
+					 mditor.fullscreen = !mditor.fullscreen;
 				});
 				// mditor.viewer.value = mditor.editor.value;
 			});

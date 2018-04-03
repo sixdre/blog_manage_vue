@@ -5,6 +5,7 @@ const common = {
 			searchForm:{
 				
 			},
+			tableDatas:[],
 			pageParams: {
 				limit:8,
 				page:1,

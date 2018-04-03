@@ -82,7 +82,6 @@ export default{
 		return {
 			listApi:'getArticleList',
 			removeApi: 'removeArticle',		//删除api
-			tableDatas:[]
 		}
 	},
 	created(){
