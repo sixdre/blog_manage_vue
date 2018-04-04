@@ -54,17 +54,13 @@ export default {
 		]),
     },
     created() {
-		if (!this.categories.length) {
-			this.getCategories();
-		}
-		if (!this.tags.length) {
-			this.getTags();
+		if (!this.categories.length||!this.tags.length) {
+			this.getCateTag();
 		}
 	},
     methods: {
         ...mapActions('article', [
-			'getCategories',
-			'getTags'
+			'getCateTag'
         ]),
         handleRemoveCate(id) {
             this.$removeDialog(async ()=>{
@@ -74,7 +70,7 @@ export default {
 						message: res.data.message,
 						type: 'success'
 					});
-					this.getCategories();
+					this.getCateTag();
 				}else{
 					this.$message.error(res.data.message);
 				}
@@ -95,7 +91,7 @@ export default {
 						message: res.data.message,
 						type: 'success'
 					});
-					this.getCategories();
+					this.getCateTag();
 				}else{
 					this.$message.error(res.data.message);
 				}
@@ -113,7 +109,7 @@ export default {
 						message: res.data.message,
 						type: 'success'
 					});
-					this.getTags();
+					this.getCateTag();
 				}else{
 					this.$message.error(res.data.message);
 				}
@@ -134,7 +130,7 @@ export default {
 						message: res.data.message,
 						type: 'success'
 					});
-					this.getTags();
+					this.getCateTag();
 				}else{
 					this.$message.error(res.data.message);
 				}

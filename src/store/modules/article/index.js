@@ -18,35 +18,17 @@ const mutations = {
 }
 
 const actions = {
-    getCategories({ state, commit }) {
+    getCateTag({ state, commit }) {
         return new Promise((resolve, reject) => {
-            // if (!state.categories.length) {
-                 Api.getCategoryList().then((res) => {
-                    // 存储权限列表
-                    commit('setCategories', res.data.data);
-                    resolve(res.data.data)
-                }).catch(() => {
-                    reject()
-                })
-            // }
-           
+            Api.getCateAnTags().then((res) => {
+                commit('setCategories', res.data.data.categories);
+                commit('setTags', res.data.data.tags);
+                resolve(res.data.data)
+            }).catch(() => {
+                reject()
+            })
         })
     },
-
-    getTags({ state,commit }) {
-        return new Promise((resolve, reject) => {
-            // if (!state.tags.length) {
-                Api.getTagList().then((res) => {
-                    // 存储权限列表
-                    commit('setTags', res.data.data);
-                    resolve(res.data.data)
-                }).catch(() => {
-                    reject()
-                })
-            // } 
-        })
-    },
-
 }
 
 export default {

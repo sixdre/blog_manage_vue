@@ -32,6 +32,8 @@
 				</el-table-column>
 				<el-table-column prop="category.name" label="分类"  width="120">
 				</el-table-column>
+				<el-table-column prop="tagNames" label="标签"  width="200">
+				</el-table-column>
 				<el-table-column label="状态" width="120">
 					<template slot-scope="scope">
 						<el-tag type="success" disable-transitions v-if="scope.row.status===2">有效</el-tag>

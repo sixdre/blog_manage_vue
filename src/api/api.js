@@ -25,6 +25,10 @@ export default {
     getArticleInfo(id) {
         return $http.get('/api/articles/'+id);
     },
+    //获取文章类型和标签
+    getCateAnTags() {
+         return $http.get('/api/catetag');
+    },
     //发表文章
     createArticle(data) {
         return $http.post('/api/articles', {article: data});
@@ -33,7 +37,7 @@ export default {
     createDraft(data) {
         return $http.post('/api/draft', {article: data});
     },
-     //创建草稿
+     //获取草稿
     getDraft() {
         return $http.get('/api/me/drafts');
     },

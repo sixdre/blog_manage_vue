@@ -9,7 +9,7 @@
 				<el-input v-model="form.title" placeholder="请输入标题"></el-input>
 			</el-form-item>
 			<el-form-item label="分类" prop="categoryName" required style="width:500px">
-				<el-select @change="changeCategory" v-model="form.categoryName" allow-create filterable placeholder="请选择文章的分类" style="width:300px">
+				<el-select  v-model="form.categoryName" filterable placeholder="请选择文章的分类" style="width:300px">
 					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item.name">
 					</el-option>
 				</el-select>
@@ -85,6 +85,9 @@
 <script>
 import xEditor from '@/components/editor'
 import { mapGetters, mapActions } from 'vuex';
+
+var timer;
+
 export default {
 	components: {
 		xEditor
@@ -93,6 +96,7 @@ export default {
 		return {
 			articleId:'',
 			form: {
+				title:'',
 				tagNames: [],
 				categoryName:'',
 				content: '',
@@ -130,9 +134,38 @@ export default {
 			}else{
 				return '不允许'
 			}
+		},
+		article_title(){
+			return this.form.title;
+		},
+		article_content(){
+			return this.form.content;
 		}
 	},
+	watch:{
+		article_content(nvl,ovl){
+			if(nvl!==ovl){
+				if(timer){
+					clearTimeout(timer)
+				}
+				timer = setTimeout(()=>{
+					this.saveDraft()
+				},2000)
+			}
+		},
+		article_title(nvl,ovl){
+			if(nvl!==ovl){
+				if(timer){
+					clearTimeout(timer)
+				}
+				timer = setTimeout(()=>{
+					this.saveDraft()
+				},2000)
+			}
+		},
+	},
 	created() {
+		
 		let id = this.$route.query.id;
 		if(id){
 			this.$Api.getArticleInfo(id).then(res=>{
@@ -154,43 +187,32 @@ export default {
 			//没有id表示不更新文章，进入页面首先获取当前用户是否有未发布的草稿
 			this.$Api.getDraft().then(res=>{
 				if(res.data.code===1){
-					let data = res.data.data[0]
-					this.articleId = data._id;
-					this.form.title = data.title;
-					this.form.categoryName = data.categoryName;
-					this.form.tagNames = data.tagNames;
-					this.form.img = data.img;
-					this.form.abstract = data.abstract;
-					this.form.content = data.content;
-					this.form.is_private = data.is_private;
-					this.form.allow_comment = data.allow_comment;
-					this.form.top = data.top;
-					this.form.good = data.good;
+					if(res.data.has_draft){
+						let data = res.data.data[0]
+						this.articleId = data._id;
+						this.form.title = data.title;
+						this.form.categoryName = data.categoryName;
+						this.form.content = data.content;
+					}
 				}
 			})
 		}
-		if (!this.categories.length) {
-			this.getCategories();
+		if (!this.categories.length||!this.tags.length) {
+			this.getCateTag();
 		}
-		if (!this.tags.length) {
-			this.getTags();
-		}
+		// window.onkeydown=()=>{
+		// 	if(timer){
+		// 		clearTimeout(timer)
+		// 	}
+		// 	timer = setTimeout(()=>{
+		// 		this.saveDraft()
+		// 	},2000)
+		// }
 
-		var timer;
-		window.onkeydown=()=>{
-			if(timer){
-				clearTimeout(timer)
-			}
-			timer = setTimeout(()=>{
-				this.saveDraft()
-			},2000)
-		
-		}
 	},
 	methods: {
 		...mapActions('article', [
-			'getCategories',
-			'getTags'
+			'getCateTag'
 		]),
 		changeTag(val){
 			if(val.length){
@@ -206,12 +228,7 @@ export default {
 				}
 			}
 		},
-		changeCategory(val){
-			if(val.length>10){
-				this.$message.error('请输入不得超过10个字符');
-				this.form.category = '';
-			}
-		},
+
 		handleUploadSuccess(res, file) {
 			if(res.code==1){
 				this.form.img = res.url;
@@ -247,7 +264,7 @@ export default {
 					this.articleId = res.data.id;
 					this.$notify({
 						title:'成功',
-						message: '保存成功',
+						message: `保存于${res.data.time}`,
 						type: 'success',
 						duration:2000
 					});
