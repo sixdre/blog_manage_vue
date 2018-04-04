@@ -139,7 +139,7 @@ export default {
 				if(res.data.code===1){
 					this.articleId = res.data.data._id;
 					this.form.title = res.data.data.title;
-					this.form.categoryName = res.data.data.category.name;
+					this.form.categoryName = res.data.data.categoryName;
 					this.form.tagNames = res.data.data.tagNames;
 					this.form.img = res.data.data.img;
 					this.form.abstract = res.data.data.abstract;
@@ -150,12 +150,41 @@ export default {
 					this.form.good = res.data.data.good;
 				}
 			})
+		}else{
+			//没有id表示不更新文章，进入页面首先获取当前用户是否有未发布的草稿
+			this.$Api.getDraft().then(res=>{
+				if(res.data.code===1){
+					let data = res.data.data[0]
+					this.articleId = data._id;
+					this.form.title = data.title;
+					this.form.categoryName = data.categoryName;
+					this.form.tagNames = data.tagNames;
+					this.form.img = data.img;
+					this.form.abstract = data.abstract;
+					this.form.content = data.content;
+					this.form.is_private = data.is_private;
+					this.form.allow_comment = data.allow_comment;
+					this.form.top = data.top;
+					this.form.good = data.good;
+				}
+			})
 		}
 		if (!this.categories.length) {
 			this.getCategories();
 		}
 		if (!this.tags.length) {
 			this.getTags();
+		}
+
+		var timer;
+		window.onkeydown=()=>{
+			if(timer){
+				clearTimeout(timer)
+			}
+			timer = setTimeout(()=>{
+				this.saveDraft()
+			},2000)
+		
 		}
 	},
 	methods: {
@@ -204,6 +233,28 @@ export default {
 		},
 		onCancel(){
 			this.$router.push('/article/list');
+		},
+		//保存草稿
+		async saveDraft(){
+			let article={
+				id:this.articleId,
+				title:this.form.title,
+				content:this.form.content
+			}
+			if(this.form.content||this.form.title){
+				let res = await this.$Api.createDraft(article);
+				if (res.data.code === 1) {
+					this.articleId = res.data.id;
+					this.$notify({
+						title:'成功',
+						message: '保存成功',
+						type: 'success',
+						duration:2000
+					});
+				} else {
+					this.$message.error('保存出错');
+				}
+			}
 		},
 		onSubmit() {
 			if(!this.form.content.length){

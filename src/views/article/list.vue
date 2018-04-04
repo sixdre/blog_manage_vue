@@ -80,6 +80,9 @@
 export default{
 	data(){
 		return {
+			searchForm:{
+				flag:'2'
+			},
 			listApi:'getArticleList',
 			removeApi: 'removeArticle',		//删除api
 		}

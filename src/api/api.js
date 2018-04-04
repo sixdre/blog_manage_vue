@@ -29,6 +29,14 @@ export default {
     createArticle(data) {
         return $http.post('/api/articles', {article: data});
     },
+    //创建草稿
+    createDraft(data) {
+        return $http.post('/api/draft', {article: data});
+    },
+     //创建草稿
+    getDraft() {
+        return $http.get('/api/me/drafts');
+    },
     //更新文章
     updateArticle(id,data) {
         return $http.put('/api/articles/'+id, {article: data});
