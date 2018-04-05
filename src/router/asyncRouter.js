@@ -4,97 +4,96 @@
 // permission字段内容从后台获取，代表该页内部详细权限，以key:value形式存储
 
 
-const asyncRouter = [
-    {
+const asyncRouter = [{
         path: '/article',
         redirect: '/article/publish',
-        meta:{
-            permission:[]
+        meta: {
+            permission: []
         },
         component: r => require.ensure([], () => r(require('@/layouts/empty')), 'article'),
     },
     {
         path: '/article/publish',
-        meta:{
-            permission:[]
+        meta: {
+            permission: []
         },
         component: r => require.ensure([], () => r(require('@/views/article/publish')), 'article'),
     },
     {
         path: '/article/list',
-        meta:{
-            permission:[]
+        meta: {
+            permission: []
         },
         component: r => require.ensure([], () => r(require('@/views/article/list')), 'article'),
     },
     {
-		path: '/tags',
+        path: '/article/tags',
         name: 'tags',
-        meta:{
-            permission:[]
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/article/tags')), 'tags'),
+        component: r => require.ensure([], () => r(require('@/views/article/tags')), 'tags'),
     },
     {
-		path: '/permission',
-        meta:{
-            permission:[]
+        path: '/permission',
+        meta: {
+            permission: []
         },
         component: r => require.ensure([], () => r(require('@/layouts/empty')), 'permission'),
     },
     {
-		path: '/permission/menu',
-        meta:{
-            permission:[]
+        path: '/permission/menu',
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/system/permission/menu')), 'permission'),
+        component: r => require.ensure([], () => r(require('@/views/system/permission/menu')), 'permission'),
     },
     {
-		path: '/permission/list',
-        meta:{
-            permission:[]
+        path: '/permission/list',
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/system/permission/list')), 'permission'),
+        component: r => require.ensure([], () => r(require('@/views/system/permission/list')), 'permission'),
     },
     {
-		path: '/permission/role',
-        meta:{
-            permission:[]
+        path: '/permission/role',
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/system/permission/role')), 'role'),
+        component: r => require.ensure([], () => r(require('@/views/system/permission/role')), 'role'),
     },
     {
-		path: '/permission/allot',
-        meta:{
-            permission:[]
+        path: '/permission/allot',
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/system/permission/allot')), 'permission'),
+        component: r => require.ensure([], () => r(require('@/views/system/permission/allot')), 'permission'),
     },
     {
-		path: '/users',
+        path: '/users',
         name: 'users',
-        meta:{
-            permission:[]
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/system/users/users')), 'users'),
+        component: r => require.ensure([], () => r(require('@/views/system/users/users')), 'users'),
     },
     {
-		path: '/files',
+        path: '/files',
         name: 'files',
-        meta:{
-            permission:[]
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/system/files/index')), 'files'),
+        component: r => require.ensure([], () => r(require('@/views/system/files/index')), 'files'),
     },
-     {
-		path: '/chat',
+    {
+        path: '/chat',
         name: 'chat',
-        meta:{
-            permission:[]
+        meta: {
+            permission: []
         },
-		component: r => require.ensure([], () => r(require('@/views/chat/index')), 'chat'),
+        component: r => require.ensure([], () => r(require('@/views/chat/index')), 'chat'),
     }
-    
+
 ]
 
 

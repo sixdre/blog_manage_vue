@@ -6,7 +6,7 @@
 		
 		<el-form ref="form" :model="form" :rules="rules" label-width="80px">
 			<el-form-item label="标题" prop="title" style="width:500px" required>
-				<el-input v-model="form.title" placeholder="请输入标题"></el-input>
+				<el-input v-model="form.title" @input="editorChange" placeholder="请输入标题"></el-input>
 			</el-form-item>
 			<el-form-item label="分类" prop="categoryName" required style="width:500px">
 				<el-select  v-model="form.categoryName" filterable placeholder="请选择文章的分类" style="width:300px">
@@ -16,7 +16,7 @@
 			</el-form-item>
 			<div class="content" style="margin-bottom:20px;">
 				<label for="">内容</label>
-				<x-editor :content.sync="form.content" ref="mdEditor"></x-editor>
+				<x-editor :content.sync="form.content" @onChange="editorChange" ref="mdEditor"></x-editor>
 			</div>
 			<el-form-item label="简介" prop="abstract" style="width:600px">
 				<el-input type="textarea" :rows="3"  v-model="form.abstract" placeholder="选取文章的摘要"></el-input>
@@ -135,34 +135,6 @@ export default {
 				return '不允许'
 			}
 		},
-		article_title(){
-			return this.form.title;
-		},
-		article_content(){
-			return this.form.content;
-		}
-	},
-	watch:{
-		article_content(nvl,ovl){
-			if(nvl!==ovl){
-				if(timer){
-					clearTimeout(timer)
-				}
-				timer = setTimeout(()=>{
-					this.saveDraft()
-				},2000)
-			}
-		},
-		article_title(nvl,ovl){
-			if(nvl!==ovl){
-				if(timer){
-					clearTimeout(timer)
-				}
-				timer = setTimeout(()=>{
-					this.saveDraft()
-				},2000)
-			}
-		},
 	},
 	created() {
 		
@@ -172,8 +144,8 @@ export default {
 				if(res.data.code===1){
 					this.articleId = res.data.data._id;
 					this.form.title = res.data.data.title;
-					this.form.categoryName = res.data.data.categoryName;
-					this.form.tagNames = res.data.data.tagNames;
+					this.form.categoryName = res.data.data.category_name;
+					this.form.tagNames = res.data.data.tag_names;
 					this.form.img = res.data.data.img;
 					this.form.abstract = res.data.data.abstract;
 					this.form.content = res.data.data.content;
@@ -191,7 +163,6 @@ export default {
 						let data = res.data.data[0]
 						this.articleId = data._id;
 						this.form.title = data.title;
-						this.form.categoryName = data.categoryName;
 						this.form.content = data.content;
 					}
 				}
@@ -250,6 +221,14 @@ export default {
 		},
 		onCancel(){
 			this.$router.push('/article/list');
+		},
+		editorChange(value){
+			if(timer){
+				clearTimeout(timer)
+			}
+			timer = setTimeout(()=>{
+				this.saveDraft()
+			},5000)
 		},
 		//保存草稿
 		async saveDraft(){

@@ -74,7 +74,8 @@ export default {
 				};
 				mditor.value = ctx.content;
 				mditor.on('changed', function(){
-                    ctx.$emit('update:content', mditor.value);
+					ctx.$emit('update:content', mditor.value);
+					ctx.$emit('onChange',mditor.value)
 				});
 				var isMac = function() { return /macintosh|mac os x/i.test(navigator.userAgent); }();
 				mditor.toolbar.items.splice(0,0,{

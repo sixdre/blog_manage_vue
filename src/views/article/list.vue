@@ -26,13 +26,13 @@
 			<el-table :data="tableDatas"  style="width: 100%;" height="460" @selection-change="selsChange">
 				<el-table-column type="selection" width="55">
 				</el-table-column>
-				<el-table-column prop="author.username" label="作者"  width="120">
+				<el-table-column prop="author_name" label="作者"  width="120">
 				</el-table-column>
-				<el-table-column prop="title" label="标题" show-overflow-tooltip>
+				<el-table-column prop="title" label="标题" width="220" show-overflow-tooltip>
 				</el-table-column>
-				<el-table-column prop="category.name" label="分类"  width="120">
+				<el-table-column prop="category_name" label="分类"  width="120">
 				</el-table-column>
-				<el-table-column prop="tagNames" label="标签"  width="200">
+				<el-table-column prop="tag_names" label="标签"  width="200">
 				</el-table-column>
 				<el-table-column label="状态" width="120">
 					<template slot-scope="scope">
@@ -41,7 +41,7 @@
 						<el-tag type="warning" disable-transitions v-if="scope.row.status===0">已删除</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column prop="nums.pv" label="浏览量" sortable width="120">
+				<el-table-column prop="pv_num" label="浏览量" sortable width="120">
 				</el-table-column>
 				
 				<el-table-column prop="create_time" label="发布时间" sortable  width="200">
