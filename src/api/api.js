@@ -11,7 +11,11 @@ export default {
      * 登录
      */
     login(username, password) {
-        return $http.post('/api/login', { username: username, password: password });
+        return $http.post('/sys/login', { username: username, password: password });
+    },
+    //创建用户
+    createUser(data) {
+        return $http.post('/sys/regist', data);
     },
     //获取登录用户信息
     getUserInfo() {
@@ -144,10 +148,6 @@ export default {
     //获取用户列表
     getUsers({ page = 1, limit = 5 }) {
         return $http.get('/sys/users', { params: { page, limit } });
-    },
-    //创建用户
-    createUser(data) {
-        return $http.post('/sys/user/regist', data);
     },
     //删除用户
     removeUser(id) {
