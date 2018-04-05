@@ -26,30 +26,30 @@
 			<el-table :data="tableDatas"  style="width: 100%;" height="460" @selection-change="selsChange">
 				<el-table-column type="selection" width="55">
 				</el-table-column>
-				<el-table-column prop="author_name" label="作者"  width="120">
+				<el-table-column prop="author_name" label="作者" width="80">
 				</el-table-column>
 				<el-table-column prop="title" label="标题" width="220" show-overflow-tooltip>
 				</el-table-column>
-				<el-table-column prop="category_name" label="分类"  width="120">
+				<el-table-column prop="category_name" label="分类"  width="80">
 				</el-table-column>
-				<el-table-column prop="tag_names" label="标签"  width="200">
+				<el-table-column prop="tag_names" label="标签">
 				</el-table-column>
-				<el-table-column label="状态" width="120">
+				<el-table-column label="状态" width="80">
 					<template slot-scope="scope">
 						<el-tag type="success" disable-transitions v-if="scope.row.status===2">有效</el-tag>
 						<el-tag type="info" disable-transitions v-if="scope.row.status===1">草稿</el-tag>
 						<el-tag type="warning" disable-transitions v-if="scope.row.status===0">已删除</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column prop="pv_num" label="浏览量" sortable width="120">
+				<el-table-column prop="pv_num" label="浏览量">
 				</el-table-column>
 				
-				<el-table-column prop="create_time" label="发布时间" sortable  width="200">
+				<el-table-column prop="create_time" label="发布时间" sortable  width="160">
 					<template slot-scope="scope">
 						{{scope.row.create_time | moment}}
 					</template>
 				</el-table-column>
-				<el-table-column label="操作" width="150">
+				<el-table-column label="" width="150">
 					<template slot-scope="scope">
 						<router-link :to="{path: '/article/publish',query:{id:scope.row._id}}">查看</router-link>
 						<el-button type="danger" size="small" @click="handleRemove(scope.row._id)">删除</el-button>

@@ -1,7 +1,7 @@
 <template>
     <el-row class="app-header">
         <router-link to="/" style="color:#fff;">
-            1111
+            博客后台管理系统
         </router-link>
         <div class="userinfo">
             <el-dropdown trigger="click">

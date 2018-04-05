@@ -11,7 +11,7 @@
             </el-form>
         </div>
 		<div class="table_container">
-			<el-table :data="users" style="width: 100%;" @selection-change="selsChange">
+			<el-table :data="tableDatas" style="width: 100%;" height="460" @selection-change="selsChange">
 				<el-table-column type="selection" width="55" >
 				</el-table-column>
 				<el-table-column type="index" width="60" label="排序">
@@ -24,7 +24,7 @@
 						<span v-else>{{scope.row.username}}</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="roleName" label="角色名称">
+				<el-table-column prop="role_name" label="角色名称">
 				</el-table-column>
 				<el-table-column prop="createdAt" label="创建时间">
 					<template slot-scope="scope">
@@ -40,23 +40,27 @@
 					<template slot-scope="scope" v-if="!scope.row.roleSuper">
 						<el-button size="small" plain v-if="!scope.row.roleId" @click="handleRoleDialog(scope.row)">分配角色</el-button>
                         <el-button size="small" plain v-else @click="handleRoleDialog(scope.row)">修改角色</el-button>
-						<el-button size="small" type="danger" plain @click="removeUser(scope.row._id)">删除</el-button>
+						<el-button size="small" type="danger" plain @click="handleRemove(scope.row._id)">删除</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
 		</div>
 
-		<!--工具条-->
+
+			<!--工具条-->
 		<el-col :span="24" class="toolbar">
-			<el-button size="small" @click="removeUserMulti" :disabled="!selectUsers.length">批量删除</el-button>
+			<el-button size="small" @click="onRemoveMulti" :disabled="!selectRows.length">批量删除</el-button>
 			<el-pagination 
-				 layout="total, prev, pager, next"
+				 layout="total, sizes,prev, pager, next,jumper"
 				 background
-				 :page-size="pageParams.limit" 
+				 @size-change="pageSizeChange"
 				 @current-change="pageChange" 
+				 :current-page.sync="pageParams.page"
+				 :page-size="pageParams.limit" 
 				 :total="pageParams.count" style="float:right;">
 			</el-pagination>
 		</el-col>	
+
 
 		<!--新增用户界面弹框-->
         <el-dialog :visible.sync="addFormVisible" :close-on-click-modal="false">
@@ -64,6 +68,9 @@
                 <el-form-item label="用户名称" prop="username">
                     <el-input v-model="userForm.username" auto-complete="off"></el-input>
                 </el-form-item>
+				<el-form-item label="邮箱" prop="email">
+					<el-input v-model="userForm.email" auto-complete="off"></el-input>
+				</el-form-item>
 				<el-form-item label="密码" prop="password">
                     <el-input v-model="userForm.password" auto-complete="off"></el-input>
                 </el-form-item>
@@ -103,7 +110,7 @@
 			</el-form>
 		   	<div slot="footer" class="dialog-footer">
 				<el-button @click.native="dialogVisible = false">取消</el-button>
-				<el-button type="primary" @click.native="addSubmit">提交</el-button>
+				<el-button type="primary" @click.native="updateUserRole">提交</el-button>
 			</div>
 		</el-dialog>
 
@@ -115,36 +122,28 @@ export default{
 	data(){
 		return {
 			form:{
-				username:'',
-				userId:'',
 				roleId:''
 			},
 			userForm:{
-				username:'',
-				password:'',
-				roleId:''
-			},
-			pageParams:{
-				limit:8,
-				page:1,
-				count:null,
+
 			},
 			dialogVisible:false,
 			addFormVisible:false,
-			users:[],
+			tableDatas:[],
 			roles:[],
 			rules: {
 				username: [
 					{ required: true, message: '请输入用户名称', trigger: 'blur' }
 				],
+				email:[{
+					required: true, message: '请输入邮箱', trigger: 'blur' 
+				}],
 				password: [
 					{ required: true, message: '请输入密码', trigger: 'blur' }
 				],
-				roleId: [
-					{ required: true, message: '请选择角色分类' }
-				]
 			},
-			selectUsers:[]
+			listApi:'getUsers',
+			removeApi: 'removeUser',		//删除api
 		}
 	},
 	computed:{
@@ -157,9 +156,18 @@ export default{
 		}
 	},
 	created(){
-		this.getUsers();
+		this.renderTable();
 	},
 	methods:{
+		async renderTable(){
+			let res = await this.getTableDatas();
+			if (res.data.code === 1) {
+				this.pageParams.count = res.data.total;
+				this.tableDatas = res.data.data;
+			} else {
+				this.$message.error(res.data.message);
+			}
+		},
 		handleAddUserDialog(){
 			this.getRoles();
 			this.addFormVisible = true;
@@ -168,26 +176,9 @@ export default{
 			this.getRoles();
 			this.form.username=row.username;
 			this.form.userId=row._id;
-			this.form.roleId=row.roleId;
+			this.form.roleId=row.role_id;
 			this.dialogVisible = true;
 		},
-		pageChange(val){
-			this.pageParams.page = val;
-			this.getUsers();
-		},
-		selsChange(val) {
-			this.selectUsers = val;
-		},
-        //获取用户列表
-        async getUsers(){
-		    let res = await this.$Api.getUsers(this.pageParams);
-            if(res.data.code===1){
-				this.users = res.data.data;
-				this.pageParams.count = res.data.count;
-            }else{
-                this.$message.error(res.data.msg);
-            }
-        },
         //获取所有的角色
         async getRoles(){
 			if(this.roles.length>0){
@@ -200,40 +191,19 @@ export default{
                 this.$message.error(res.data.msg);
             }
         },
-		async addSubmit(){
+		async updateUserRole(){
 			let res = await this.$Api.updateUserRole(this.form.userId,this.form.roleId);
 			if(res.data.code===1){
                 this.$message({
                     showClose: true,
-                    message: res.data.msg,
+                    message: res.data.message,
                     type: 'success'
 				});
-				this.getUsers();
+				this.renderTable();
 				this.dialogVisible = false;
             }else{
-                this.$message.error(res.data.msg);
+                this.$message.error(res.data.message);
             }
-		},
-		//删除用户
-		removeUser(id){
-			this.$removeDialog(async ()=>{
-				let res = await this.$Api.removeUser(id);
-				if(res.data.code===1){
-					this.$message({
-						showClose: true,
-						message: res.data.msg,
-						type: 'success'
-					});
-					this.getUsers();
-				}else{
-					this.$message.error(res.data.msg);
-				}
-			})
-		},
-		//批量删除用户
-		removeUserMulti(){
-			let ids = this.selectUsers.map(item => item._id).toString();
-			this.removeUser(ids);
 		},
 		//创建用户
 		createUser(){
@@ -243,13 +213,13 @@ export default{
 					if(res.data.code===1){
 						this.$message({
 							showClose: true,
-							message: res.data.msg,
+							message: res.data.message,
 							type: 'success'
 						});
-						this.getUsers();
+						this.renderTable();
 						this.addFormVisible = false;
 					}else{
-						this.$message.error(res.data.msg);
+						this.$message.error(res.data.message);
 					}
 				}else{
 					return false;

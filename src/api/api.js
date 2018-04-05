@@ -4,8 +4,8 @@ export default {
 
     //首页统计
     graph() {
-        return $http.get('/api/graph');
-    },    
+        return $http.get('/sys/graph');
+    },
 
     /**
      * 登录
@@ -19,35 +19,35 @@ export default {
     },
     //获取文章列表
     getArticleList(params) {
-         return $http.get('/api/articles',{params});
+        return $http.get('/api/articles', { params });
     },
     //获取文章详情
     getArticleInfo(id) {
-        return $http.get('/api/articles/'+id);
+        return $http.get('/api/articles/' + id);
     },
     //获取文章类型和标签
     getCateAnTags() {
-         return $http.get('/api/catetag');
+        return $http.get('/api/catetag');
     },
     //发表文章
     createArticle(data) {
-        return $http.post('/api/articles', {article: data});
+        return $http.post('/api/articles', { article: data });
     },
     //创建草稿
     createDraft(data) {
-        return $http.post('/api/draft', {article: data});
+        return $http.post('/api/draft', { article: data });
     },
-     //获取草稿
+    //获取草稿
     getDraft() {
         return $http.get('/api/me/drafts');
     },
     //更新文章
-    updateArticle(id,data) {
-        return $http.put('/api/articles/'+id, {article: data});
+    updateArticle(id, data) {
+        return $http.put('/api/articles/' + id, { article: data });
     },
     //删除文章
     removeArticle(id) {
-         return $http.delete('/api/articles/'+id);
+        return $http.delete('/api/articles/' + id);
     },
 
     //获取分类列表
@@ -56,11 +56,11 @@ export default {
     },
     //添加分类
     createCategory(name) {
-         return $http.post('/api/categories',{name});
+        return $http.post('/api/categories', { name });
     },
     //删除分类
     removeCategory(id) {
-        return $http.delete('/api/categories/'+id);
+        return $http.delete('/api/categories/' + id);
     },
     //获取标签列表
     getTagList() {
@@ -68,89 +68,94 @@ export default {
     },
     //添加标签
     createTag(name) {
-         return $http.post('/api/tags',{name});
+        return $http.post('/api/tags', { name });
     },
     //删除标签
     removeTag(id) {
-        return $http.delete('/api/tags/'+id);
+        return $http.delete('/api/tags/' + id);
     },
     getFileList(params) {
-         return $http.get('/api/allFiles',{params});
+        return $http.get('/sys/allFiles', { params });
     },
-    upload(formData,callback) {
+    upload(formData, callback) {
         let config = {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         }
         return $http({
-            method: 'post', url: '/api/upload/addFile', data: formData, config, onUploadProgress: function (progressEvent) {
+            method: 'post',
+            url: '/sys/upload/addFile',
+            data: formData,
+            config,
+            onUploadProgress: function(progressEvent) {
                 if (progressEvent.lengthComputable) {
                     if (callback && typeof callback == 'function') {
                         callback(progressEvent)
                     }
                 }
-        } });
+            }
+        });
     },
     //创建权限
     createPermission(data) {
-        return $http.post('/api/permission', data);
+        return $http.post('/sys/permission', data);
     },
     //更新权限
-    updatePermission(id,data) {
-        return $http.put('/api/permissions/'+id, data);
+    updatePermission(id, data) {
+        return $http.put('/sys/permissions/' + id, data);
     },
     //获取权限列表
-    getPermissionList({page=1,limit=5,group=0}) {
-        return $http.get('/api/permissions',{params:{page,limit,group}});
+    getPermissionList({ page = 1, limit = 5, group = 0 }) {
+        return $http.get('/sys/permissions', { params: { page, limit, group } });
     },
     //保存角色权限
-    saveRolePermission( roleId, menuIds,permissionIds) {
-         return $http.post('/api/roles/'+roleId+'/permission', { menuIds,permissionIds});
+    saveRolePermission(roleId, menuIds, permissionIds) {
+        return $http.post('/sys/roles/' + roleId + '/permission', { menuIds, permissionIds });
     },
     //获取tree类型菜单
     getMenuList() {
-        return $http.get('/api/menus');
+        return $http.get('/sys/menus');
     },
     //创建菜单
     createMenu(data) {
-        return $http.post('/api/menus', data);
+        return $http.post('/sys/menus', data);
     },
     //删除菜单
     removeMenu(id) {
-        return $http.delete('/api/menus/'+id);
+        return $http.delete('/sys/menus/' + id);
     },
     //更新菜单
-    updateMenu(id,data) {
-        return $http.put('/api/menus/'+id,data);
+    updateMenu(id, data) {
+        return $http.put('/sys/menus/' + id, data);
     },
     //获取角色的权限
     getRolePermission(roleId) {
-         return $http.get('/api/roles/'+roleId+'/permission');
+        return $http.get('/sys/roles/' + roleId + '/permission');
     },
     //获取角色列表
     getRoles() {
-        return $http.get('/api/roles');
+        return $http.get('/sys/roles');
     },
     //创建角色
     createRole(name) {
-        return $http.post('/api/roles', { name });
+        return $http.post('/sys/roles', { name });
     },
     //获取用户列表
     getUsers({ page = 1, limit = 5 }) {
-        return $http.get('/api/users',{params:{page,limit}});
+        return $http.get('/sys/users', { params: { page, limit } });
     },
     //创建用户
     createUser(data) {
-        return $http.post('/api/users', data);
+        return $http.post('/sys/user/regist', data);
     },
     //删除用户
     removeUser(id) {
-        return $http.delete('/api/users/'+id);
+        return $http.delete('/sys/users/' + id);
     },
     //更新或分配用户的角色
     updateUserRole(userId, roleId) {
-        return $http.post('/api/users/role', { userId, roleId });
+        return $http.post('/sys/users/' + userId + '/role', { roleId });
     },
 
 }

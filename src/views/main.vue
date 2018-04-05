@@ -11,7 +11,7 @@
 import echarts from 'echarts';
 var barOption = {
     title: {
-        text: '文章标签',
+        text: '文章标签统计',
         x: 'center'
     },
     tooltip: {
@@ -118,7 +118,7 @@ export default {
         },
         setTagData(data){
             let op = JSON.parse(JSON.stringify(barOption));
-            op.title.text = '文章标签';
+            op.title.text = '文章标签统计';
             op.xAxis[0].data = data.map(item=>item.name);
 			op.series[0].data = data.map(item=>item.count);
 			return op;
