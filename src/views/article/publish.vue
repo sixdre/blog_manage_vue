@@ -76,7 +76,10 @@
 					<el-button type="default" @click="onCancel">取消</el-button>
 					<el-button type="primary" @click="onUpdate">更新</el-button> 
 				</div>
-				<el-button v-else type="primary" @click="onSubmit">发布</el-button>
+				<div  v-else>
+					<el-button type="default" @click="onGiveUpDraft">取消</el-button>
+					<el-button type="primary" @click="onSubmit">发布</el-button>
+				</div>
 			</el-form-item>
 		</el-form>
 	</section>
@@ -95,6 +98,7 @@ export default {
 	data() {
 		return {
 			articleId:'',
+			has_draft:false,		//是否有草稿
 			form: {
 				title:'',
 				tagNames: [],
@@ -119,7 +123,7 @@ export default {
 			'tags',
 		]),
 		isUpdate(){
-			return this.articleId&&this.articleId.length===24;
+			return this.articleId&&this.articleId.length===24&&!this.has_draft;
 		},
 		privateTip(){
 			if(this.form.is_private){
@@ -164,6 +168,7 @@ export default {
 						this.articleId = data._id;
 						this.form.title = data.title;
 						this.form.content = data.content;
+						this.has_draft = res.data.has_draft;
 					}
 				}
 			})
@@ -185,6 +190,14 @@ export default {
 		...mapActions('article', [
 			'getCateTag'
 		]),
+
+		reset(){
+			this.$refs['form'].resetFields();
+			this.articleId = null;
+			this.has_draft=false;
+			this.$refs['mdEditor'].clear()
+		},
+
 		changeTag(val){
 			if(val.length){
 				if(val.length<4){
@@ -222,6 +235,18 @@ export default {
 		onCancel(){
 			this.$router.push('/article/list');
 		},
+		//放弃编辑草稿
+		onGiveUpDraft(){
+			this.$removeDialog('确定放弃编辑此草稿吗？',async () => {
+                let res = await this.$Api.removeArticle(this.articleId);
+				if (res.data.code === 1) {
+					this.$message.success(res.data.message);
+					this.reset()
+				} else {
+					this.$message.error(res.data.message);
+				}
+            })
+		},
 		editorChange(value){
 			if(timer){
 				clearTimeout(timer)
@@ -241,6 +266,7 @@ export default {
 				let res = await this.$Api.createDraft(article);
 				if (res.data.code === 1) {
 					this.articleId = res.data.id;
+					this.has_draft = true;
 					this.$notify({
 						title:'成功',
 						message: `保存于${res.data.time}`,
