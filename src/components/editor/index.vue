@@ -6,7 +6,6 @@
 
 <script>
 import { Loading } from 'element-ui';
-import $ from 'jquery'
 import "mditor/dist/js/mditor.js"
 import "mditor/dist/css/mditor.css"
 export default {
@@ -53,7 +52,7 @@ export default {
 		ready(){
 			var ctx = this;		
 			let e = this.$refs['markDown_editor'];
-			var mditor = this.mditor = Mditor.fromTextarea(e);
+			var mditor = this.mditor = window.Mditor.fromTextarea(e);
 			mditor.on('ready',()=>{
 				mditor.height = '550px';
 				var helpBtn = mditor.toolbar.getItem("help");	//帮助按钮点击
@@ -61,17 +60,21 @@ export default {
 				helpBtn.handler = function () {
 					return ;
 				};
+
 				imgBtn.handler = function () {
 					var accept = {
 						image: 'image/png, image/gif, image/jpg, image/jpeg',
 					};
-					var $file = $('<input type="file" accept="' + accept.image + '">');
-					$file.click();
-					$file.on('change', function () {
-						var file = this.files[0];
-						ctx.uploadImg(file);
-					});
+					var $file = window.document.createElement('input')
+						$file.setAttribute('type','file')
+						$file.setAttribute('accept',accept.image)
+						$file.click();
+						$file.onchange = function(){
+							var file = this.files[0];
+							ctx.uploadImg(file);
+						}
 				};
+
 				mditor.value = ctx.content;
 				mditor.on('changed', function(){
 					ctx.$emit('update:content', mditor.value);
