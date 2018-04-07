@@ -81,7 +81,7 @@ export default {
     getFileList(params) {
         return $http.get('/sys/allFiles', { params });
     },
-    upload(formData, callback) {
+    addFile(formData, callback) {
         let config = {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -90,6 +90,26 @@ export default {
         return $http({
             method: 'post',
             url: '/sys/upload/addFile',
+            data: formData,
+            config,
+            onUploadProgress: function(progressEvent) {
+                if (progressEvent.lengthComputable) {
+                    if (callback && typeof callback == 'function') {
+                        callback(progressEvent)
+                    }
+                }
+            }
+        });
+    },
+    upload(formData, callback) {
+        let config = {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }
+        return $http({
+            method: 'post',
+            url: '/sys/upload',
             data: formData,
             config,
             onUploadProgress: function(progressEvent) {

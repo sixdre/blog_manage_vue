@@ -120,7 +120,7 @@ export default {
 			uploadFiles.forEach((file)=>{
 				formData.append('file',file.raw);
 			});
-			let res = await this.$Api.upload(formData,(p)=>{
+			let res = await this.$Api.addFile(formData,(p)=>{
 				let loaded = p.loaded,
 				total = p.total;
 				this.$nextTick(() =>{

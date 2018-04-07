@@ -30,7 +30,7 @@
 			<el-form-item label="封面" class="uploadItem">
 				<el-upload class="avatar-uploader" 
 					ref="upload"
-					action="http://localhost:7893/api/upload/addFile" 
+					action="http://localhost:7893/sys/upload/" 
 					:show-file-list="false" 
 					name="file" 
 					accept="image/*" 
