@@ -46,8 +46,7 @@
             </div>
         </div>
         <div class="copyright">
-            <p>联系方式：0531-68658677</p>
-            <p>Copyright © 2009–2017 Dribbble Holdings Ltd. All screenshots © their respective owners.</p>
+            <p>联系方式：1969716722@qq.com</p>
         </div>
     </div>
 </template>

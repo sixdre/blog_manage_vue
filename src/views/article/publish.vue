@@ -123,7 +123,7 @@ export default {
 			'tags',
 		]),
 		isUpdate(){
-			return this.articleId&&this.articleId.length===24&&!this.has_draft;
+			return this.articleId&&this.articleId.length===24;
 		},
 		privateTip(){
 			if(this.form.is_private){
