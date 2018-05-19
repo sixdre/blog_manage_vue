@@ -9,9 +9,11 @@ import store from './store'
 import { MessageBox } from 'element-ui';
 import { formValidate, timeFormat } from '@/utils';
 import common from '@/mixin'
+import rangeTime from '@/components/rangeTime'
 
 let MyPlugin = {
     install(Vue, options) {
+        Vue.component('rangeTime', rangeTime);
         Vue.prototype.$Api = api;
         Vue.prototype.$removeDialog = function(title, cb1, cb2) {
             if (typeof title == 'function') {

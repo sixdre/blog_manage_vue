@@ -9,18 +9,18 @@
 
 import setting from './setting'
 
-let baseUrl = setting.remoteHost; 
+let baseUrl = '';
 let routerMode = setting.routerMode;
 let imgBaseUrl = setting.imgBaseUrl;
 
 if (process.env.NODE_ENV == 'development') {
-	
-}else if(process.env.NODE_ENV == 'production'){
-	baseUrl = ''
+
+} else if (process.env.NODE_ENV == 'production') {
+    baseUrl = setting.remoteHost;
 }
 
-export default{
-	baseUrl,
-	routerMode,
-	imgBaseUrl
+export default {
+    baseUrl,
+    routerMode,
+    imgBaseUrl
 }

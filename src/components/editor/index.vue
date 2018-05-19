@@ -44,6 +44,7 @@ export default {
 				this.$message.success(res.data.message);
 			}else{
 				this.$message.error(res.data.message);
+				this.loading = false;
 			}
 		},
 		clear(){
@@ -74,8 +75,9 @@ export default {
 							ctx.uploadImg(file);
 						}
 				};
-
-				mditor.value = ctx.content;
+				ctx.$nextTick(()=>{
+					mditor.value = ctx.content;
+				})
 				mditor.on('changed', function(){
 					ctx.$emit('update:content', mditor.value);
 					ctx.$emit('onChange',mditor.value)

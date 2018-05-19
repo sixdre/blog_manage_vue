@@ -11,7 +11,7 @@
 		</div>
 
         <div class="table_container">
-			<el-table :data="permissionList"  style="width: 100%;">
+			<el-table class="my_table" :data="permissionList"  style="width: 100%;">
 				<el-table-column type="index" width="60" label="排序">
 				</el-table-column>
 				<el-table-column prop="name" label="权限名">

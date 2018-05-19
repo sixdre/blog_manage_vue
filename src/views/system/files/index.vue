@@ -1,8 +1,6 @@
 <template>
-	<section class="section">
-		<div class="section_breadcrumb">
-			<strong class="title">文件列表</strong>
-		</div>
+	<section class="section_content">
+		<h1 class="section_title">文件列表</h1>
 		<div class="search_toolbar">
 			<el-form :inline="true"  class="demo-form-inline">
 				<el-form-item >
@@ -28,7 +26,7 @@
 			</el-form>
 		</div>
 		<div class="table_container">
-			<el-table :data="tableDatas"  style="width: 100%;" height="460">
+			<el-table class="my_table" :data="tableDatas"  style="width: 100%;" height="460">
 				<el-table-column type="index" width="60" label="排序">
 				</el-table-column>
 				<el-table-column prop="filename" width="200" show-overflow-tooltip label="文件名称">

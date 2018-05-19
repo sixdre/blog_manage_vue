@@ -31,6 +31,7 @@
 					:show-file-list="false" 
 					name="file" 
 					accept="image/*" 
+					:headers="headers"
 					:on-progress="handleUploadProgress" 
 					:on-success="handleUploadSuccess" 
 					:before-upload="beforeUpload">
@@ -83,6 +84,7 @@
 </template>
 
 <script>
+import Auth from '@/services/auth'
 import xEditor from '@/components/editor'
 import { mapGetters, mapActions } from 'vuex';
 
@@ -94,17 +96,20 @@ export default {
 	},
 	data() {
 		return {
+			headers:{
+				'x-access-token':Auth.getToken()
+			},
 			articleId:'',
 			has_draft:false,		//是否有草稿
 			form: {
-				title:'',
 				tagNames: [],
 				categoryName:'',
 				content: '',
 				is_private:false,
 				allow_comment:true,
 				top:false,
-				good:false
+				good:false,
+				img:''
 			},
 			percentage:0,
 			rules: {
@@ -211,8 +216,10 @@ export default {
 		},
 
 		handleUploadSuccess(res, file) {
+			console.log(res)
 			if(res.code==1){
 				this.form.img = res.url;
+				console.log(this.form.img)
 			}else{
 				this.$message.error('文件上传失败');
 			}

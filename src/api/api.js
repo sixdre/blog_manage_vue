@@ -1,5 +1,4 @@
 import $http from '@/services/http'
-import $config from '@/config/env'
 export default {
 
     //首页统计
