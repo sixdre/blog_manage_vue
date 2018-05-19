@@ -1,21 +1,18 @@
 <template>
   <el-container class="main_layout">
-    <el-header>
-      <header-component></header-component>
-    </el-header>
+    <el-aside width="210px">
+      <aside-component></aside-component>
+    </el-aside>
     <el-container>
-      <el-aside style="width:auto;">
-        <aside-component></aside-component>
-      </el-aside>
-      <el-container>
-          <el-main>
-              <transition name="fade" mode="out-in">
-                  <router-view></router-view>
-              </transition>
-          </el-main>
-      </el-container>
+      <el-header>
+        <header-component></header-component>
+      </el-header>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
+
 </template>
 
 <script>
@@ -26,8 +23,6 @@ export default {
     headerComponent,
     asideComponent
   },
-
-
 }
 </script>
 
@@ -39,13 +34,18 @@ export default {
 }
 .el-header,
 .el-footer {
-  background-color: #242f42;
-  line-height: 60px;
+  background-color: #fff;
+  height: 70px !important;
 }
-
+.el-aside{
+  overflow: visible;
+}
 .el-main {
   background-color: #fff;
   color: #333;
-  padding: 10px;
+  padding:10px 30px;
+}
+.app-aside{
+  max-width: 212px !important;
 }
 </style>

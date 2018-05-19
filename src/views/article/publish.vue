@@ -1,9 +1,6 @@
 <template>
-	<section class="section">
-		<div class="section_breadcrumb">
-			<strong class="title">文章发布</strong>
-		</div>
-		
+	<section class="section_content">
+		<h1 class="section_title">文章发布</h1>
 		<el-form ref="form" :model="form" :rules="rules" label-width="80px">
 			<el-form-item label="标题" prop="title" style="width:500px" required>
 				<el-input v-model="form.title" @input="editorChange" placeholder="请输入标题"></el-input>

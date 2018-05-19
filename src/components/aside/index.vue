@@ -1,31 +1,148 @@
 <template>
-	<el-menu :router="true" background-color="#324157" class="el-menu-vertical-demo" :collapse="isCollapse" text-color="#fff" active-text-color="#ffd04b" style="height: 100%;" mode="vertical" :default-active="$route.path">
-		<nav-item :routes="navList"></nav-item>
-	</el-menu>
+	<div style="height: 100%;">
+		<div class="logo_div">
+			<h1 class="title">后台管理系统</h1>
+		</div>
+		<el-menu class="app_menu" 
+			:router="true"  
+			active-text-color="#28b779"
+			mode="vertical" 
+			:default-active="$route.path">
+			<template v-for="(item,index) in navList">
+				<el-submenu :index="item.name" v-if="item.child&&item.child.length>0" :key="index" :show-timeout="0" :hide-timeout="0">
+					<template slot="title">
+						<i v-if='item.icon' :class="item.icon"></i>
+						<span slot="title">{{item.name}} </span>
+					</template>
+					<el-menu-item v-for="(child,index) in item.child" v-if="!child.hidden" :key="index" :index="child.path">
+						<template slot="title">
+							<router-link :to="child.path" style="color:#666;">
+								<i v-if='child.icon' :class="child.icon"></i>
+								{{child.name}}
+							</router-link>
+						</template>
+					</el-menu-item>
+				</el-submenu>
+				<el-menu-item v-if="!item.child||!item.child.length" :key="index" :index="item.path">
+					<template slot="title">
+						<router-link :to="item.path" >
+							<i v-if='item.icon' :class="item.icon"></i>
+							{{ item.name}}
+						</router-link>
+					</template>
+				</el-menu-item>
+			</template>
+		</el-menu>
+	</div>
+	
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import navItem from './navItem.vue'
 export default {
-	components: { navItem },
-	data(){
-		return {
-			isCollapse:false
-		}
+    data(){
+        return {
+			
+        }
 	},
 	computed: {
-		// 使用对象展开运算符将 getter 混入 computed 对象中
 		...mapGetters([
-			'navList'
-		])
+            'navList'
+        ]),
+	},
+	methods: {
+		
 	}
 }
 </script>
 
-<style scoped>
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-	width: 202px;
-	min-height: 400px;
-}
+<style lang="less">
+@import url('../../assets/css/mixin.less');
+	.logo_div{
+		height: 70px;
+		line-height: 70px;
+		background-color: @info_color;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 210px;
+		z-index: 2;
+		.logo{
+			width: 32px;
+			height: auto;
+			vertical-align: middle;
+			margin-right:15px;
+		}
+		.title{
+			color: #fff;
+			font-size: 20px;
+			font-weight: bold;
+			text-align: center;
+		}
+	}
+	.app_menu{
+		height: 100%;
+		background-color:#fff;
+		padding-top: 70px;
+		box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+		overflow-y: scroll;
+		padding-top: 70px;
+		.el-menu-item{
+			color: @txt_color !important; 
+			font-size: 16px;
+			&.is-active{
+				background-color:#f7fcfa !important;
+				color: @info_color !important;
+				border-left: 4px solid @info_color;
+			}
+			&>a{
+				color: @txt_color !important; 
+				font-size: 16px;
+			}
+		}
+		.el-menu{
+			.el-menu-item{
+				&.is-active{
+					border-left: 0;
+				}
+				&>a{
+					font-size: 14px;
+				}
+			}
+		}
+		.el-submenu__title{
+			span{
+				color: @txt_color; 
+			}
+			font-size: 16px;
+		}
+		.el-submenu{
+			.el-menu-item{
+				font-size: 14px;
+			}
+			&.is-active{
+				.el-submenu__title{
+					border-left: 4px solid @info_color;
+					background-color:#f7fcfa !important;
+					&>span{
+						color: #28b779 !important;
+						font-weight: bold;
+					}
+				}
+				&>ul{
+					li{
+						background-color: #eef9f4 !important;
+					}
+				}
+			}
+			&>ul{
+				li{
+					a.active{
+						color: #28b779 !important;
+					}
+				}
+			}
+		}
+	}
 </style>
+

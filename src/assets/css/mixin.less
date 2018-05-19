@@ -1,72 +1,45 @@
-@blue: #3190e8;  
-@bc: #e4e4e4;
-@fc:#fff;
+@txt_color:#666;
+@gray_color:#999999;
+@active_color:#28b779;
 
-// 背景图片地址和大小
-.bis(@url) { 
-	background-image: url(@url);
-	background-repeat: no-repeat;
-	background-size: 100% 100%;
+
+@info_color:#28b779;
+@warning_color:#f9af50;
+@error_color:#e75c5c;
+@danger_color:#e75c5c;
+
+// 蓝 5696ee
+// 绿 28b779
+// 橙 f9af50
+// 红 e75c5c
+// 紫 8e95db
+.mb20{
+    margin-bottom: 20px !important;
 }
-
-//定位全屏
-.allcover{
-	position:absolute;
-	top:0;
-	right:0;
+.mt20{
+    margin-top: 20px;
 }
-
-//transform上下左右居中
-.ctt {  
-	position: absolute;
-	top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.mtb20{
+    margin-top:20px;
+    margin-bottom: 20px;
 }
-//定位上下左右居中
-.ctp(@width, @height) {  
-	position: absolute;
-	top: 50%;
-    left: 50%;
-    margin-top: -@height/2;
-    margin-left: -@width/2;
+.mb15{
+    margin-bottom: 15px;
 }
-
-//定位上下居中
-.tb {  
-	position: absolute;
-	top: 50%;
-    transform: translateY(-50%);
+.mt15{
+    margin-top: 15px;
 }
-
-//定位左右居中
-.lr {  
-	position: absolute;
-	left: 50%;
-    transform: translateX(-50%);
+.mtb15{
+    margin-top:15px;
+    margin-bottom: 15px;
 }
-
-//宽高
-.wh(@width, @height){
-	width: @width;
-	height: @height;
+.mb10{
+    margin-bottom: 10px;
 }
-
-//字体大小、行高、字体
-.ft(@size, @line-height) {  
-	font-size: @size;
-	line-height:@line-height;
+.mt10{
+    margin-top: 10px;
 }
-
-//字体大小，颜色
-.sc(@size, @color){
-	font-size: @size;
-	color: @color;
-}
-
-//flex 布局和 子元素 对其方式
-.fj(@type: space-between){
-	display: flex;
-	justify-content: @type;
-
+.mtb10{
+    margin-top:10px;
+    margin-bottom: 10px;
 }

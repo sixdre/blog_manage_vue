@@ -1,8 +1,6 @@
 <template>
-	<section class="section">
-        <div class="section_breadcrumb">
-			<strong class="title">权限列表</strong>
-		</div>
+	<section class="section_content">
+		<h1 class="section_title">权限列表</h1>
 		<div class="search_toolbar">
 			<el-form :inline="true" class="demo-form-inline">
 				<el-form-item>

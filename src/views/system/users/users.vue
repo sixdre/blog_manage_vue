@@ -1,12 +1,11 @@
 <template>
-	<section class="section">
-		<div class="section_breadcrumb">
-			<strong class="title">用户列表</strong>
-		</div>
+	<section class="section_content">
+		<h1 class="section_title">用户列表</h1>
 		<div class="search_toolbar">
             <el-form :inline="true" class="demo-form-inline">
                 <el-form-item>
                     <el-button type="primary" size="small" @click="handleAddUserDialog">新增</el-button>
+					<el-button type="primary" size="small" @click="onRemoveMulti" :disabled="!selectRows.length">批量删除</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -49,7 +48,6 @@
 
 			<!--工具条-->
 		<el-col :span="24" class="toolbar">
-			<el-button size="small" @click="onRemoveMulti" :disabled="!selectRows.length">批量删除</el-button>
 			<el-pagination 
 				 layout="total, sizes,prev, pager, next,jumper"
 				 background

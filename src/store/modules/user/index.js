@@ -40,6 +40,21 @@ const mutations = {
 }
 
 const actions = {
+    login({ commit }, { username, password }) {
+        return new Promise((resolve, reject) => {
+            Api.login(username, password).then(res => {
+                if (res.data.code === 1) {
+                    commit('setName', username);
+                    commit('setToken', res.data.token);
+                    commit('setRole', res.data.userInfo.role);
+                    commit('setAvatar', res.data.userInfo.avatar);
+                }
+                resolve(res);
+            }).catch(err => {
+                reject(err)
+            })
+        })
+    },
     // 登出
     logout({ commit }) {
         return new Promise((resolve) => {
