@@ -5,11 +5,11 @@
 			<div style="font-size: 200px;">403</div>
 			<div style="font-size: 60px;">Forbidden</div>
 			</div>
-			<img style="float:left;margin: 100px 0 0 40px;" src="../../../static/404_island.png">
+			<img style="float:left;margin: 100px 0 0 40px;" :src="imgSrc">
 		</div>
 	
 		<div style="margin-top:64px;font-size:26px;text-align:center;">
-			<span style="color:rgb(0, 146, 255);text-decoration: underline;text-shadow:0 -1px 1px #B5B5B5;cursor: pointer;" @click="back">GO BACK</span>
+			<router-link style="color:rgb(0, 146, 255);text-decoration: underline;text-shadow:0 -1px 1px #B5B5B5;" to="/" >回首页</router-link>
 		</div>
 	</div>
 </template>
@@ -18,19 +18,9 @@
 export default{
 	data(){
 		return {
-
+			imgSrc:require("../../assets/images/404_island.png")
 		}
 	},
-	methods:{
-		back(){
-			let backUrl = this.$route.query.redirect;
-			if(backUrl){
-				this.$router.push(backUrl)
-			}else{
-				this.$router.push('/')
-			}
-		}
-	}
 }
 </script>
 

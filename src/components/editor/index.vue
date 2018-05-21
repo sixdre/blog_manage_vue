@@ -5,9 +5,6 @@
 </template>
 
 <script>
-import { Loading } from 'element-ui';
-import "mditor/dist/js/mditor.js"
-import "mditor/dist/css/mditor.css"
 export default {
     props: {
         content: [String],
@@ -75,9 +72,11 @@ export default {
 							ctx.uploadImg(file);
 						}
 				};
-				ctx.$nextTick(()=>{
-					mditor.value = ctx.content;
-				})
+				setTimeout(()=>{
+					ctx.$nextTick(()=>{
+						mditor.value = ctx.content;
+					})
+				},200)
 				mditor.on('changed', function(){
 					ctx.$emit('update:content', mditor.value);
 					ctx.$emit('onChange',mditor.value)

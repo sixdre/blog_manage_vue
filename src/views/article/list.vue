@@ -21,7 +21,7 @@
 						<el-option label="已删除" :value="0"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="发布时间" >
+				<el-form-item label="发布时间">
 					<range-time :startTime.sync="searchForm.startTime" :endTime.sync="searchForm.endTime"></range-time>
 				</el-form-item>
 				<el-form-item>
@@ -123,6 +123,8 @@ export default{
 		},
 		resetSearchForm(){
 			this.$refs['searchForm'].resetFields();
+			this.searchForm.startTime = undefined;
+			this.searchForm.endTime = undefined;
 			this.pageParams={
 				limit:5,
 				page:1,

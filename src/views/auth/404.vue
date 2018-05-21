@@ -3,19 +3,24 @@
 		<div class="clear">
 			<div style="color:#0092ff;text-shadow:0 -1px 1px #B5B5B5; margin-left:100px;float:left;">
 				<div style="font-size: 200px;">404</div>
-				<div style="font-size: 50px;">La page demandée</div>
-				<div style="font-size: 60px;">n'existe pas...</div>
+				<div style="font-size: 50px;">Not Found</div>
 			</div>
-			<img style="float:left;margin: 100px 0 0 40px;" src="../../../static/404_island.png">
+			<img style="float:left;margin: 100px 0 0 40px;" :src="imgSrc">
 		</div>
 		<div style="margin-top:64px;font-size:26px;text-align:center;">
-			<router-link style="color:rgb(0, 146, 255);text-decoration: underline;text-shadow:0 -1px 1px #B5B5B5;" to="/" >GO HOME</router-link>
+			<router-link style="color:rgb(0, 146, 255);text-decoration: underline;text-shadow:0 -1px 1px #B5B5B5;" to="/" >回首页</router-link>
 		</div>
 	</div>
 </template>
 
 <script>
-	
+export default{
+	data(){
+		return {
+			imgSrc:require('../../assets/images/404_island.png')
+		}
+	},
+}
 </script>
 
 <style lang="less" scoped>
