@@ -28,7 +28,16 @@ export default {
         };
     },
     watch: {
-        
+        startTime(newVal,oldVal){
+            if(!newVal){
+                this.time = null;
+            }
+        },
+        endTime(newVal,oldVal){
+            if(!newVal){
+                this.time = null;
+            }
+        },
     },
     methods: {
         handleChange(val){

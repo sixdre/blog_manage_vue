@@ -9,7 +9,7 @@
 				<el-form-item label="作者" prop="author">
 					<el-input class="my_input" style="width:200px" v-model="searchForm.author" placeholder="作者"></el-input>
 				</el-form-item>
-				<el-form-item label="类型" prop="category">
+				<el-form-item label="类型" prop="categoryId">
 					<el-select class="my_input" v-model="searchForm.categoryId" clearable placeholder="">
 						<el-option v-for="(item,index) in categories" :label="item.name" :value="item._id" :key="index"></el-option>
 					</el-select>
@@ -21,7 +21,7 @@
 						<el-option label="已删除" :value="0"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="发布时间">
+				<el-form-item label="发布时间" prop="startTime">
 					<range-time :startTime.sync="searchForm.startTime" :endTime.sync="searchForm.endTime"></range-time>
 				</el-form-item>
 				<el-form-item>
@@ -61,6 +61,7 @@
 					<template slot-scope="scope">
 						<div class="text-center">
 							<router-link class="icon_eye" :to="{path: '/article/publish',query:{id:scope.row._id}}"></router-link>
+							<span class="icon_reset pointer" v-if="scope.row.status===0" @click="recoverArticle(scope.row._id)"></span>
 							<span class="icon_del pointer" @click="handleRemove(scope.row._id)"></span>
 						</div>
 					</template>
@@ -68,9 +69,8 @@
 			</el-table>
 		</div>
 
-			<!--工具条-->
+		<!--工具条-->
 		<el-col :span="24" class="toolbar">
-			
 			<el-pagination 
 				 layout="total, sizes,prev, pager, next,jumper"
 				 background
@@ -123,8 +123,6 @@ export default{
 		},
 		resetSearchForm(){
 			this.$refs['searchForm'].resetFields();
-			this.searchForm.startTime = undefined;
-			this.searchForm.endTime = undefined;
 			this.pageParams={
 				limit:5,
 				page:1,
@@ -132,6 +130,21 @@ export default{
 			}
 			this.renderTable();
 		},
+		recoverArticle(id){
+			this.$confirm('确定恢复该文章吗?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning',
+			}).then(async () => {
+				let res = await this.$Api.recoverArticle(id);
+				if (res.data.code === 1) {
+					this.$message.success(res.data.message);
+					this.renderTable();
+				} 
+			}).catch(() => {
+			
+			});
+		}
 	}
 }
 

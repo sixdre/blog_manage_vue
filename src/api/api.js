@@ -52,7 +52,10 @@ export default {
     removeArticle(id) {
         return $http.delete('/api/articles/' + id);
     },
-
+    //恢复文章
+    recoverArticle(id) {
+        return $http.put('/api/articles/recover/' + id);
+    },
     //获取分类列表
     getCategoryList() {
         return $http.get('/api/categories');
