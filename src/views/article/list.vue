@@ -60,7 +60,7 @@
 				<el-table-column label="操作" width="150">
 					<template slot-scope="scope">
 						<div class="text-center">
-							<router-link class="icon_eye" :to="{path: '/article/publish',query:{id:scope.row._id}}"></router-link>
+							<router-link class="icon_eye" v-if="scope.row.status!==0" :to="{path: '/article/publish',query:{id:scope.row._id}}"></router-link>
 							<span class="icon_reset pointer" v-if="scope.row.status===0" @click="recoverArticle(scope.row._id)"></span>
 							<span class="icon_del pointer" @click="handleRemove(scope.row._id)"></span>
 						</div>

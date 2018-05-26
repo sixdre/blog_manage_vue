@@ -15,7 +15,7 @@
                                 <span  class="input_icon">
                                     <img src="../../assets/images/login/icon_phone.png" alt="">
                                 </span>
-                                <el-input class="my_input"  v-model="loginForm.username" type="text"  placeholder="请输入登录账号" @keyup.enter.native="submitForm"></el-input>
+                                <el-input class="my_input" autofocus  v-model="loginForm.username" type="text"  placeholder="请输入登录账号" @keyup.enter.native="submitForm"></el-input>
                             </el-form-item>
                             <el-form-item prop="password" class="el-input--prefix" style="position:relative;margin-bottom:30px;">
                                 <span class="input_icon">
