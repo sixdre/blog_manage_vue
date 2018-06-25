@@ -54,7 +54,7 @@ export default {
     },
     //恢复文章
     recoverArticle(id) {
-        return $http.put('/api/articles/recover/' + id);
+        return $http.put(`/api/articles/${id}/recover/`);
     },
     //获取分类列表
     getCategoryList() {

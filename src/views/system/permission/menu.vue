@@ -6,11 +6,12 @@
                 <el-button style="float: right; padding: 3px 0" @click="handleAddDialog" type="text">创建菜单</el-button>
             </div>
             <el-tree :data="menuList"
+            show-checkbox
                 default-expand-all 
                 node-key="_id"
                 ref="tree"
                 :props="defaultProps"
-                :check-strictly="false"
+                :check-strictly="true"
                 highlight-current
                 :expand-on-click-node="false"
                 :render-content="renderContent"
@@ -64,7 +65,11 @@
 </template>
 
 <script>
+import zTree from '@/components/ztree'
 export default{
+    components: {
+        zTree
+    },
 	data(){
 		return {
             form:{

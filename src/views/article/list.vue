@@ -91,7 +91,12 @@ export default{
 	data(){
 		return {
 			searchForm:{
-				flag:2
+                title:'',
+                author:'',
+                categoryId:'',
+                flag:2,
+                startTime:'',
+                endTime:''
 			},
 			listApi:'getArticleList',
 			removeApi: 'removeArticle',		//删除api

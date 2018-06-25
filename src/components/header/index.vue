@@ -10,9 +10,8 @@
                 <el-dropdown-menu slot="dropdown">
                     <div class="user_dropdown">
                         <h5 class="username">{{username}}</h5>
-                        <div><span class="txt_gray">部门：</span>{{userInfo.departmentName}}</div>
-                        <div><span class="txt_gray">上次登录：</span>{{userInfo.lastLoginTime}}</div>
-                        <div><span class="txt_gray">登录IP：</span>{{userInfo.lastLoginIp}} </div>
+                        <div><span class="txt_gray">上次登录：</span>{{userInfo.lastLoginTime|moment}}</div>
+                        <div><span class="txt_gray">登录IP：</span>{{userInfo.loginIp}} </div>
                         <router-link class="btn btn-info btn-small" style="width:100%;margin-bottom:10px;margin-top:10px;" to="/password">修改密码</router-link>
                         <div>
                             <span class="btn btn-danger btn-plain btn-small" style="width:100%" @click="logout">退出登录</span>
@@ -30,13 +29,14 @@ import { mapGetters,mapActions } from 'vuex';
 export default {
     data(){
         return {
-            userInfo:{}
+           
         }
     },
 	computed: {
 		...mapGetters([
             'username',
             'avatar',
+            'userInfo'
         ]),
     },
     created(){

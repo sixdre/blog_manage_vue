@@ -48,19 +48,32 @@
 
 		<!--新增界面弹框-->
 		 <el-dialog :visible.sync="addFormVisible" :close-on-click-modal="false">
-			<el-form :model="form" :rules="rules" label-width="80px"  ref="form">
-				<el-form-item label="权限名" prop="name">
+			<el-form :model="form" :rules="rules" label-width="100px"  ref="form">
+				<el-form-item label="权限名" prop="name" required>
 					<el-input v-model="form.name" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="权限路由" prop="resource">
+                <el-form-item label="权限代码" prop="code" required>
+					<el-input v-model="form.code" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="权限路由" prop="resource" required>
 					<el-input v-model="form.resource" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="请求形式" prop="type">
+                <el-form-item label="是否为页面" prop="isPage" required>
+                    <el-radio v-model="form.isPage" :label="true">是</el-radio>
+                    <el-radio v-model="form.isPage" :label="false">否</el-radio>
+				</el-form-item>
+                <el-form-item label="页面地址" v-if="form.isPage" prop="menuUrl" required>
+                    <el-input v-model="form.menuUrl" auto-complete="off"></el-input>
+				</el-form-item>
+
+
+
+				<el-form-item label="请求形式" prop="type" required>
 					<el-radio-group v-model="form.type">
 						<el-radio v-for="item in httpTypes" :key="item" :label="item"></el-radio>
 					</el-radio-group>
 				</el-form-item>
-				<el-form-item label="权限分类" prop="tag">
+				<el-form-item label="权限分类" prop="tag" required>
 					<el-select v-model="form.tag" placeholder="请选择分类">
 						<el-option
 						v-for="item in menuList"
@@ -83,14 +96,16 @@
 </template>
 
 <script>
-export default{
+export default {
 	data(){
 		return {
 			form:{
 				name:'',
 				resource:'',
 				type:'',
-				tag:''
+                tag:'',
+                code:'',
+                isPage:false
 			},
 			pageParams:{
 				limit:5,
@@ -130,7 +145,9 @@ export default{
 				name:'',
 				resource:'',
 				type:'',
-				tag:''
+                tag:'',
+                code:'',
+                isPage:false
 			}
 		},
 		handleEditDialog(row){

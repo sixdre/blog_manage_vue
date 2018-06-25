@@ -17,7 +17,7 @@
             <el-tree :data="menuList" show-checkbox default-expand-all 
                 node-key="_id" ref="tree" 
                 :props="defaultProps" 
-                :check-strictly="false" 
+                :check-strictly="true" 
                 highlight-current 
                 :expand-on-click-node="false" >
             </el-tree>

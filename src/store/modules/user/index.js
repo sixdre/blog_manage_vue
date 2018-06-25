@@ -11,7 +11,8 @@ const state = {
     // 角色分组
     role: Auth.getRole(),
     // 头像
-    avatar: Auth.getAvatar()
+    avatar: Auth.getAvatar(),
+    userInfo: {}
 }
 
 const getters = {}
@@ -36,7 +37,10 @@ const mutations = {
     setRole: (state, data) => {
         Auth.setRole(data);
         state.role = data
-    }
+    },
+    setUserInfo: (state, data) => {
+        state.userInfo = data
+    },
 }
 
 const actions = {
@@ -73,7 +77,7 @@ const actions = {
             Api.getUserInfo().then((res) => {
                 // 存储权限列表
                 commit('permission/setList', res.data.menus, { root: true });
-                // commit('permission/setResources', res.data.permissions, { root: true });
+                commit('setUserInfo', res.data.userInfo);
                 resolve(res.data.menus)
             }).catch(() => {
                 reject()
