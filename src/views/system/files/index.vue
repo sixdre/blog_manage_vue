@@ -61,7 +61,7 @@
 		</div>
 
 			<!--工具条-->
-		<el-col :span="24" class="toolbar">
+		<el-col :span="24" class="page_toolbar">
 			<el-pagination 
 				 layout="total, sizes,prev, pager, next,jumper"
 				 background

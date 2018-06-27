@@ -36,18 +36,25 @@
 				<el-table-column type="selection" width="55">
 				</el-table-column>
 				<el-table-column prop="author_name" label="作者">
+                    <template slot-scope="scope">
+                        <img style="border-radius:50%;vertical-align: middle;" :src="scope.row.author.avatar" width="30" alt="">
+                        {{scope.row.author.username}}
+                    </template>
 				</el-table-column>
 				<el-table-column prop="title" label="标题" width="220" show-overflow-tooltip>
 				</el-table-column>
 				<el-table-column prop="category_name" label="分类">
 				</el-table-column>
 				<el-table-column prop="tag_names" label="标签">
+                    <template slot-scope="scope">
+                        <el-tag type="success" style="margin-right:10px;" v-for="(item,index) in scope.row.tag_names" :key="index" size="mini">{{item}}</el-tag>
+                    </template>
 				</el-table-column>
 				<el-table-column label="状态">
 					<template slot-scope="scope">
-						<el-tag type="success" disable-transitions v-if="scope.row.status===2">有效</el-tag>
-						<el-tag type="info" disable-transitions v-if="scope.row.status===1">草稿</el-tag>
-						<el-tag type="warning" disable-transitions v-if="scope.row.status===0">已删除</el-tag>
+						<el-tag size="small" type="success" disable-transitions v-if="scope.row.status===2">有效</el-tag>
+						<el-tag size="small" type="info" disable-transitions v-if="scope.row.status===1">草稿</el-tag>
+						<el-tag size="small" type="warning" disable-transitions v-if="scope.row.status===0">已删除</el-tag>
 					</template>
 				</el-table-column>
 				<el-table-column prop="pv_num" label="浏览量">
@@ -70,7 +77,7 @@
 		</div>
 
 		<!--工具条-->
-		<el-col :span="24" class="toolbar">
+		<el-col :span="24" class="page_toolbar">
 			<el-pagination 
 				 layout="total, sizes,prev, pager, next,jumper"
 				 background
