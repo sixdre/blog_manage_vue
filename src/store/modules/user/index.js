@@ -12,6 +12,8 @@ const state = {
     role: Auth.getRole(),
     // 头像
     avatar: Auth.getAvatar(),
+    ryToken: sessionStorage.getItem('ryToken'),
+    userId: sessionStorage.getItem('userId'),
     userInfo: {}
 }
 
@@ -41,6 +43,14 @@ const mutations = {
     setUserInfo: (state, data) => {
         state.userInfo = data
     },
+    setRyToken: (state, data) => {
+        sessionStorage.setItem('ryToken', data)
+        state.ryToken = data
+    },
+    setUid: (state, data) => {
+        sessionStorage.setItem('userId', data)
+        state.userId = data
+    },
 }
 
 const actions = {
@@ -52,6 +62,8 @@ const actions = {
                     commit('setToken', res.data.token);
                     commit('setRole', res.data.userInfo.role);
                     commit('setAvatar', res.data.userInfo.avatar);
+                    commit('setRyToken', res.data.ryToken);
+                    commit('setUid', res.data.userInfo._id);
                 }
                 resolve(res);
             }).catch(err => {

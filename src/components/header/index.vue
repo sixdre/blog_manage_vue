@@ -59,6 +59,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import url('../../assets/css/mixin.less');
 .user_dropdown{
     min-width: 200px;
     padding: 10px 20px;
@@ -84,9 +85,8 @@ export default {
     right: 0;
     left: 210px;
     padding: 0 20px;
-    background: #fff;
+    background: @info_color;
     line-height: 70px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);  
     .logo{
         vertical-align: middle;
     }
