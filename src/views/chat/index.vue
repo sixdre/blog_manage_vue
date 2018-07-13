@@ -56,6 +56,8 @@
 
 <script>
 import Init from './init';
+import RongService from './service'
+import RongIM from './config'
 const conversationType = RongIMLib.ConversationType.PRIVATE;
 export default {
     data() {
@@ -102,6 +104,42 @@ export default {
         }
     },
     created() {
+        // var config = RongIM.config;
+        // config.token = this.token;
+        // var modules = {
+        //     RongIMLib: window.RongIMLib
+        // };
+        // RongService.init(config, function(services, currentUser) {
+        //     console.log('CurrentUser %o', currentUser);
+            
+        //     var Conversation = services.Conversation;
+        //     var Message = services.Message;
+
+        //     RongIM.Conversation = Conversation;
+        //     RongIM.Message = Message;
+
+        //     Conversation.get(function(error, conversationList) {
+        //         if (error) {
+        //             console.error('Conversation.get Error: %s', error);
+        //             return;
+        //         }
+        //         this.userList = conversationList.map(item=>{
+        //             let t = item.latestMessage.content;
+        //             return {
+        //                 username:t.user.username,
+        //                 avatar:t.user.avatar,
+        //                 id:t.user.id,
+        //                 lastMsg:t.content
+        //             }
+        //         })
+        //         console.log(conversationList)
+               
+        //     });
+            
+        //     // init();
+
+        // }, modules);
+        
         this.ready().then(()=>{
             this.getConversationList();
         })

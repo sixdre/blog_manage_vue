@@ -85,8 +85,9 @@ export default {
     right: 0;
     left: 210px;
     padding: 0 20px;
-    background: @info_color;
     line-height: 70px;
+    background: #fff;
+    box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
     .logo{
         vertical-align: middle;
     }

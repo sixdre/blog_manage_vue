@@ -1,7 +1,7 @@
 <template>
   <el-container class="main_layout">
     <el-aside width="210px">
-      <!-- <aside-component></aside-component> -->
+      <aside-component></aside-component>
     </el-aside>
     <el-container>
       <el-header>
