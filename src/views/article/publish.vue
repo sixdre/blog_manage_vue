@@ -1,85 +1,122 @@
 <template>
 	<section class="section_content">
 		<h1 class="section_title">文章发布</h1>
-		<el-form ref="form" :model="form" :rules="rules" label-width="80px">
-			<el-form-item label="标题" prop="title" style="width:500px" required>
-				<el-input v-model="form.title" @input="editorChange" placeholder="请输入标题"></el-input>
-			</el-form-item>
-			<el-form-item label="分类" prop="categoryName" required style="width:500px">
-				<el-select  v-model="form.categoryName" filterable placeholder="请选择文章的分类" style="width:300px">
-					<el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item.name">
-					</el-option>
-				</el-select>
-			</el-form-item>
-			<div class="content" style="margin-bottom:20px;">
-				<label for="">内容</label>
-				<x-editor :content.sync="form.content" @onChange="editorChange" ref="mdEditor"></x-editor>
-			</div>
-			<el-form-item label="简介" prop="abstract" style="width:600px">
-				<el-input type="textarea" :rows="3"  v-model="form.abstract" placeholder="选取文章的摘要"></el-input>
-			</el-form-item>
-			<el-form-item label="标签" prop="tags" style="width:600px">
-				<el-select  @change="changeTag" v-model="form.tagNames" :multiple-limit="3" allow-create filterable default-first-option multiple placeholder="选择标签(最多不超过3个)" style="width:300px">
-					<el-option v-for="item in tags" :key="item._id" :label="item.name" :value="item.name">
-					</el-option>
-				</el-select>
-			</el-form-item>
-			<el-form-item label="封面" class="uploadItem">
-				<el-upload class="avatar-uploader" 
-					ref="upload"
-					action="http://localhost:7893/sys/upload/" 
-					:show-file-list="false" 
-					name="file" 
-					accept="image/*" 
-					:headers="headers"
-					:on-progress="handleUploadProgress" 
-					:on-success="handleUploadSuccess" 
-					:before-upload="beforeUpload">
-					<img v-if="form.img" :src="form.img" class="avatar">
-					<i v-else class="el-icon-plus avatar-uploader-icon"></i>
-				</el-upload>
-				<!-- <el-progress :percentage="percentage"></el-progress> -->
-			</el-form-item>
-			
-			<el-form-item label="允许评论" prop="allow_comment" style="width:500px">
-				<el-tooltip :content="commentTip" placement="top">
-					<el-switch
-						v-model="form.allow_comment"
-						active-color="#13ce66">
-					</el-switch>
-				</el-tooltip>
-			</el-form-item>
-			<el-form-item label="是否私有" prop="is_private" style="width:500px">
-				<el-tooltip :content="privateTip" placement="top">
-					<el-switch
-						v-model="form.is_private"
-						active-color="#13ce66">
-					</el-switch>
-				</el-tooltip>
-			</el-form-item>
-			<el-form-item label="置顶" prop="top" style="width:500px">
-				<el-switch
-					v-model="form.top"
-					active-color="#13ce66">
-				</el-switch>
-			</el-form-item>
-			<el-form-item label="精华" prop="good" style="width:500px">
-				<el-switch
-					v-model="form.good"
-					active-color="#13ce66">
-				</el-switch>
-			</el-form-item>
-			<el-form-item>
-				<div  v-if="isUpdate" >
-					<el-button type="default" @click="onCancel">取消</el-button>
-					<el-button type="primary" @click="onUpdate">更新</el-button> 
-				</div>
-				<div  v-else>
-					<el-button type="default" @click="onGiveUpDraft">取消</el-button>
-					<el-button type="primary" @click="onSubmit">发布</el-button>
-				</div>
-			</el-form-item>
-		</el-form>
+        <el-form ref="form"  label-position="right" size="small" :model="form" :rules="rules">
+            <el-row :gutter="10">
+                <el-col :span="18">
+                    <el-card>
+                        <el-form-item label="" prop="title" style="width:500px" required>
+                            <el-input v-model="form.title" @input="editorChange" placeholder="请输入标题"></el-input>
+                        </el-form-item>
+                        <el-form-item label="" prop="abstract" style="width:600px">
+                            <el-input type="textarea" :rows="2"  v-model="form.abstract" placeholder="选取文章的摘要"></el-input>
+                        </el-form-item>
+                        <div class="content" style="margin-bottom:20px;">
+                            <!-- <label for="">内容</label> -->
+                            <x-editor :content.sync="form.content" @onChange="editorChange" ref="mdEditor"></x-editor>
+                        </div>
+                        
+                        
+                        <!-- <el-form-item label="封面" class="uploadItem">
+                            <el-upload class="avatar-uploader" 
+                                ref="upload"
+                                action="http://localhost:7893/sys/upload/" 
+                                :show-file-list="false" 
+                                name="file" 
+                                accept="image/*" 
+                                :headers="headers"
+                                :on-progress="handleUploadProgress" 
+                                :on-success="handleUploadSuccess" 
+                                :before-upload="beforeUpload">
+                                <img v-if="form.img" :src="form.img" class="avatar">
+                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                            </el-upload> -->
+                            <!-- <el-progress :percentage="percentage"></el-progress> -->
+                        <!-- </el-form-item> -->
+                    </el-card>
+                </el-col>
+                <el-col :span="6">
+                    <el-card class="box-card" style="margin-bottom:10px;">
+                        <div slot="header" class="clearfix">
+                            <span>分类/标签</span>
+                        </div>
+                        <el-form-item label="" prop="categoryName" required label-width="0">
+                            <el-select  v-model="form.categoryName" filterable placeholder="请选择文章的分类(必选)" style="width:100%;">
+                                <el-option v-for="item in categories" :key="item._id" :label="item.name" :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="" prop="tags" label-width="0">
+                            <el-select  @change="changeTag" v-model="form.tagNames" :multiple-limit="3" allow-create filterable default-first-option multiple placeholder="选择标签(最多不超过3个)" style="width:100%">
+                                <el-option v-for="item in tags" :key="item._id" :label="item.name" :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-card>
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>发布</span>
+                        </div>
+                         <el-form-item label="封面" class="uploadItem">
+                            <el-upload class="avatar-uploader" 
+                                ref="upload"
+                                action="http://localhost:7893/sys/upload/" 
+                                :show-file-list="false" 
+                                name="file" 
+                                accept="image/*" 
+                                :headers="headers"
+                                :on-progress="handleUploadProgress" 
+                                :on-success="handleUploadSuccess" 
+                                :before-upload="beforeUpload">
+                                <img v-if="form.img" :src="form.img" class="avatar">
+                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                            </el-upload> 
+                            <!-- <el-progress :percentage="percentage"></el-progress> -->
+                        </el-form-item>
+                        <el-form-item label="允许评论" prop="allow_comment" >
+                            <el-tooltip :content="commentTip" placement="top">
+                                <el-switch
+                                    v-model="form.allow_comment"
+                                    active-color="#13ce66">
+                                </el-switch>
+                            </el-tooltip>
+                        </el-form-item>
+                        <el-form-item label="是否私有" prop="is_private" >
+                            <el-tooltip :content="privateTip" placement="top">
+                                <el-switch
+                                    v-model="form.is_private"
+                                    active-color="#13ce66">
+                                </el-switch>
+                            </el-tooltip>
+                        </el-form-item>
+                         <el-form-item label="置顶" prop="top">
+                            <el-switch
+                                v-model="form.top"
+                                active-color="#13ce66">
+                            </el-switch>
+                        </el-form-item>
+                        <el-form-item label="精华" prop="good">
+                            <el-switch
+                                v-model="form.good"
+                                active-color="#13ce66">
+                            </el-switch>
+                        </el-form-item>
+                        <el-form-item>
+                            <div  v-if="isUpdate" >
+                                <el-button type="default" @click="onCancel">取消</el-button>
+                                <el-button type="primary" @click="onUpdate">更新</el-button> 
+                            </div>
+                            <div  v-else>
+                                <el-button type="default" @click="onGiveUpDraft">取消</el-button>
+                                <el-button type="primary" @click="onSubmit">发布</el-button>
+                            </div>
+                        </el-form-item>
+                    </el-card>
+                </el-col>
+            </el-row>
+         </el-form>
+
+
 	</section>
 </template>
 
@@ -351,17 +388,17 @@ export default {
 .avatar-uploader-icon {
 	font-size: 28px;
 	color: #8c939d;
-	width: 160px;
-	height: 160px;
-	line-height: 160px;
+	width: 150px;
+	height: 150px;
+	line-height: 150px;
 	text-align: center;
 	border: 1px dashed #d9d9d9;
 	border-radius: 6px;
 }
 
 .avatar {
-	width: 160px;
-	height: 160px;
+	width: 150px;
+	height: 150px;
 	display: block;
 
 }

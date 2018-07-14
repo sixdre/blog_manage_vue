@@ -32,7 +32,7 @@
 			</el-form>
 		</div>
 		<div class="table_container">
-			<el-table class="my_table" :data="tableDatas"  style="width: 100%;" height="460" @selection-change="selsChange">
+			<el-table class="my_table" :data="tableDatas"  border style="width: 100%;" height="460" @selection-change="selsChange">
 				<el-table-column type="selection" width="55">
 				</el-table-column>
 				<el-table-column prop="author_name" label="作者">

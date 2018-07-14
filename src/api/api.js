@@ -5,7 +5,9 @@ export default {
     graph() {
         return $http.get('/sys/graph');
     },
-
+    getUserInfoById(id) {
+        return $http.get(`/api/users/${id}/info`);
+    },
     /**
      * 登录
      */

@@ -126,8 +126,7 @@ var User = {
 */
 User.get = function(user) {
     var id = user.id;
-    console.log(id)
-        //保证不刷新页面情况下，同一个 userId 的信息是一致的
+    //保证不刷新页面情况下，同一个 userId 的信息是一致的
     user = User._Cache[id];
     if (user) {
         return user;
@@ -187,12 +186,31 @@ User.get = function(user) {
 
     var portrait = getPortrait(portraitIndex);
 
-    user = {
-        name: name,
-        portrait: portrait
-    };
-    User._Cache[id] = user;
+    // user = {
+    //     name: name,
+    //     portrait: portrait
+    // };
+    // User._Cache[id] = user;
 
+    let url = `http://localhost:7893/api/users/${id}/info`;
+    $.ajax({
+        url: url,
+        type: 'get', //GET
+        async: false, //或false,是否异步
+        timeout: 5000, //超时时间
+        dataType: 'json', //返回的数据格式：
+        success: function(data, textStatus, jqXHR) {
+
+            user = {
+                name: data.data.userInfo.username,
+                portrait: data.data.userInfo.avatar
+            };
+        },
+        error: function(xhr, textStatus) {},
+
+    })
+
+    User._Cache[id] = user;
     return user;
 };
 
@@ -244,8 +262,7 @@ Conversation.get = function(callback) {
     imInstance.getConversationList({
         onSuccess: function(conversationList) {
             var error = null;
-            console.log(conversationList)
-                // 示例暂时只演示单聊
+            // 示例暂时只演示单聊
             conversationList = conversationList.filter(function(conversation) {
                 var isPrivate = (conversation.conversationType == IMLib.ConversationType.PRIVATE);
                 return isPrivate;
