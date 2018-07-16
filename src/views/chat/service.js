@@ -1,6 +1,9 @@
 import utils from './utils';
 import Api from '@/api/api';
 
+
+var emoji = RongIMLib.RongIMEmoji;
+
 var IMLib = null,
     IMClient = null,
     imInstance = null;
@@ -164,13 +167,11 @@ var textMessageFormat = function(content) {
         return '<a class="rong-link-email" href="mailto:' + email + '">' + email + '<a>';
     });
 
-    return content;
-    // return emoji.emojiToHTML(content, 18);
+    return emoji.symbolToHTML(content);
 }
 
 
 var getMessageContent = function(message) {
-    console.log(message)
     var content = '[暂未解析此类型消息]';
     var messageMap = {
         TextMessage: textMessageFormat(message.content.content),
@@ -249,6 +250,10 @@ Conversation.get = function(callback) {
     }, conversationTypes);
 };
 
+
+
+
+
 Conversation.watch = function(watcher) {
     conversationWatcher.add(watcher);
 };
@@ -258,6 +263,7 @@ Emitter.on('onconversation', function(conversation) {
         conversationWatcher.notify(conversationList);
     });
 });
+
 
 var Message = {};
 var messageWatcher = new Watcher();
@@ -376,6 +382,13 @@ Message.watch = function(watcher) {
 Emitter.on('onmessage', function(message) {
     messageWatcher.notify(message);
 });
+
+
+
+
+
+
+
 
 var setListener = function() {
     IMClient.setConnectionStatusListener({

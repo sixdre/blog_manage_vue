@@ -9,7 +9,7 @@
                         </div>
                         <div class="person_info">
                             <div class="name">{{item._target.name}}</div> 
-                            <div class="lasted_msg">{{item.latestMessage._content}}</div>
+                            <div class="lasted_msg">{{item.latestMessage.content.content}}</div>
                         </div>
                     </li>
 
@@ -25,7 +25,7 @@
                     </div>
                     <ul  ref="messageList" style="padding-top:60px;height: 460px;overflow-y:auto;">
                         <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in messageList" :key="index">
-                            <div v-if="item.messageType=='TextMessage'">
+                           <div>
                                 <div class="layim-chat-user">
                                     <img :src="item._sender.portrait" :alt="item._sender.name">
                                     <cite>
@@ -33,20 +33,10 @@
                                         <span>{{item._sender.name}}</span>
                                     </cite>
                                 </div>
-                                <div class="layim-chat-text" v-html="item._content">
-                                    
+                                <div v-if="item.messageType=='TextMessage'" class="layim-chat-text" v-html="item._content">
                                 </div>
-                            </div>
-                           <div v-if="item.messageType=='ImageMessage'">
-                                <div class="layim-chat-user">
-                                    <img :src="item._sender.portrait" :alt="item._sender.name">
-                                    <cite>
-                                        <i>{{item._sentTime}}</i>
-                                        <span>{{item._sender.name}}</span>
-                                    </cite>
-                                </div>
-                                <div class="layim-chat-text">
-                                    <img :src="item.content.imageUri">
+                                <div v-if="item.messageType=='ImageMessage'">
+                                    <img :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;margin-top:25px;">
                                 </div>
                             </div>
                         </li>
@@ -57,9 +47,15 @@
                         <div class="chat-footer-tools">
                            <div class="messageForm-tool"></div>
                            <div class="messageForm-tool">
-                                <i class="iconfont-upload" style="position:relative;">
+                                <i class="iconfont-emoji pointer" @click="toggleEmoji" style="position:relative;">
+                                </i>
+                                <i class="iconfont-upload pointer" style="position:relative;">
                                     <input @change="uploadImg($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
+                                 <div class="rongcloud-expressionWrap" v-show="showEmoji">
+                                    <span class="fl pointer" @click="clickEmoji(item)" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -69,6 +65,7 @@
                             type="textarea"
                             placeholder="请输入内容"
                             v-model="content"
+                            @keyup="sendEnter($event)"
                            > 
                         </textarea>
                     </div>
@@ -88,6 +85,186 @@
 <script>
 import RC from './service'
 const conversationType = RongIMLib.ConversationType.PRIVATE;
+
+export default {
+    data() {
+        return {
+            conversationList:[],
+            form:{
+                name:''
+            },
+            messages:{},
+            messageList:[],
+            emojiList:[],
+            showEmoji:false,
+            content:'',
+            targetId:'',
+            currentUser:{},
+            instance:null,
+            appKey:'qd46yzrfqibvf',
+        };
+    },
+    mounted() {
+        RongIMLib.RongIMEmoji.init();
+        this.emojiList = RongIMLib.RongIMEmoji.list;
+    },
+    computed:{
+        token(){
+            return this.$store.state.user.ryToken;
+        },
+        uid(){
+            return this.$store.state.user.userId;
+        },
+        username(){
+            return this.$store.state.user.username;
+        },
+        avatar(){
+            return this.$store.state.user.avatar;
+        },
+        
+    },
+    created() {
+        this.init();
+	},
+    methods: {
+        uploadImg(e){
+            var ctx = this;
+            var files = e.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var formData = new FormData();
+                var file = files[i];
+                formData.append('file', file);
+
+                this.$Api.addFile(formData).then(function(res) {
+                        if (res.data.code == 1) {
+                            let data = res.data;
+                            data.fileType = 'image';
+                            var targetId = ctx.targetId;
+                            RC.Message.send({
+                                content: new RongIMLib.ImageMessage({
+                                    imageUri: data.url
+                                }),
+                                type:conversationType,
+                                targetId:targetId
+                            }, (error, message)=> {
+                                ctx.messageList.push(message);
+                                ctx.content = '';
+                                ctx.scrollBottom()
+                            });
+                            // getThumbnail(file, {}, function(base64) {
+                            //     data.thumbnail = base64;
+                            //     var targetId = ctx.targetId;
+                            //     RC.Message.send({
+                            //         content: new RongIMLib.ImageMessage({
+                            //             content: data.thumbnail, 
+                            //             imageUri: data.url
+                            //         }),
+                            //         type:conversationType,
+                            //         targetId:targetId
+                            //     }, (error, message)=> {
+                            //         ctx.messageList.push(message);
+                            //         ctx.content = '';
+                            //         ctx.scrollBottom()
+                            //     });
+                            // })
+                        } else {
+                            alert(res.data.message);
+                        }
+                    })
+            }
+        },
+        scrollBottom(ref="messageList"){
+            this.$nextTick(()=>{
+                this.$refs[ref].scrollTop =this.$refs[ref].scrollHeight;
+            })
+        },
+        init(){
+            let appKey = this.appKey;
+            let token = this.token;
+            var modules = {
+                RongIMLib: window.RongIMLib
+            };
+            RC.init({
+                appKey,
+                token
+            }, (services, currentUser)=> {
+                console.log('CurrentUser %o', currentUser);
+                var Conversation = services.Conversation;
+                var Message = services.Message;
+                this.getConversationList()
+                messageWatch(this);
+                conversationWatch(this)
+            }, modules);
+        },
+        getHistoryMessages(targetId) {
+            RC.Message.get({
+                type: conversationType,
+                targetId: targetId
+            }, (error, data)=> {
+                if (error) {
+                    console.error('Conversation.get Error: %s', error);
+                    return;
+                }
+                var {messageList,hasMsg} = data;
+                this.messageList = messageList;
+                console.log(messageList)
+                this.scrollBottom()
+                // if(!this.messages[this.targetId]){
+                //     this.messages[this.targetId] = {};
+                //     this.messages[this.targetId].messageList = [];
+                //     this.messages[this.targetId].messageList = messageList;
+                    
+                // }else{
+                //     var tm = this.messages[this.targetId].messageList;
+                //     this.messages[this.targetId].messageList = [...tm,...messageList];
+                // }
+                // console.log(this.messages[this.targetId].messageList)
+                // this.messages[this.targetId].hasMsg = hasMsg;
+                // this.messageList = this.messages[this.targetId].messageList;
+            });
+        },
+        getConversationList(){
+            getConversationList(this);
+        },
+        sendMessage() {
+            var content = this.content;
+            var targetId = this.targetId;
+            if (content) {
+                RC.Message.send({
+                    content: new RongIMLib.TextMessage({
+                        content: content
+                    }),
+                    type:conversationType,
+                    targetId:targetId
+                }, (error, message)=> {
+                    this.messageList.push(message);
+                    this.content = '';
+                    this.scrollBottom()
+                });
+            }
+        },
+        sendEnter(event){
+            if (event.keyCode == '13' && !event.shiftKey) {
+                event.preventDefault()
+                this.sendMessage()
+            }
+        },
+        changeUser(item){
+            this.targetId = item.targetId;
+            this.currentUser = item._target;
+            console.log(item)
+            this.getHistoryMessages(this.targetId)
+        },
+        clickEmoji(item){
+            this.content = this.content + item.symbol;
+        },
+        toggleEmoji(){
+            this.showEmoji = !this.showEmoji;
+        }
+    }
+}
+
+
 
 
 var isActive = function(message, ctx){
@@ -199,181 +376,34 @@ var getThumbnail = function(file, opts, callback) {
 };
 
 
-
-
-
-
-
-
-
-export default {
-    data() {
-        return {
-            // userList:[{
-            //     username:'admin',
-            //     avatar:'http://osf6cl53d.bkt.clouddn.com/01d2f582-8d88-4d70-a87e-ea4985c2c754.png',
-            //     userId:'5ae449a30b382d220c3042ee'
-            // },{
-            //     username:'test',
-            //     avatar:'https://gravatar.com/avatar/d9e8e7d540309dfa1ca67e804ad92b52?size=48',
-            //     userId:'5ae449a30b382d220c3042ef'
-            // },{
-            //     username:'benben',
-            //     avatar:'https://ubmcmm.baidustatic.com/media/v1/0f000aR7ZspWhwESfrNrwf.jpg',
-            //     userId:'5ae449a30b382d220c3042f1'
-            // }],
-            conversationList:[],
-            form:{
-                name:''
-            },
-            messages:{},
-            messageList:[],
-            content:'',
-            targetId:'',
-            currentUser:{},
-            instance:null,
-            appKey:'qd46yzrfqibvf',
-        };
-    },
-    mounted() {
-        // var Conversation = RongIM.Conversation;
-        // Conversation.watch(()=> {
-        //     this.getConversationList();
-        // });
-    },
-    computed:{
-        token(){
-            return this.$store.state.user.ryToken;
-        },
-        uid(){
-            return this.$store.state.user.userId;
-        },
-        username(){
-            return this.$store.state.user.username;
-        },
-        avatar(){
-            return this.$store.state.user.avatar;
-        },
-        
-    },
-    created() {
-        this.init();
-	},
-    methods: {
-        uploadImg(e){
-            var ctx = this;
-            var files = e.target.files;
-            for (var i = 0; i < files.length; i++) {
-                var formData = new FormData();
-                var file = files[i];
-                formData.append('file', file);
-
-                this.$Api.addFile(formData).then(function(res) {
-                        if (res.data.code == 1) {
-                            let data = res.data;
-                            data.fileType = 'image';
-                            getThumbnail(file, {}, function(base64) {
-                                data.thumbnail = base64;
-                                var targetId = ctx.targetId;
-                                RC.Message.send({
-                                    content: new RongIMLib.ImageMessage({
-                                        content: data.thumbnail, 
-                                        imageUri: data.url
-                                    }),
-                                    type:conversationType,
-                                    targetId:targetId
-                                }, (error, message)=> {
-                                    ctx.messageList.push(message);
-                                    ctx.content = '';
-                                    ctx.scrollBottom()
-                                });
-                            })
-                        } else {
-                            alert(res.data.message);
-                        }
-                    })
-            }
-        },
-        scrollBottom(ref="messageList"){
-            this.$nextTick(()=>{
-                this.$refs[ref].scrollTop =this.$refs[ref].scrollHeight;
-            })
-        },
-        init(){
-            let appKey = this.appKey;
-            let token = this.token;
-            var modules = {
-                RongIMLib: window.RongIMLib
-            };
-            RC.init({
-                appKey,
-                token
-            }, (services, currentUser)=> {
-                console.log('CurrentUser %o', currentUser);
-                var Conversation = services.Conversation;
-                var Message = services.Message;
-                this.getConversationList()
-                messageWatch(this);
-                conversationWatch(this)
-            }, modules);
-        },
-        getHistoryMessages(targetId) {
-            RC.Message.get({
-                type: conversationType,
-                targetId: targetId
-            }, (error, data)=> {
-                if (error) {
-                    console.error('Conversation.get Error: %s', error);
-                    return;
-                }
-                var {messageList,hasMsg} = data;
-                this.messageList = messageList;
-                console.log(messageList)
-                this.scrollBottom()
-                // if(!this.messages[this.targetId]){
-                //     this.messages[this.targetId] = {};
-                //     this.messages[this.targetId].messageList = [];
-                //     this.messages[this.targetId].messageList = messageList;
-                    
-                // }else{
-                //     var tm = this.messages[this.targetId].messageList;
-                //     this.messages[this.targetId].messageList = [...tm,...messageList];
-                // }
-                // console.log(this.messages[this.targetId].messageList)
-                // this.messages[this.targetId].hasMsg = hasMsg;
-                // this.messageList = this.messages[this.targetId].messageList;
-            });
-        },
-        getConversationList(){
-            getConversationList(this);
-        },
-        sendMessage() {
-            var content = this.content;
-            var targetId = this.targetId;
-            RC.Message.send({
-                content: new RongIMLib.TextMessage({
-                    content: content
-                }),
-                type:conversationType,
-                targetId:targetId
-            }, (error, message)=> {
-                this.messageList.push(message);
-                this.content = '';
-                this.scrollBottom()
-            });
-        },
-        changeUser(item){
-            this.targetId = item.targetId;
-            this.currentUser = item._target;
-            console.log(item)
-            this.getHistoryMessages(this.targetId)
-        }
-    }
-}
 </script>
 
 <style lang="less" scoped>
 @import './index.less';
+.rongcloud-expressionWrap{
+    border: 1px solid #D9DADC;
+    width: 290px;
+    padding: 5px 8px;
+    position: absolute;
+    left: -2px;
+    top: -198px;
+    height: 180px;
+    background: #fff;
+    z-index: 1100;
+    overflow: auto;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.iconfont-emoji{
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url('../../assets/images/icon/emoji.png');
+    cursor: pointer;
+}
 .iconfont-upload{
     display: inline-block;
     width: 26px;
@@ -393,6 +423,9 @@ export default {
     position: relative;
     margin-right: 8px;
     float: left;
+    &>i{
+        margin-right: 10px;
+    }
 }
 .chat_wrapper{
     display: flex;
@@ -435,6 +468,10 @@ export default {
                     .lasted_msg{
                         color: #98a6ad;
                         font-size: 13px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        width: 100px;
                     }
                 }
             }
