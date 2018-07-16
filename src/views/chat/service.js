@@ -1,5 +1,4 @@
 import utils from './utils';
-import Api from '@/api/api';
 
 
 var emoji = RongIMLib.RongIMEmoji;
@@ -146,15 +145,12 @@ var formatSentTime = function(time) {
     return hours + ':' + minutes;
 }
 
-
-
+//内容格式化
 var textMessageFormat = function(content) {
     if (!content || content.length === 0) {
         return '';
     }
-
     content = utils.encodeHtmlStr(content);
-
     content = utils.replaceUri(content, function(uri, protocol) {
         var link = uri;
         if (!protocol) {
@@ -162,11 +158,9 @@ var textMessageFormat = function(content) {
         }
         return '<a class="rong-link-site" target="_blank" href="' + link + '">' + uri + '</a>';
     });
-
     content = utils.replaceEmail(content, function(email) {
         return '<a class="rong-link-email" href="mailto:' + email + '">' + email + '<a>';
     });
-
     return emoji.symbolToHTML(content);
 }
 

@@ -9,13 +9,16 @@
                         </div>
                         <div class="person_info">
                             <div class="name">{{item._target.name}}</div> 
-                            <div class="lasted_msg">{{item.latestMessage.content.content}}</div>
+                            <div class="lasted_msg">
+                                <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
+                                <span v-show="item.latestMessage.content.messageName=='TextMessage'">{{item.latestMessage.content.content}}</span>
+                            </div>
                         </div>
                     </li>
 
                 </ul>
             </div>
-            <div class="chat_right" v-show="targetId">
+            <div class="chat_right" v-show="targetId" v-loading="loading" element-loading-background="transparent" element-loading-text="加载中...">
                 <div class="layim-chat-main" style="height:auto;position:relative;">
                     <div style="padding:10px 0;border-bottom:1px solid #eee;position:absolute;top:0;left:0;right:0;background:#fff;z-index:9;">
                          <div class="layim-chat-other" style="top:0;height:50px;line-height:50px;">
@@ -89,10 +92,8 @@ const conversationType = RongIMLib.ConversationType.PRIVATE;
 export default {
     data() {
         return {
+            loading:false,
             conversationList:[],
-            form:{
-                name:''
-            },
             messages:{},
             messageList:[],
             emojiList:[],
@@ -100,7 +101,6 @@ export default {
             content:'',
             targetId:'',
             currentUser:{},
-            instance:null,
             appKey:'qd46yzrfqibvf',
         };
     },
@@ -189,14 +189,14 @@ export default {
                 token
             }, (services, currentUser)=> {
                 console.log('CurrentUser %o', currentUser);
-                var Conversation = services.Conversation;
-                var Message = services.Message;
                 this.getConversationList()
                 messageWatch(this);
                 conversationWatch(this)
             }, modules);
         },
         getHistoryMessages(targetId) {
+            this.loading = true;
+            this.messageList = [];
             RC.Message.get({
                 type: conversationType,
                 targetId: targetId
@@ -207,8 +207,10 @@ export default {
                 }
                 var {messageList,hasMsg} = data;
                 this.messageList = messageList;
-                console.log(messageList)
                 this.scrollBottom()
+                this.$nextTick(()=>{
+                    this.loading = false;
+                })
                 // if(!this.messages[this.targetId]){
                 //     this.messages[this.targetId] = {};
                 //     this.messages[this.targetId].messageList = [];
@@ -279,6 +281,7 @@ function getConversationList(ctx){
             console.error('Conversation.get Error: %s', error);
             return;
         }
+        console.log(conversationList)
         ctx.conversationList = conversationList;
     });
 }
