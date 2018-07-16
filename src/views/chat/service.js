@@ -1,27 +1,10 @@
+import utils from './utils';
+import Api from '@/api/api';
+
 var IMLib = null,
     IMClient = null,
     imInstance = null;
 
-var utils = {
-    isFunction: function(func) {
-        return (typeof func == 'function');
-    },
-    isArray: function(arrs) {
-        return (Object.prototype.toString.call(arrs) == '[object Array]');
-    },
-    noop: function() {},
-    forEach: function(arrs, callback) {
-        for (var i = 0, len = arrs.length; i < len; i++) {
-            var item = arrs[i];
-            callback(item, i);
-        }
-    },
-    copy: function(target, source) {
-        for (var key in source) {
-            target[key] = source[key];
-        }
-    }
-};
 
 var Logger = {
     warn: console.warn,
@@ -131,67 +114,6 @@ User.get = function(user) {
     if (user) {
         return user;
     }
-
-    var nameList = "梦琪忆柳之桃慕青问兰尔岚元香初夏沛菡傲珊曼文乐菱痴珊恨玉惜文香寒新柔语蓉海安夜蓉涵柏水桃醉蓝春儿语琴从彤傲晴语兰又菱碧彤元霜怜梦紫寒妙彤曼易南莲紫翠雨寒易烟如萱若南寻真晓亦向珊慕灵以蕊寻雁映易雪柳孤岚笑霜海云";
-    var nameLen = nameList.length;
-
-    var xingList = "赵钱孙李周吴郑王冯陈褚卫蒋沈韩杨朱秦尤许何吕施张于";
-    var xingLen = xingList.length;
-
-    var portraits = [
-        'https://rongcloud-image.cn.ronghub.com/fa33294a358e7f2abf.gif?e=2147483647&token=CddrKW5AbOMQaDRwc3ReDNvo3-sL_SO1fSUBKV3H:z2QkbpEqUEMrOPrJtV3tBP4gQYo=',
-        'http://7xogjk.com1.z0.glb.clouddn.com/01fac54313ad977d6e.gif',
-        'https://rongcloud-image.cn.ronghub.com/2fcdba4205860a63fb.gif?e=2147483647&token=livk5rb3__JZjCtEiMxXpQ8QscLxbNLehwhHySnX:m7S0ADf1E-d2bIG3E0vuiZJSH_w=',
-        'http://oqekw07cj.bkt.clouddn.com/9da99c4255a24baba1.gif',
-        'http://2f.zol-img.com.cn/product/172_100x75/267/cepP02EKJTV6.gif',
-        'https://fsprodrcx.cn.ronghub.com/lVMs15VSLeR47CzXlVMs15VbxLGVULo2/timg.gif',
-        'https://fsprodrcx.cn.ronghub.com/FmUv4RZmLtL72i_hFmUv4RYqrWMWbCI7/timg+%284%29.gif',
-        'https://fsprodrcx.cn.ronghub.com/vJiff7ybnkxRJ59_vJiff7zADyO8gW0a/timg+%285%29.gif',
-        'https://fsprodrcx.cn.ronghub.com/5FJuo-RTb5AJ7W6j5FJuo-Rf_-_kU162/timg+%283%29.gif',
-        'https://fsprodrcx.cn.ronghub.com/Jx-MkScejaLKoIyRJx-MkScT89YnHp6U/timg+%282%29.gif',
-        'https://fsprodrcx.cn.ronghub.com/pQjyn6UJ86xIt_KfpQjyn6UGM_6lDaO-/timg+%281%29.gif',
-        'https://fsprodrcx.cn.ronghub.com/1T1xVdU_cGY4gnFV1T1xVdUFyRPVM_4N/test.gif',
-        'https://fsprodrcx.cn.ronghub.com/yn2CV8p8g2QnwoJXyn2CV8ppkNXKdrNS/1512691986120.gif',
-        'https://fsprodrcx.cn.ronghub.com/B0qmIAdLpxPq9aYgB0qmIAdV5acHSrhp/timg.jpeg'
-    ];
-
-    var portraitLen = portraits.length;
-
-    var getIndex = (max) => {
-        return Math.floor(Math.random() * max) || 1;
-    };
-
-    var getName = (len) => {
-        var names = [];
-        for (var i = 0; i < len; i++) {
-            var index = getIndex(nameLen);
-            names.push(nameList[index]);
-        }
-        return names.join('');
-    };
-
-    var getXing = (index) => {
-        return xingList.split('')[index];
-    };
-
-    var getPortrait = (index) => {
-        return portraits[index];
-    };
-
-    var nameIndex = getIndex(3);
-    var xingIndex = getIndex(xingLen);
-    var name = getXing(xingIndex) + getName(nameIndex);
-
-    var portraitIndex = getIndex(portraitLen);
-
-    var portrait = getPortrait(portraitIndex);
-
-    // user = {
-    //     name: name,
-    //     portrait: portrait
-    // };
-    // User._Cache[id] = user;
-
     let url = `http://localhost:7893/api/users/${id}/info`;
     $.ajax({
         url: url,
@@ -221,10 +143,37 @@ var formatSentTime = function(time) {
     return hours + ':' + minutes;
 }
 
+
+
+var textMessageFormat = function(content) {
+    if (!content || content.length === 0) {
+        return '';
+    }
+
+    content = utils.encodeHtmlStr(content);
+
+    content = utils.replaceUri(content, function(uri, protocol) {
+        var link = uri;
+        if (!protocol) {
+            link = 'http://' + uri;
+        }
+        return '<a class="rong-link-site" target="_blank" href="' + link + '">' + uri + '</a>';
+    });
+
+    content = utils.replaceEmail(content, function(email) {
+        return '<a class="rong-link-email" href="mailto:' + email + '">' + email + '<a>';
+    });
+
+    return content;
+    // return emoji.emojiToHTML(content, 18);
+}
+
+
 var getMessageContent = function(message) {
+    console.log(message)
     var content = '[暂未解析此类型消息]';
     var messageMap = {
-        TextMessage: message.content.content,
+        TextMessage: textMessageFormat(message.content.content),
         FileMessage: '[文件]',
         ImageMessage: '[图片]'
     };
@@ -267,10 +216,6 @@ Conversation.get = function(callback) {
                 var isPrivate = (conversation.conversationType == IMLib.ConversationType.PRIVATE);
                 return isPrivate;
             });
-            console.log(conversationList)
-
-
-
             utils.forEach(conversationList, function(conversation) {
                 var target = User.get({
                     id: conversation.targetId
@@ -320,18 +265,20 @@ var messageWatcher = new Watcher();
 Message.get = function(conversation, callback) {
     var type = conversation.type;
     var targetId = conversation.targetId;
-    var count = 20;
+    var count = conversation.count || 20;
     // 获取历史消息起始时间，0 表示从最近的一条消息开始向前获取 20 条, 详细说明：http://www.rongcloud.cn/docs/web_api_demo.html#message_history
-    var timestrap = 0;
+    var timestrap = conversation.timestrap || 0;
     imInstance.getHistoryMessages(type, targetId, timestrap, count, {
-        onSuccess: function(messageList) {
+        onSuccess: function(messageList, hasMsg) {
             var error = null;
-
             utils.forEach(messageList, function(message) {
                 formartMessage(message);
             });
-
-            callback(error, messageList);
+            var data = {
+                messageList: messageList,
+                hasMsg: hasMsg
+            }
+            callback(error, data);
         },
         onError: function(error) {
             Logger.log('Message.get Error: %s', error);
@@ -340,31 +287,86 @@ Message.get = function(conversation, callback) {
     });
 };
 
-Message.sendTxt = function(message, callback) {
+
+
+Message.send = function(message, callback) {
     callback = callback || utils.noop;
-
-    var content = message.content;
-    var sender = message.sender;
-    var msg = new IMLib.TextMessage({
-        content: content,
-        user: sender
-    });
-
     var conversationtype = message.type
     var targetId = message.targetId;
-    imInstance.sendMessage(conversationtype, targetId, msg, {
+    var content = message.content;
+
+    RongIMClient.getInstance().sendMessage(conversationtype, targetId, content, {
+        // 发送消息成功
         onSuccess: function(message) {
+            console.log(message);
             var error = null;
             formartMessage(message);
             callback(error, message);
 
             Emitter.fire('onconversation');
         },
-        onError: function(error) {
-            Logger.log('Message.sendTxt Error: %s', error);
-            callback(error);
+        onError: function(errorCode, message) {
+            var info = '';
+            switch (errorCode) {
+                case RongIMLib.ErrorCode.TIMEOUT:
+                    info = '超时';
+                    break;
+                case RongIMLib.ErrorCode.UNKNOWN_ERROR:
+                    info = '未知错误';
+                    break;
+                case RongIMLib.ErrorCode.REJECTED_BY_BLACKLIST:
+                    info = '在黑名单中，无法向对方发送消息';
+                    break;
+                case RongIMLib.ErrorCode.NOT_IN_DISCUSSION:
+                    info = '不在讨论组中';
+                    break;
+                case RongIMLib.ErrorCode.NOT_IN_GROUP:
+                    info = '不在群组中';
+                    break;
+                case RongIMLib.ErrorCode.NOT_IN_CHATROOM:
+                    info = '不在聊天室中';
+                    break;
+                default:
+                    info = x;
+                    break;
+            }
+            console.log('发送失败:' + info);
         }
     });
+
+
+
+
+
+
+
+
+
+
+    // callback = callback || utils.noop;
+
+    // var content = message.content;
+    // var sender = message.sender;
+    // var msg = new IMLib.TextMessage({
+    //     content: content,
+    //     user: sender
+    // });
+
+    // var conversationtype = message.type
+    // var targetId = message.targetId;
+    // imInstance.sendMessage(conversationtype, targetId, msg, {
+    //     onSuccess: function(message) {
+    //         var error = null;
+    //         formartMessage(message);
+    //         callback(error, message);
+
+    //         Emitter.fire('onconversation');
+    //     },
+    //     onError: function(error) {
+    //         Logger.log('Message.sendTxt Error: %s', error);
+    //         callback(error);
+    //     }
+    // });
 };
 
 Message.watch = function(watcher) {
@@ -449,5 +451,7 @@ var init = function(options, callback, modules) {
 };
 
 export default {
-    init: init
+    init: init,
+    Message,
+    Conversation
 }

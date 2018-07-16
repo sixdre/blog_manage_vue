@@ -1,3 +1,5 @@
+
+
 <template>
     <section class="section">
         <div class="chat_wrapper">
@@ -7,27 +9,28 @@
                         <div class="avatar">
                             <img :src="item._target.portrait" alt="">
                         </div>
-                        <!-- <div class="person_info">
-                            <div class="name">{{item.username}}</div> -->
-                            <!-- <div class="lasted_msg">{{item.lastMsg}}</div> -->
-                        <!-- </div> -->
+                        <div class="person_info">
+                            <div class="name">{{item._target.name}}</div> 
+                            <div class="lasted_msg">{{item.latestMessage._content}}</div>
+                        </div>
                     </li>
 
                 </ul>
             </div>
             <div class="chat_right">
-                <div class="layim-chat-main" style="height:490px" ref="chatList">
+                <!-- <router-view></router-view> -->
+                <div class="layim-chat-main" style="height:490px" ref="messageList">
                     <ul>
-                        <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in chatList" :key="index">
+                        <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in messageList" :key="index">
                             <div class="layim-chat-user">
-                                <img :src="item.content.user.avatar" :alt="item.content.user.username">
+                                <img :src="item._sender.portrait" :alt="item._sender.name">
                                 <cite>
                                     <i>{{item.sentTime|moment}}</i>
-                                    <span>{{item.content.user.username}}</span>
+                                    <span>{{item._sender.name}}</span>
                                 </cite>
                             </div>
-                            <div class="layim-chat-text">
-                                {{item.content.content}}
+                            <div class="layim-chat-text" v-html="item._content">
+                                
                             </div>
                         </li>
                     </ul>
@@ -38,7 +41,7 @@
                             class="chat-textarea"
                             type="textarea"
                             placeholder="请输入内容"
-                            v-model="msg"
+                            v-model="content"
                            > 
                         </textarea>
                     </div>
@@ -56,10 +59,7 @@
 </template>
 
 <script>
-import RongService from './service'
-import RongIM from './config'
-const conversationType = RongIMLib.ConversationType.PRIVATE;
-
+import RC from './im'
 export default {
     data() {
         return {
@@ -80,15 +80,19 @@ export default {
             form:{
                 name:''
             },
-            chatList:[],
-            msg:'',
+            messages:{},
+            messageList:[],
+            content:'',
             targetId:'',
             instance:null,
             appKey:'qd46yzrfqibvf',
         };
     },
     mounted() {
-       
+        // var Conversation = RongIM.Conversation;
+        // Conversation.watch(()=> {
+        //     this.getConversationList();
+        // });
     },
     computed:{
         token(){
@@ -102,72 +106,43 @@ export default {
         },
         avatar(){
             return this.$store.state.user.avatar;
-        }
+        },
+        
     },
     created() {
         this.init();
 	},
     methods: {
+        scrollBottom(ref="messageList"){
+            this.$nextTick(()=>{
+                this.$refs[ref].scrollTop =this.$refs[ref].scrollHeight;
+            })
+        },
         init(){
-            var config = RongIM.config;
-            config.token = this.token;
-            var modules = {
-                RongIMLib: window.RongIMLib
-            };
-            RongService.init(config, (services, currentUser)=> {
-                console.log('CurrentUser %o', currentUser);
-                var Conversation = services.Conversation;
-                var Message = services.Message;
-                RongIM.Conversation = Conversation;
-                RongIM.Message = Message;
-               this.getConversationList()
-                
-            }, modules);
-        },
-        getHistoryMessages(targetId) {
-            // console.log(targetId)
-            RongIM.Message.get({
-                type: conversationType,
-                targetId: targetId
-            }, (error, messageList)=> {
-                if (error) {
-                    console.error('Conversation.get Error: %s', error);
-                    return;
-                }
-                // ctx.messageList = messageList;
-            });
-        },
-        getConversationList(){
-            RongIM.Conversation.get( (error, conversationList)=> {
-                if (error) {
-                    console.error('Conversation.get Error: %s', error);
-                    return;
-                }
-                this.conversationList =  conversationList;
-                 console.log(this.conversationList)
-                console.log(this.conversationList[0])
-            });
-        },
-
-
-
-        sendMessage() {
-            var Message = RongIM.Message;
-            var content = this.msg;
-            var targetId = this.targetId;
-
-            Message.sendTxt({
-                content: content,
-                type:conversationType,
-                targetId:targetId
-            }, (error, message)=> {
-                // ctx.messageList.push(message);
-                // ctx.content = '';
-            });
+            var ctx = this;
+            let appKey = this.appKey;
+            let token = this.token;
+            RC.init({
+                appKey: appKey,
+                token: token,
+            },function(instance){
+                RC.getConversationList(function(conversationList){
+                    console.log(conversationList)
+                    ctx.conversationList = conversationList;
+                })
+            })
         },
         changeUser(item){
             this.targetId = item.targetId;
-        }
+            RC.startConversation(item.targetId);
+        },
+        sendMessage() {
+            let content = this.content;
+            RC.send(content,function(message){
+                console.log(message)
+            });
+        },
+       
     }
 }
 </script>

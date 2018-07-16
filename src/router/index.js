@@ -21,12 +21,28 @@ var routes = [{
     name: 'index',
     redirect: '/welcome',
     component: r => require.ensure([], () => r(require('@/layouts/layout'))),
-    children: [
-        {
+    children: [{
             path: '/welcome',
             name: 'welcome',
             component: r => require.ensure([], () => r(require('@/views/main')), 'main'),
-        }
+        },
+        {
+            path: '/chat',
+            name: 'chat',
+            meta: {
+                permission: []
+            },
+            component: r => require.ensure([], () => r(require('@/views/chat/index')), 'chat'),
+            children: [{
+                path: '/chat/:targetId',
+                name: 'conversation',
+                meta: {
+                    permission: []
+                },
+                component: r => require.ensure([], () => r(require('@/views/chat/message-list')), 'chat'),
+            }]
+        },
+
     ]
 }, {
     path: '/login',
@@ -42,9 +58,9 @@ var routes = [{
     component: r => require.ensure([], () => r(require('@/views/auth/403')))
 }]
 
- //这个用作动态路由的父页
+//这个用作动态路由的父页
 const baseAsyncRouter = {
-    path: '/asyncRouter',   
+    path: '/asyncRouter',
     redirect: '/404',
     component: r => require.ensure([], () => r(require('@/layouts/layout')), 'layout'),
     children: []
@@ -65,18 +81,19 @@ const router = new Router({
  */
 function routerMatch(permission, routeList) {
     return new Promise((resolve) => {
-        if (!permission.length||!Array.isArray(permission)) {
+        if (!permission.length || !Array.isArray(permission)) {
             resolve([])
             return
         }
         let routers = [];
+
         function createRouter(permission) {
             permission.forEach((item) => {
                 if (item.child && item.child.length) {
                     createRouter(item.child)
                 }
                 let path = item.path
-                // 循环异步路由，将符合权限列表的路由加入到routers中
+                    // 循环异步路由，将符合权限列表的路由加入到routers中
                 routeList.find(function(s) {
                     if (s.path == path) {
                         s.meta.permission = item.permission
@@ -95,7 +112,7 @@ function routerMatch(permission, routeList) {
 router.beforeEach((to, from, next) => {
     NProgress.start();
     if (Auth.authenticated()) {
-        if (to.path === '/login') {     //已登录不可以再次回到登录页面，再次登录需要先退出系统
+        if (to.path === '/login') { //已登录不可以再次回到登录页面，再次登录需要先退出系统
             router.replace('/')
         } else {
             if (store.state.permission.list.length === 0) { //页面刷新需要重新请求
@@ -104,7 +121,7 @@ router.beforeEach((to, from, next) => {
                     routerMatch(res, asyncRouter).then(data => {
                         baseAsyncRouter.children = data;
                         router.addRoutes([baseAsyncRouter]);
-                        next({ ...to}) 
+                        next({...to })
                     })
                 }).catch(() => {
                     // console.log('登录错误')
@@ -135,7 +152,7 @@ router.beforeEach((to, from, next) => {
 })
 
 router.afterEach(() => {
-    NProgress.done(); 
+    NProgress.done();
 })
 
 

@@ -35,12 +35,18 @@ let MyPlugin = {
         Vue.prototype.form_rules = formValidate;
         Vue.filter('moment', timeFormat);
         Vue.mixin(common);
+        //图片预览
+        Vue.directive('preview', {
+            bind: function(el, binding, vnode) {
+                var viewer = new window.Viewer(el);
+            }
+        })
     }
 };
 
 Vue.use(MyPlugin) //插件(公共方法)
 Vue.config.productionTip = false;
-
+Vue.prototype.$RongIM = null;
 
 new Vue({
     el: '#app',

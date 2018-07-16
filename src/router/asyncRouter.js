@@ -85,14 +85,7 @@ const asyncRouter = [{
         },
         component: r => require.ensure([], () => r(require('@/views/system/files/index')), 'files'),
     },
-    {
-        path: '/chat',
-        name: 'chat',
-        meta: {
-            permission: []
-        },
-        component: r => require.ensure([], () => r(require('@/views/chat/index')), 'chat'),
-    }
+
 
 ]
 
