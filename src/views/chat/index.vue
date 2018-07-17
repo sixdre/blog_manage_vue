@@ -6,6 +6,7 @@
                     <li @click="changeUser(item)" :class="{'active':targetId==item.targetId}" v-for="(item,index) in conversationList" :key="index">
                         <div class="avatar">
                             <img :src="item._target.portrait" alt="">
+                            <sub v-show="item._target.online=='1'" class="dot_badge"></sub>
                         </div>
                         <div class="person_info">
                             <div class="name">{{item._target.name}}</div> 
@@ -20,7 +21,7 @@
             </div>
             <div class="chat_right" v-show="targetId" v-loading="loading" element-loading-background="transparent" element-loading-text="加载中...">
                 <div class="layim-chat-main" style="height:auto;position:relative;padding:15px 0;">
-                    <div style="padding:10px 0;border-bottom:1px solid #eee;position:absolute;top:0;left:0;right:0;background:#fff;z-index:9;">
+                    <div style="padding:10px 0;border-bottom:1px solid #eee;position:absolute;top:0;left:0;right:0;background:#fff;z-index:2;">
                          <div class="layim-chat-other" style="top:0;height:50px;line-height:50px;">
                             <img :src="currentUser.portrait">
                             <span socket-event="">{{currentUser.name}}</span>
@@ -34,7 +35,7 @@
                         </div>
                         <ul>
                             <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
-                            <div>
+                                <div>
                                     <div class="layim-chat-user">
                                         <img :src="item._sender.portrait" :alt="item._sender.name">
                                         <cite>
@@ -64,7 +65,7 @@
                                     <input @change="uploadImg($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
                                  <div class="rongcloud-expressionWrap" v-show="showEmoji">
-                                    <span class="fl pointer" @click="clickEmoji(item)" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
+                                    <span class="fl pointer" style="padding:5px;" @click="clickEmoji(item)" :title="item.symbol" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
                                     </span>
                                 </div>
                             </div>
@@ -76,6 +77,7 @@
                             type="textarea"
                             placeholder="请输入内容"
                             v-model="content"
+                            ref="content"
                             @keyup="sendEnter($event)"
                            > 
                         </textarea>
@@ -116,6 +118,7 @@ export default {
         };
     },
     mounted() {
+        this.init();
         RongIMLib.RongIMEmoji.init();
         this.emojiList = RongIMLib.RongIMEmoji.list;
     },
@@ -134,9 +137,6 @@ export default {
         },
         
     },
-    created() {
-        this.init();
-	},
     methods: {
         uploadImg(e){
             var ctx = this;
@@ -261,11 +261,12 @@ export default {
         changeUser(item){
             this.targetId = item.targetId;
             this.currentUser = item._target;
-            console.log(item)
             this.getHistoryMessages(this.targetId)
         },
         clickEmoji(item){
             this.content = this.content + item.symbol;
+            this.toggleEmoji()
+            this.$refs['content'].focus()
         },
         toggleEmoji(){
             this.showEmoji = !this.showEmoji;
@@ -465,13 +466,24 @@ var getThumbnail = function(file, opts, callback) {
                     min-width:50px;
                     width: 50px;
                     height: 50px;
-                    border-radius: 50%;
-                    overflow: hidden;
-                    background-color: #ddd;
                     margin-right: 10px;
+                    position: relative;
+                    vertical-align: middle;
+                    display: inline-block;
                     img{
                         width: 100%;
                         height:100%;
+                        border-radius: 50%;
+                    }
+                    .dot_badge{
+                        position: absolute;
+                        top: 0;
+                        height: 8px;
+                        width: 8px;
+                        padding: 0;
+                        right: 0;
+                        border-radius: 50%;
+                        background-color: #2e93f0;
                     }
                 }
                 .person_info{

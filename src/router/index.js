@@ -33,14 +33,6 @@ var routes = [{
                 permission: []
             },
             component: r => require.ensure([], () => r(require('@/views/chat/index')), 'chat'),
-            children: [{
-                path: '/chat/:targetId',
-                name: 'conversation',
-                meta: {
-                    permission: []
-                },
-                component: r => require.ensure([], () => r(require('@/views/chat/message-list')), 'chat'),
-            }]
         },
 
     ]

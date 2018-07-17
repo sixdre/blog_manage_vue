@@ -102,20 +102,16 @@ function Watcher() {
 }
 
 var User = {
+    multi: true,
     _Cache: {}
 };
 
 /*
     此处只为演示，实际应用需请求应用服务器获取用户信息
 */
-User.get = function(user) {
-    var id = user.id;
-    //保证不刷新页面情况下，同一个 userId 的信息是一致的
-    user = User._Cache[id];
-    if (user) {
-        return user;
-    }
-    let url = `http://localhost:7893/api/users/${id}/info`;
+//批量获取用户信息（只在第一次获取回话列表的时候调用)
+User.getMulti = function(ids) {
+    let url = `http://localhost:7893/api/chat/${ids}/info`;
     $.ajax({
         url: url,
         type: 'get', //GET
@@ -123,10 +119,45 @@ User.get = function(user) {
         timeout: 5000, //超时时间
         dataType: 'json', //返回的数据格式：
         success: function(data, textStatus, jqXHR) {
+            User.multi = false;
+            var users = data.data;
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                var id = users[i].userId;
+                var cacheuser = User._Cache[id];
+                if (!cacheuser) {
+                    User._Cache[id] = {
+                        name: user.username,
+                        portrait: user.avatar,
+                        online: user.online
+                    };
+                }
+            }
+        },
+        error: function(xhr, textStatus) {},
 
+    })
+}
+
+User.get = function(user) {
+    var id = user.id;
+    //保证不刷新页面情况下，同一个 userId 的信息是一致的
+    user = User._Cache[id];
+    if (user) {
+        return user;
+    }
+    let url = `http://localhost:7893/api/chat/${id}/info`;
+    $.ajax({
+        url: url,
+        type: 'get', //GET
+        async: false, //或false,是否异步
+        timeout: 5000, //超时时间
+        dataType: 'json', //返回的数据格式：
+        success: function(data, textStatus, jqXHR) {
             user = {
-                name: data.data.userInfo.username,
-                portrait: data.data.userInfo.avatar
+                name: data.data[0].username,
+                portrait: data.data[0].avatar,
+                online: data.data[0].online
             };
         },
         error: function(xhr, textStatus) {},
@@ -203,6 +234,12 @@ Conversation.get = function(callback) {
                 var isPrivate = (conversation.conversationType == IMLib.ConversationType.PRIVATE);
                 return isPrivate;
             });
+            if (User.multi) {
+                var userIds = conversationList.map(function(item) {
+                    return item.targetId
+                })
+                User.getMulti(userIds.join(','));
+            }
             utils.forEach(conversationList, function(conversation) {
                 var target = User.get({
                     id: conversation.targetId
@@ -284,9 +321,8 @@ Message.clearHistory = function(params, callback) {
         targetId: params.targetId, // 目标 Id
         timestamp: params.timestamp // 清除时间点
     }, {
-        onSuccess: function() {
-            // 清除成功
-            callback()
+        onSuccess: function(data) {
+            callback(data)
         },
         onError: function(error) {
             // 请排查：单群聊消息云存储是否开通
