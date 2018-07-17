@@ -28,7 +28,7 @@
                     </div>
                     <div ref="messageList" class="messageList" style="padding:60px 10px 0 10px;height: 460px;overflow-y:auto;">
                         <div style="text-align:center;">
-                            <span v-show="messages.hasMsg" @click="loadHisMessages" style="cursor:pointer;font-size: 12px;font-weight: normal;color: #8e969f;background-color: #f9fbfd;display: inline-block;padding: 0 20px;cursor: pointer;">
+                            <span v-show="messages.list.length&&messages.hasMsg" @click="loadHisMessages" style="cursor:pointer;font-size: 12px;font-weight: normal;color: #8e969f;background-color: #f9fbfd;display: inline-block;padding:3px 20px;border-radius:3px;">
                                 查看历史消息
                             </span>
                         </div>
@@ -246,7 +246,9 @@ export default {
                 }, (error, message)=> {
                     this.messages.list.push(message);
                     this.content = '';
-                    this.scrollBottom()
+                    this.$nextTick(()=>{
+                        this.scrollBottom()
+                    })
                 });
             }
         },

@@ -137,13 +137,6 @@ User.get = function(user) {
     return user;
 };
 
-var formatSentTime = function(time) {
-    var date = new Date(time);
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    return hours + ':' + minutes;
-}
-
 //内容格式化
 var textMessageFormat = function(content) {
     if (!content || content.length === 0) {
@@ -216,7 +209,6 @@ Conversation.get = function(callback) {
                 });
 
                 var sentTime = conversation.sentTime;
-                // sentTime = formatSentTime(sentTime);
                 sentTime = utils.getTime(sentTime);
                 var message = conversation.latestMessage;
                 var content = getMessageContent(message);
@@ -285,6 +277,28 @@ Message.get = function(conversation, callback) {
 
 
 
+//清除消息记录
+Message.clearHistory = function(params, callback) {
+    RongIMLib.RongIMClient.getInstance().clearRemoteHistoryMessages({
+        conversationType: params.conversationType, // 会话类型
+        targetId: params.targetId, // 目标 Id
+        timestamp: params.timestamp // 清除时间点
+    }, {
+        onSuccess: function() {
+            // 清除成功
+            callback()
+        },
+        onError: function(error) {
+            // 请排查：单群聊消息云存储是否开通
+            console.log(error);
+        }
+    });
+}
+
+
+
+
+//发送消息
 Message.send = function(message, callback) {
     callback = callback || utils.noop;
     var conversationtype = message.type
@@ -327,31 +341,6 @@ Message.send = function(message, callback) {
             console.log('发送失败:' + info);
         }
     });
-
-    // callback = callback || utils.noop;
-
-    // var content = message.content;
-    // var sender = message.sender;
-    // var msg = new IMLib.TextMessage({
-    //     content: content,
-    //     user: sender
-    // });
-
-    // var conversationtype = message.type
-    // var targetId = message.targetId;
-    // imInstance.sendMessage(conversationtype, targetId, msg, {
-    //     onSuccess: function(message) {
-    //         var error = null;
-    //         formartMessage(message);
-    //         callback(error, message);
-
-    //         Emitter.fire('onconversation');
-    //     },
-    //     onError: function(error) {
-    //         Logger.log('Message.sendTxt Error: %s', error);
-    //         callback(error);
-    //     }
-    // });
 };
 
 Message.watch = function(watcher) {
