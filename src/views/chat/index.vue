@@ -19,31 +19,39 @@
                 </ul>
             </div>
             <div class="chat_right" v-show="targetId" v-loading="loading" element-loading-background="transparent" element-loading-text="加载中...">
-                <div class="layim-chat-main" style="height:auto;position:relative;">
+                <div class="layim-chat-main" style="height:auto;position:relative;padding:15px 0;">
                     <div style="padding:10px 0;border-bottom:1px solid #eee;position:absolute;top:0;left:0;right:0;background:#fff;z-index:9;">
                          <div class="layim-chat-other" style="top:0;height:50px;line-height:50px;">
                             <img :src="currentUser.portrait">
                             <span socket-event="">{{currentUser.name}}</span>
                         </div>
                     </div>
-                    <ul  ref="messageList" style="padding-top:60px;height: 460px;overflow-y:auto;">
-                        <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in messageList" :key="index">
-                           <div>
-                                <div class="layim-chat-user">
-                                    <img :src="item._sender.portrait" :alt="item._sender.name">
-                                    <cite>
-                                        <i>{{item._sentTime}}</i>
-                                        <span>{{item._sender.name}}</span>
-                                    </cite>
+                    <div ref="messageList" class="messageList" style="padding:60px 10px 0 10px;height: 460px;overflow-y:auto;">
+                        <div style="text-align:center;">
+                            <span v-show="messages.hasMsg" @click="loadHisMessages" style="cursor:pointer;font-size: 12px;font-weight: normal;color: #8e969f;background-color: #f9fbfd;display: inline-block;padding: 0 20px;cursor: pointer;">
+                                查看历史消息
+                            </span>
+                        </div>
+                        <ul>
+                            <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
+                            <div>
+                                    <div class="layim-chat-user">
+                                        <img :src="item._sender.portrait" :alt="item._sender.name">
+                                        <cite>
+                                            <i>{{item._sentTime}}</i>
+                                            <span>{{item._sender.name}}</span>
+                                        </cite>
+                                    </div>
+                                    <div v-if="item.messageType=='TextMessage'" class="layim-chat-text" v-html="item._content">
+                                    </div>
+                                    <div v-if="item.messageType=='ImageMessage'">
+                                        <img :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;margin-top:25px;">
+                                    </div>
                                 </div>
-                                <div v-if="item.messageType=='TextMessage'" class="layim-chat-text" v-html="item._content">
-                                </div>
-                                <div v-if="item.messageType=='ImageMessage'">
-                                    <img :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;margin-top:25px;">
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    
                 </div>
                 <div class="layim-chat-footer">
                     <div class="chat-footer-con">
@@ -94,7 +102,10 @@ export default {
         return {
             loading:false,
             conversationList:[],
-            messages:{},
+            messages:{
+                list:[],
+                hasMsg:true
+            },
             messageList:[],
             emojiList:[],
             showEmoji:false,
@@ -147,26 +158,10 @@ export default {
                                 type:conversationType,
                                 targetId:targetId
                             }, (error, message)=> {
-                                ctx.messageList.push(message);
+                                ctx.messages.list.push(message);
                                 ctx.content = '';
                                 ctx.scrollBottom()
                             });
-                            // getThumbnail(file, {}, function(base64) {
-                            //     data.thumbnail = base64;
-                            //     var targetId = ctx.targetId;
-                            //     RC.Message.send({
-                            //         content: new RongIMLib.ImageMessage({
-                            //             content: data.thumbnail, 
-                            //             imageUri: data.url
-                            //         }),
-                            //         type:conversationType,
-                            //         targetId:targetId
-                            //     }, (error, message)=> {
-                            //         ctx.messageList.push(message);
-                            //         ctx.content = '';
-                            //         ctx.scrollBottom()
-                            //     });
-                            // })
                         } else {
                             alert(res.data.message);
                         }
@@ -194,35 +189,45 @@ export default {
                 conversationWatch(this)
             }, modules);
         },
-        getHistoryMessages(targetId) {
+        loadHisMessages(){
             this.loading = true;
-            this.messageList = [];
+            var targetId = this.targetId;
             RC.Message.get({
                 type: conversationType,
-                targetId: targetId
+                targetId: targetId,
+                timestrap:null
+            }, (error, data)=> {
+                var oldHeight = this.$refs['messageList'].scrollHeight;
+                var {messageList,hasMsg} = data;
+                this.messages.hasMsg = hasMsg;
+                this.messages.list = [...messageList,...this.messages.list];
+                this.$nextTick(()=>{
+                    var newHeight = this.$refs['messageList'].scrollHeight;
+                    this.$refs['messageList'].scrollTop = newHeight-oldHeight;
+                    this.loading = false;
+                })
+            })
+        },
+        getHistoryMessages(targetId) {
+            this.loading = true;
+            this.messages.list = [];
+            this.messages.hasMsg = true;
+            RC.Message.get({
+                type: conversationType,
+                targetId: targetId,
+                timestrap:0
             }, (error, data)=> {
                 if (error) {
                     console.error('Conversation.get Error: %s', error);
                     return;
                 }
                 var {messageList,hasMsg} = data;
-                this.messageList = messageList;
+                this.messages.list = messageList;
+                this.messages.hasMsg = hasMsg;
                 this.scrollBottom()
                 this.$nextTick(()=>{
                     this.loading = false;
                 })
-                // if(!this.messages[this.targetId]){
-                //     this.messages[this.targetId] = {};
-                //     this.messages[this.targetId].messageList = [];
-                //     this.messages[this.targetId].messageList = messageList;
-                    
-                // }else{
-                //     var tm = this.messages[this.targetId].messageList;
-                //     this.messages[this.targetId].messageList = [...tm,...messageList];
-                // }
-                // console.log(this.messages[this.targetId].messageList)
-                // this.messages[this.targetId].hasMsg = hasMsg;
-                // this.messageList = this.messages[this.targetId].messageList;
             });
         },
         getConversationList(){
@@ -239,7 +244,7 @@ export default {
                     type:conversationType,
                     targetId:targetId
                 }, (error, message)=> {
-                    this.messageList.push(message);
+                    this.messages.list.push(message);
                     this.content = '';
                     this.scrollBottom()
                 });
@@ -289,7 +294,8 @@ function getConversationList(ctx){
 function messageWatch(ctx){
     RC.Message.watch(function(message){
         if (isActive(message, ctx)) {
-            ctx.messageList.push(message);
+            console.log(message)
+           ctx.messages.list.push(message);
         }
     });
 };
@@ -383,6 +389,10 @@ var getThumbnail = function(file, opts, callback) {
 
 <style lang="less" scoped>
 @import './index.less';
+.messageList::-webkit-scrollbar{
+    width: 5px;
+    height: 8px;
+}
 .rongcloud-expressionWrap{
     border: 1px solid #D9DADC;
     width: 290px;

@@ -1,6 +1,5 @@
 import utils from './utils';
 
-
 var emoji = RongIMLib.RongIMEmoji;
 
 var IMLib = null,
@@ -181,7 +180,7 @@ var formartMessage = function(message) {
         id: message.senderUserId
     });
     var sentTime = message.sentTime;
-    sentTime = formatSentTime(sentTime);
+    sentTime = utils.getTime(sentTime);
 
     var direction = (message.messageDirection == 1) ? 'sender' : 'receiver';
 
@@ -217,8 +216,8 @@ Conversation.get = function(callback) {
                 });
 
                 var sentTime = conversation.sentTime;
-                sentTime = formatSentTime(sentTime);
-
+                // sentTime = formatSentTime(sentTime);
+                sentTime = utils.getTime(sentTime);
                 var message = conversation.latestMessage;
                 var content = getMessageContent(message);
                 var sender = User.get({
@@ -245,9 +244,6 @@ Conversation.get = function(callback) {
 };
 
 
-
-
-
 Conversation.watch = function(watcher) {
     conversationWatcher.add(watcher);
 };
@@ -267,7 +263,7 @@ Message.get = function(conversation, callback) {
     var targetId = conversation.targetId;
     var count = conversation.count || 20;
     // 获取历史消息起始时间，0 表示从最近的一条消息开始向前获取 20 条, 详细说明：http://www.rongcloud.cn/docs/web_api_demo.html#message_history
-    var timestrap = conversation.timestrap || 0;
+    var timestrap = conversation.timestrap;
     imInstance.getHistoryMessages(type, targetId, timestrap, count, {
         onSuccess: function(messageList, hasMsg) {
             var error = null;
@@ -298,11 +294,9 @@ Message.send = function(message, callback) {
     RongIMClient.getInstance().sendMessage(conversationtype, targetId, content, {
         // 发送消息成功
         onSuccess: function(message) {
-            console.log(message);
             var error = null;
             formartMessage(message);
             callback(error, message);
-
             Emitter.fire('onconversation');
         },
         onError: function(errorCode, message) {
@@ -333,15 +327,6 @@ Message.send = function(message, callback) {
             console.log('发送失败:' + info);
         }
     });
-
-
-
-
-
-
-
-
-
 
     // callback = callback || utils.noop;
 
@@ -378,12 +363,6 @@ Emitter.on('onmessage', function(message) {
 });
 
 
-
-
-
-
-
-
 var setListener = function() {
     IMClient.setConnectionStatusListener({
         onChanged: function(status) {
@@ -391,7 +370,6 @@ var setListener = function() {
             Logger.warn('WebSDK Status Changed: %d', status);
         }
     });
-
     IMClient.setOnReceiveMessageListener({
         onReceived: function(message) {
             formartMessage(message);
