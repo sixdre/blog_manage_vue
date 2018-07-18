@@ -273,6 +273,61 @@ Conversation.get = function(callback) {
 };
 
 
+//获取会话未读数
+Conversation.getUnreadCount = function(params, callback) {
+    var conversationType = params.conversationType;
+    var targetId = params.targetId;
+    RongIMClient.getInstance().getUnreadCount(conversationType, targetId, {
+        onSuccess: function(count) {
+            var error = null;
+            callback(error, count)
+        },
+        onError: function(error) {
+            callback(error)
+        }
+    });;
+}
+
+// Conversation.sendReadReceiptMessage = function(targetId, type) {
+//     console.log(targetId, type)
+//     RongIMLib.RongIMClient.getInstance()
+//         .getConversation(Number(type), targetId, {
+//             onSuccess: function(data) {
+//                 console.log(data)
+//                 if (data) {
+
+//                     var read = RongIMLib.ReadReceiptMessage
+//                         .obtain(data.latestMessage.messageUId, data.latestMessage.sentTime, "1");
+//                     Message.send({
+//                         type: type,
+//                         targetId: targetId,
+//                         content: read
+//                     }, function(message) {
+//                         console.log(message)
+//                     })
+//                 }
+//             },
+//             onError: function() {}
+//         });
+// };
+
+
+//清除会话未读数
+Conversation.clearUnreadCount = function(params, callback) {
+    var conversationType = params.conversationType;
+    var targetId = params.targetId;
+    RongIMClient.getInstance().clearUnreadCount(conversationType, targetId, {
+        onSuccess: function(data) {
+            // Conversation.sendReadReceiptMessage(targetId, conversationType)
+        },
+        onError: function(errorCode) {
+
+        }
+    });
+}
+
+
+
 Conversation.watch = function(watcher) {
     conversationWatcher.add(watcher);
 };

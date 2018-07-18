@@ -6,15 +6,26 @@
                     <li @click="changeUser(item)" :class="{'active':targetId==item.targetId}" v-for="(item,index) in conversationList" :key="index">
                         <div class="avatar">
                             <img :src="item._target.portrait" alt="">
-                            <sub v-show="item._target.online=='1'" class="dot_badge"></sub>
+                        </div>
+                        <div class="rongcloud-ext">
+                            <div class="rongcloud-attr clearfix">
+                                <span class="rongcloud-badge" v-show="item.unreadMessageCount>0">{{item.unreadMessageCount>99?"99+":item.unreadMessageCount}}</span>
+                            </div>
                         </div>
                         <div class="person_info">
-                            <div class="name">{{item._target.name}}</div> 
+                            <div class="name">
+                                {{item._target.name}}
+                                <p>
+                                    <!-- <i style="font-size:12px;color:#f1f1f1;" v-show="item._target.online=='1'">[在线]</i> -->
+                                    <i style="font-size:12px;color:#999999;" v-show="item._target.online=='0'">[离线]</i>
+                                </p>
+                            </div> 
                             <div class="lasted_msg">
                                 <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
                                 <span v-show="item.latestMessage.content.messageName=='TextMessage'">{{item.latestMessage.content.content}}</span>
                             </div>
                         </div>
+                       
                     </li>
 
                 </ul>
@@ -261,6 +272,10 @@ export default {
         changeUser(item){
             this.targetId = item.targetId;
             this.currentUser = item._target;
+            RC.Conversation.clearUnreadCount({
+                conversationType:conversationType,
+                targetId:item.targetId
+            });
             this.getHistoryMessages(this.targetId)
         },
         clickEmoji(item){
@@ -413,6 +428,33 @@ var getThumbnail = function(file, opts, callback) {
     -ms-user-select: none;
     user-select: none;
 }
+.rongcloud-ext {
+    position: absolute;
+    right: 15px;
+    color: #6b6f7c;
+    font-size: 13px;
+    text-align: right;
+    min-width: 55px;
+    .rongcloud-attr {
+        height: 22px;
+        font-size: 12px;
+        margin-top: 10px;
+        .rongcloud-badge {
+            display: inline-block;
+            min-width: 10px;
+            padding: 3px 7px;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            background-color: #0099ff;
+            border-radius: 10px;
+        }
+    }
+}
 .iconfont-emoji{
     display: inline-block;
     width: 20px;
@@ -456,6 +498,8 @@ var getThumbnail = function(file, opts, callback) {
         border-right: 0;
         .person_list{
             li{
+                position: relative;
+                cursor: pointer;
                 display: flex;
                 align-items: center;
                 padding: 10px 15px;

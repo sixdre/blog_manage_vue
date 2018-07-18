@@ -61,7 +61,7 @@
 
 
 		<!--新增用户界面弹框-->
-        <el-dialog :visible.sync="addFormVisible" :close-on-click-modal="false">
+        <el-dialog :visible.sync="addFormVisible" :close-on-click-modal="false" >
             <el-form :model="userForm" :rules="rules" label-width="80px" ref="userForm">
                 <el-form-item label="用户名称" prop="username">
                     <el-input v-model="userForm.username" auto-complete="off"></el-input>
