@@ -64,7 +64,7 @@
                                         <div class="rongcloud-Message-file" v-if="item.messageType=='FileMessage'">
                                             <div class="rongcloud-sprite rongcloud-file-icon"></div>
                                             <div class="rongcloud-file-name">{{item.content.name}}</div>
-                                            <div class="rongcloud-file-size">{{item.content.size}}</div>
+                                            <div class="rongcloud-file-name">{{handleFileSize(item.content.size)}}</div>
                                             <a class="rongcloud-sprite rongcloud-file-download" :href="item.content.fileUrl"></a>
                                         </div>
                                     </div>
@@ -151,6 +151,14 @@ export default {
         })
     },
     methods: {
+        handleFileSize(size){
+			let kb = size/1024;
+			if(kb<1024){
+				return kb.toFixed(2)+'KB';
+			}else{
+				return (kb/1024).toFixed(2)+'MB'
+			}
+		},
         async getRongToken(){
             let res= await this.$Api.getRongToken();
             if (res.data.code === 1) {

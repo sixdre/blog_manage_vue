@@ -235,7 +235,9 @@ Conversation.get = function(callback) {
                 var userIds = conversationList.map(function(item) {
                     return item.targetId
                 })
-                User.getMulti(userIds.join(','));
+                if(userIds.length){
+                    User.getMulti(userIds.join(','));
+                }
             }
             utils.forEach(conversationList, function(conversation) {
                 var target = User.get({
