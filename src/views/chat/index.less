@@ -38,6 +38,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    display: inline-block;
+    vertical-align: top;
+    font-size: 14px;
+    position: relative;
 }
 .rongcloud-expressionWrap{
     border: 1px solid #D9DADC;
@@ -75,6 +79,7 @@
                 display: flex;
                 align-items: center;
                 padding: 10px 15px;
+               
                 &:hover,&.active{
                     background-color: rgb(50, 65, 87);
                 }
@@ -223,6 +228,7 @@
                 margin-bottom: 10px;
                 padding-left: 60px;
                 min-height: 68px;
+               
                 .rongcloud-Message-user{
                     display: inline-block;
                     vertical-align: top;
@@ -263,6 +269,18 @@
                     border-radius: 3px;
                     color: #333;
                     word-break: break-all;
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        left: -10px;
+                        top: 13px;
+                        width: 0;
+                        height: 0;
+                        border: 10px dashed transparent;
+                        overflow: hidden;
+                        border-top-style: solid;
+                        border-top-color: #e2e2e2;
+                    }
                 }
                 &.rongcloud-Message-send{
                     text-align: right;
@@ -292,6 +310,11 @@
                         text-align: left;
                         background-color: #5FB878;
                         color: #fff;
+                        &::after{
+                            left: auto;
+                            right: -10px;
+                            border-top-color: #5fb878;
+                        }
                     }
                    
                 }
