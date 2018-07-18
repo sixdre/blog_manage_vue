@@ -1,4 +1,5 @@
 import utils from './utils';
+import $config from '@/config/env'
 
 var emoji = RongIMLib.RongIMEmoji;
 
@@ -103,7 +104,23 @@ function Watcher() {
 
 var User = {
     multi: true,
-    _Cache: {}
+    _Cache: {},
+    ajax: function(params, callback) {
+        var ids = params.ids;
+        var GET_USER_INFO_URL = $config.baseUrl + `/api/chat/${ids}/info`;
+        $.ajax({
+            url: GET_USER_INFO_URL,
+            type: 'GET', //GET
+            async: false, //或false,是否异步
+            timeout: 5000, //超时时间
+            dataType: 'json', //返回的数据格式：
+            success: function(data, textStatus, jqXHR) {
+                callback && callback(data);
+            },
+            error: function(xhr, textStatus) {},
+
+        })
+    }
 };
 
 /*
@@ -111,34 +128,25 @@ var User = {
 */
 //批量获取用户信息（只在第一次获取回话列表的时候调用)
 User.getMulti = function(ids) {
-    let url = `http://localhost:7893/api/chat/${ids}/info`;
-    $.ajax({
-        url: url,
-        type: 'get', //GET
-        async: false, //或false,是否异步
-        timeout: 5000, //超时时间
-        dataType: 'json', //返回的数据格式：
-        success: function(data, textStatus, jqXHR) {
-            User.multi = false;
-            var users = data.data;
-            for (var i = 0; i < users.length; i++) {
-                var user = users[i];
-                var id = users[i].userId;
-                var cacheuser = User._Cache[id];
-                if (!cacheuser) {
-                    User._Cache[id] = {
-                        name: user.username,
-                        portrait: user.avatar,
-                        online: user.online
-                    };
-                }
+    User.ajax({ ids: ids }, function(data) {
+        User.multi = false;
+        var users = data.data;
+        for (var i = 0; i < users.length; i++) {
+            var user = users[i];
+            var id = users[i].userId;
+            var cacheuser = User._Cache[id];
+            if (!cacheuser) {
+                User._Cache[id] = {
+                    name: user.username,
+                    portrait: user.avatar,
+                    online: user.online
+                };
             }
-        },
-        error: function(xhr, textStatus) {},
-
+        }
     })
 }
 
+//单个获取用户信息
 User.get = function(user) {
     var id = user.id;
     //保证不刷新页面情况下，同一个 userId 的信息是一致的
@@ -146,24 +154,13 @@ User.get = function(user) {
     if (user) {
         return user;
     }
-    let url = `http://localhost:7893/api/chat/${id}/info`;
-    $.ajax({
-        url: url,
-        type: 'get', //GET
-        async: false, //或false,是否异步
-        timeout: 5000, //超时时间
-        dataType: 'json', //返回的数据格式：
-        success: function(data, textStatus, jqXHR) {
-            user = {
-                name: data.data[0].username,
-                portrait: data.data[0].avatar,
-                online: data.data[0].online
-            };
-        },
-        error: function(xhr, textStatus) {},
-
+    User.ajax({ ids: id }, function(data) {
+        user = {
+            name: data.data[0].username,
+            portrait: data.data[0].avatar,
+            online: data.data[0].online
+        };
     })
-
     User._Cache[id] = user;
     return user;
 };
@@ -339,6 +336,9 @@ Emitter.on('onconversation', function(conversation) {
 });
 
 
+
+
+
 var Message = {};
 var messageWatcher = new Watcher();
 
@@ -367,8 +367,6 @@ Message.get = function(conversation, callback) {
     });
 };
 
-
-
 //清除消息记录
 Message.clearHistory = function(params, callback) {
     RongIMLib.RongIMClient.getInstance().clearRemoteHistoryMessages({
@@ -377,7 +375,7 @@ Message.clearHistory = function(params, callback) {
         timestamp: params.timestamp // 清除时间点
     }, {
         onSuccess: function(data) {
-            callback(data)
+            callback && callback(data)
         },
         onError: function(error) {
             // 请排查：单群聊消息云存储是否开通
@@ -385,9 +383,6 @@ Message.clearHistory = function(params, callback) {
         }
     });
 }
-
-
-
 
 //发送消息
 Message.send = function(message, callback) {
@@ -437,17 +432,40 @@ Message.send = function(message, callback) {
 Message.watch = function(watcher) {
     messageWatcher.add(watcher);
 };
-
 Emitter.on('onmessage', function(message) {
     messageWatcher.notify(message);
 });
 
 
+
+
+
 var setListener = function() {
     IMClient.setConnectionStatusListener({
         onChanged: function(status) {
+            var info = '';
+            switch (status) {
+                case RongIMLib.ConnectionStatus.CONNECTED:
+                    info = '链接成功'
+                    break;
+                case RongIMLib.ConnectionStatus.CONNECTING:
+                    info = '正在链接'
+                    break;
+                case RongIMLib.ConnectionStatus.DISCONNECTED:
+                    info = '断开连接'
+                    break;
+                case RongIMLib.ConnectionStatus.KICKED_OFFLINE_BY_OTHER_CLIENT:
+                    info = '其他设备登录'
+                    break;
+                case RongIMLib.ConnectionStatus.DOMAIN_INCORRECT:
+                    info = '域名不正确'
+                    break;
+                case RongIMLib.ConnectionStatus.NETWORK_UNAVAILABLE:
+                    info = '网络不可用'
+                    break;
+            }
             //Status 说明可参考 http://www.rongcloud.cn/docs/web_api_demo.html#init_listener
-            Logger.warn('WebSDK Status Changed: %d', status);
+            Logger.log('WebSDK Status Changed: ', info);
         }
     });
     IMClient.setOnReceiveMessageListener({
@@ -502,17 +520,13 @@ var connect = function(token, callback) {
 var init = function(options, callback, modules) {
     IMLib = modules.RongIMLib;
     IMClient = IMLib.RongIMClient;
-
     var appKey = options.appKey;
     var sdk = options.sdk;
     IMClient.init(appKey, null, sdk);
     imInstance = IMClient.getInstance();
-
     setListener();
-
     var token = options.token;
     connect(token, callback);
-
 };
 
 export default {

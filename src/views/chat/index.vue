@@ -46,7 +46,7 @@
                         </div>
                         <ul>
                             <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
-                                <div>
+                                <div class="clearfix">
                                     <div class="layim-chat-user">
                                         <img :src="item._sender.portrait" :alt="item._sender.name">
                                         <cite>
@@ -54,10 +54,18 @@
                                             <span>{{item._sender.name}}</span>
                                         </cite>
                                     </div>
-                                    <div v-if="item.messageType=='TextMessage'" class="layim-chat-text" v-html="item._content">
-                                    </div>
-                                    <div v-if="item.messageType=='ImageMessage'">
-                                        <img :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;margin-top:25px;">
+                                    <div class="rongcloud-Message-body" >
+                                        <div v-if="item.messageType=='TextMessage'" class="layim-chat-text" v-html="item._content">
+                                        </div>
+                                        <div v-if="item.messageType=='ImageMessage'">
+                                            <img v-preview class="pointer" :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;margin-top:25px;">
+                                        </div>
+                                        <div class="rongcloud-Message-file" v-if="item.messageType=='FileMessage'">
+                                            <div class="rongcloud-sprite rongcloud-file-icon"></div>
+                                            <div class="rongcloud-file-name">{{item.content.name}}</div>
+                                            <div class="rongcloud-file-size">{{item.content.size}}</div>
+                                            <a class="rongcloud-sprite rongcloud-file-download" :href="item.content.fileUrl"></a>
+                                        </div>
                                     </div>
                                 </div>
                             </li>
@@ -74,6 +82,9 @@
                                 </i>
                                 <i class="iconfont-upload pointer" style="position:relative;">
                                     <input @change="uploadImg($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                </i>
+                                 <i class="iconfont-upload pointer" style="position:relative;">
+                                    <input @change="uploadFile($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
                                  <div class="rongcloud-expressionWrap" v-show="showEmoji">
                                     <span class="fl pointer" style="padding:5px;" @click="clickEmoji(item)" :title="item.symbol" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
@@ -129,26 +140,23 @@ export default {
         };
     },
     mounted() {
-        this.init();
-        RongIMLib.RongIMEmoji.init();
-        this.emojiList = RongIMLib.RongIMEmoji.list;
-    },
-    computed:{
-        token(){
-            return this.$store.state.user.ryToken;
-        },
-        uid(){
-            return this.$store.state.user.userId;
-        },
-        username(){
-            return this.$store.state.user.username;
-        },
-        avatar(){
-            return this.$store.state.user.avatar;
-        },
-        
+        this.getRongToken().then(()=>{
+            this.init();
+            RongIMLib.RongIMEmoji.init();
+            this.emojiList = RongIMLib.RongIMEmoji.list;
+        },()=>{
+
+        })
     },
     methods: {
+        async getRongToken(){
+            let res= await this.$Api.getRongToken();
+            if (res.data.code === 1) {
+				this.token = res.data.ryToken;
+			} else {
+				alert(res.data.message);
+			}
+        },
         uploadImg(e){
             var ctx = this;
             var files = e.target.files;
@@ -156,32 +164,62 @@ export default {
                 var formData = new FormData();
                 var file = files[i];
                 formData.append('file', file);
-
                 this.$Api.addFile(formData).then(function(res) {
-                        if (res.data.code == 1) {
-                            let data = res.data;
-                            data.fileType = 'image';
-                            var targetId = ctx.targetId;
-                            RC.Message.send({
-                                content: new RongIMLib.ImageMessage({
-                                    imageUri: data.url
-                                }),
-                                type:conversationType,
-                                targetId:targetId
-                            }, (error, message)=> {
-                                ctx.messages.list.push(message);
-                                ctx.content = '';
-                                ctx.scrollBottom()
-                            });
-                        } else {
-                            alert(res.data.message);
-                        }
-                    })
+                    if (res.data.code == 1) {
+                        let data = res.data;
+                        data.fileType = 'image';
+                        var targetId = ctx.targetId;
+                        RC.Message.send({
+                            content: new RongIMLib.ImageMessage({
+                                imageUri: data.url
+                            }),
+                            type:conversationType,
+                            targetId:targetId
+                        }, (error, message)=> {
+                            ctx.messages.list.push(message);
+                            ctx.content = '';
+                            ctx.scrollBottom()
+                        });
+                    } else {
+                        alert(res.data.message);
+                    }
+                })
+            }
+        },
+        uploadFile(e){
+            var ctx = this;
+            var files = e.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var formData = new FormData();
+                var file = files[i];
+                formData.append('file', file);
+                this.$Api.addFile(formData).then(function(res) {
+                    if (res.data.code == 1) {
+                        let data = res.data;
+                        data.fileType = 'file';
+                        var targetId = ctx.targetId;
+                        RC.Message.send({
+                            content: new RongIMLib.FileMessage({
+                                name: file.name,
+                                size: file.size,
+                                fileUrl: data.url
+                            }),
+                            type:conversationType,
+                            targetId:targetId
+                        }, (error, message)=> {
+                            ctx.messages.list.push(message);
+                            ctx.content = '';
+                            ctx.scrollBottom()
+                        });
+                    } else {
+                        alert(res.data.message);
+                    }
+                })
             }
         },
         scrollBottom(ref="messageList"){
             this.$nextTick(()=>{
-                this.$refs[ref].scrollTop =this.$refs[ref].scrollHeight;
+                this.$refs[ref].scrollTop = this.$refs[ref].scrollHeight;
             })
         },
         init(){
@@ -407,10 +445,68 @@ var getThumbnail = function(file, opts, callback) {
 
 <style lang="less" scoped>
 @import './index.less';
+.clearfix:after {
+    content: '';
+    display: table;
+    clear: both;
+}
 .messageList::-webkit-scrollbar{
     width: 5px;
     height: 8px;
 }
+.rongcloud-Message-body {
+    padding-top: 25px;
+}
+.layim-chat-mine{
+    .rongcloud-Message-body {
+        float: right;
+    }
+}
+
+.rongcloud-sprite {
+    background: url('http://cdn.ronghub.com/customerservice-icon.png') 0 0/50px auto no-repeat;
+    display: inline-block;
+    z-index: 1;
+}
+.rongcloud-Message-file {
+    position: relative;
+    width: 270px;
+    overflow: hidden;
+    border: 1px solid #b9c1ca;
+    border-radius: 3px;
+}
+.rongcloud-file-icon {
+    float: left;
+    width: 52px;
+    height: 52px;
+    margin: 8px;
+    display: inline-block;
+    border-radius: 5px;
+    background-size: 45px;
+    background-position: 3px -541px;
+    background-color: #3ea9ff;
+}
+.rongcloud-file-download {
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-size: 45px;
+    background-position: 0 -611px;
+}
+.rongcloud-file-name {
+    width: 155px;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+
 .rongcloud-expressionWrap{
     border: 1px solid #D9DADC;
     width: 290px;
