@@ -1,9 +1,9 @@
 <template>
     <section class="section">
-        <div class="chat_wrapper">
-            <div class="chat_left">
-                <ul class="person_list" v-if="conversationList.length">
-                    <li @click="changeUser(item)" :class="{'active':targetId==item.targetId}" v-for="(item,index) in conversationList" :key="index">
+        <div class="rongcloud-wrapper">
+            <div class="rongcloud-left">
+                <ul class="rongcloud-conversation-list" v-if="conversationList.length">
+                    <li class="rongcloud-conversation" @click="changeUser(item)" :class="{'active':targetId==item.targetId}" v-for="(item,index) in conversationList" :key="index">
                         <div class="avatar">
                             <img :src="item._target.portrait" alt="">
                         </div>
@@ -12,17 +12,18 @@
                                 <span class="rongcloud-badge" v-show="item.unreadMessageCount>0">{{item.unreadMessageCount>99?"99+":item.unreadMessageCount}}</span>
                             </div>
                         </div>
-                        <div class="person_info">
+                        <div class="rongcloud-user">
                             <div class="name">
                                 {{item._target.name}}
                                 <p>
-                                    <!-- <i style="font-size:12px;color:#f1f1f1;" v-show="item._target.online=='1'">[在线]</i> -->
-                                    <i style="font-size:12px;color:#999999;" v-show="item._target.online=='0'">[离线]</i>
+                                    <!-- <i class="rongcloud-online online" v-show="item._target.online=='1'">[在线]</i> -->
+                                    <i class="rongcloud-online offline" v-show="item._target.online=='0'">[离线]</i>
                                 </p>
                             </div> 
-                            <div class="lasted_msg">
-                                <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
+                            <div class="rongcloud-lasted-msg">
                                 <span v-show="item.latestMessage.content.messageName=='TextMessage'">{{item.latestMessage.content.content}}</span>
+                                <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
+                                <span v-show="item.latestMessage.content.messageName=='FileMessage'">[文件]</span>
                             </div>
                         </div>
                        
@@ -30,24 +31,24 @@
 
                 </ul>
             </div>
-            <div class="chat_right" v-show="targetId" v-loading="loading" element-loading-background="transparent" element-loading-text="加载中...">
-                <div class="layim-chat-main" style="height:auto;position:relative;padding:15px 0;">
-                    <div style="padding:10px 0;border-bottom:1px solid #eee;position:absolute;top:0;left:0;right:0;background:#fff;z-index:2;">
-                         <div class="layim-chat-other" style="top:0;height:50px;line-height:50px;">
+            <div class="rongcloud-right" v-show="targetId" v-loading="loading" element-loading-background="transparent" element-loading-text="加载中...">
+                <div class="rongcloud-rong-pannel layim-chat-main">
+                    <div class="rongcloud-rong-header">
+                         <div class="rongcloud-infoBar">
                             <img :src="currentUser.portrait">
                             <span socket-event="">{{currentUser.name}}</span>
                         </div>
                     </div>
-                    <div ref="messageList" class="messageList" style="padding:60px 10px 0 10px;height: 460px;overflow-y:auto;">
-                        <div style="text-align:center;">
-                            <span v-show="messages.list.length&&messages.hasMsg" @click="loadHisMessages" style="cursor:pointer;font-size: 12px;font-weight: normal;color: #8e969f;background-color: #f9fbfd;display: inline-block;padding:3px 20px;border-radius:3px;">
+                    <div ref="messageList" class="rcs-message-list">
+                        <div class="rongcloud-Messages-history">
+                            <span v-show="messages.list.length&&messages.hasMsg" @click="loadHisMessages">
                                 查看历史消息
                             </span>
                         </div>
-                        <ul>
-                            <li :class="{'layim-chat-mine':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
+                        <ul class="rong-message-list">
+                            <li class="rongcloud-Message" :class="{'rongcloud-Message-send':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
                                 <div class="clearfix">
-                                    <div class="layim-chat-user">
+                                    <div class="rongcloud-Message-user">
                                         <img :src="item._sender.portrait" :alt="item._sender.name">
                                         <cite>
                                             <i>{{item._sentTime}}</i>
@@ -55,10 +56,10 @@
                                         </cite>
                                     </div>
                                     <div class="rongcloud-Message-body" >
-                                        <div v-if="item.messageType=='TextMessage'" class="layim-chat-text" v-html="item._content">
+                                        <div v-if="item.messageType=='TextMessage'" class="rongcloud-Message-text" v-html="item._content">
                                         </div>
                                         <div v-if="item.messageType=='ImageMessage'">
-                                            <img v-preview class="pointer" :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;margin-top:25px;">
+                                            <img v-preview class="pointer" :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;">
                                         </div>
                                         <div class="rongcloud-Message-file" v-if="item.messageType=='FileMessage'">
                                             <div class="rongcloud-sprite rongcloud-file-icon"></div>
@@ -73,29 +74,30 @@
                     </div>
                     
                 </div>
-                <div class="layim-chat-footer">
+                <div class="rongcloud-rong-footer">
                     <div class="chat-footer-con">
-                        <div class="chat-footer-tools">
-                           <div class="messageForm-tool"></div>
-                           <div class="messageForm-tool">
-                                <i class="iconfont-emoji pointer" @click="toggleEmoji" style="position:relative;">
-                                </i>
-                                <i class="iconfont-upload pointer" style="position:relative;">
-                                    <input @change="uploadImg($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
-                                </i>
-                                 <i class="iconfont-upload pointer" style="position:relative;">
-                                    <input @change="uploadFile($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
-                                </i>
-                                 <div class="rongcloud-expressionWrap" v-show="showEmoji">
+                        <div class="rongcloud-footer-tools">
+                           <div class="rongcloud-MessageForm-tool">
+                                <i class="iconfont-emoji pointer" @click="toggleEmoji"></i>
+                                <div class="rongcloud-expressionWrap" v-show="showEmoji">
                                     <span class="fl pointer" style="padding:5px;" @click="clickEmoji(item)" :title="item.symbol" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
                                     </span>
                                 </div>
                             </div>
+                            <div class="rongcloud-MessageForm-tool">
+                                <i class="iconfont-upload pointer">
+                                    <input @change="uploadImg($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                </i>
+                            </div>
+                             <div class="rongcloud-MessageForm-tool">
+                                 <i class="iconfont-upload pointer">
+                                    <input @change="uploadFile($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                </i>
+                            </div>
                         </div>
                     </div>
-                    <div class="layim-chat-textarea">
+                    <div class="rongcloud-footer-textarea">
                          <textarea
-                            class="chat-textarea"
                             type="textarea"
                             placeholder="请输入内容"
                             v-model="content"
@@ -104,9 +106,9 @@
                            > 
                         </textarea>
                     </div>
-                    <div class="layim-chat-bottom">
-                        <div class="layim-chat-send">
-                            <span class="layim-send-btn" @click="sendMessage">发送</span>
+                    <div class="rongcloud-MessageForm-bottom">
+                        <div class="rongcloud-MessageForm-send">
+                            <span class="rongcloud-MessageForm-send-btn" @click="sendMessage">发送</span>
                         </div>
                     </div>
                 </div>
@@ -450,107 +452,7 @@ var getThumbnail = function(file, opts, callback) {
     display: table;
     clear: both;
 }
-.messageList::-webkit-scrollbar{
-    width: 5px;
-    height: 8px;
-}
-.rongcloud-Message-body {
-    padding-top: 25px;
-}
-.layim-chat-mine{
-    .rongcloud-Message-body {
-        float: right;
-    }
-}
 
-.rongcloud-sprite {
-    background: url('http://cdn.ronghub.com/customerservice-icon.png') 0 0/50px auto no-repeat;
-    display: inline-block;
-    z-index: 1;
-}
-.rongcloud-Message-file {
-    position: relative;
-    width: 270px;
-    overflow: hidden;
-    border: 1px solid #b9c1ca;
-    border-radius: 3px;
-}
-.rongcloud-file-icon {
-    float: left;
-    width: 52px;
-    height: 52px;
-    margin: 8px;
-    display: inline-block;
-    border-radius: 5px;
-    background-size: 45px;
-    background-position: 3px -541px;
-    background-color: #3ea9ff;
-}
-.rongcloud-file-download {
-    position: absolute;
-    right: 10px;
-    top: 15px;
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    background-size: 45px;
-    background-position: 0 -611px;
-}
-.rongcloud-file-name {
-    width: 155px;
-    margin-top: 8px;
-    margin-bottom: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-
-
-.rongcloud-expressionWrap{
-    border: 1px solid #D9DADC;
-    width: 290px;
-    padding: 5px 8px;
-    position: absolute;
-    left: -2px;
-    top: -198px;
-    height: 180px;
-    background: #fff;
-    z-index: 1100;
-    overflow: auto;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-.rongcloud-ext {
-    position: absolute;
-    right: 15px;
-    color: #6b6f7c;
-    font-size: 13px;
-    text-align: right;
-    min-width: 55px;
-    .rongcloud-attr {
-        height: 22px;
-        font-size: 12px;
-        margin-top: 10px;
-        .rongcloud-badge {
-            display: inline-block;
-            min-width: 10px;
-            padding: 3px 7px;
-            font-size: 12px;
-            font-weight: bold;
-            line-height: 1;
-            color: #fff;
-            text-align: center;
-            white-space: nowrap;
-            vertical-align: baseline;
-            background-color: #0099ff;
-            border-radius: 10px;
-        }
-    }
-}
 .iconfont-emoji{
     display: inline-block;
     width: 20px;
@@ -564,92 +466,6 @@ var getThumbnail = function(file, opts, callback) {
     height: 20px;
     background: url('../../assets/images/icon/image.png');
     cursor: pointer;
-}
-.chat-footer-tools {
-    line-height: 22px;
-    height: 22px;
-    position: relative;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
-}
-.messageForm-tool {
-    position: relative;
-    margin-right: 8px;
-    float: left;
-    &>i{
-        margin-right: 10px;
-    }
-}
-.chat_wrapper{
-    display: flex;
-    width: 1000px;
-    height: 630px;
-    .chat_left{
-        min-width: 200px;
-        width: 200px;
-        height: 100%;
-        background-color: #25313e;
-        border: 1px solid #eee;
-        border-right: 0;
-        .person_list{
-            li{
-                position: relative;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                padding: 10px 15px;
-                &:hover,&.active{
-                    background-color: rgb(50, 65, 87);
-                }
-                .avatar{
-                    min-width:50px;
-                    width: 50px;
-                    height: 50px;
-                    margin-right: 10px;
-                    position: relative;
-                    vertical-align: middle;
-                    display: inline-block;
-                    img{
-                        width: 100%;
-                        height:100%;
-                        border-radius: 50%;
-                    }
-                    .dot_badge{
-                        position: absolute;
-                        top: 0;
-                        height: 8px;
-                        width: 8px;
-                        padding: 0;
-                        right: 0;
-                        border-radius: 50%;
-                        background-color: #2e93f0;
-                    }
-                }
-                .person_info{
-                    color: #fff;
-                    .name{
-                        font-size: 14px;
-                        margin-bottom: 3px;
-                    }
-                    .lasted_msg{
-                        color: #98a6ad;
-                        font-size: 13px;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        width: 100px;
-                    }
-                }
-            }
-        }
-        
-    }
-    .chat_right{
-        flex: auto;
-        border: 1px solid #eee;
-   
-    }
 }
 
 </style>
