@@ -11,6 +11,12 @@ export default {
     getUserInfoById(id) {
         return $http.get(`/api/users/${id}/info`);
     },
+    download(fileUrl) {
+        return $http.get('/sys/download', { params: { fileUrl: fileUrl } })
+    },
+    searchUser(username) {
+        return $http.get('/sys/users/search', { params: { username: username } })
+    },
     /**
      * 登录
      */

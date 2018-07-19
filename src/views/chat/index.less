@@ -1,5 +1,17 @@
+.clearfix:after {
+    content: '';
+    display: table;
+    clear: both;
+}
+pre{
+    margin: 0;
+    padding: 0;
+}
+.pointer{
+    cursor: pointer;
+}
 .rongcloud-sprite {
-    background: url('http://cdn.ronghub.com/customerservice-icon.png') 0 0/50px auto no-repeat;
+    background: url('http://cdn.ronghub.com/customerservice-icon.png');
     display: inline-block;
     z-index: 1;
 }
@@ -37,11 +49,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: inline-block;
     vertical-align: top;
     font-size: 14px;
     position: relative;
-    float: left;
     text-align: left;
 }
 .rongcloud-expressionWrap{
@@ -67,12 +77,12 @@
     width: 1000px;
     height: 630px;
     .rongcloud-left{
+        position: relative;
         min-width: 200px;
         width: 200px;
         height: 100%;
-        background-color: #25313e;
+        background-color: #fff;
         border: 1px solid #eee;
-        border-right: 0;
         .rongcloud-conversation-list{
             .rongcloud-conversation{
                 position: relative;
@@ -80,9 +90,9 @@
                 display: flex;
                 align-items: center;
                 padding: 10px 15px;
-               
+                border-bottom: 1px solid #eee;
                 &:hover,&.active{
-                    background-color: rgb(50, 65, 87);
+                    background-color: #f7fcfa;
                 }
                 .avatar{
                     min-width:50px;
@@ -96,6 +106,11 @@
                         width: 100%;
                         height:100%;
                         border-radius: 50%;
+                        &.offline{
+                            -webkit-filter: grayscale(1);
+                            filter: gray;
+                            filter: grayscale(1);
+                        }
                     }
                     .dot_badge{
                         position: absolute;
@@ -136,17 +151,16 @@
                     }
                 }
                 .rongcloud-user{
-                    color: #fff;
                     .name{
                         font-size: 14px;
                         margin-bottom: 3px;
                     }
                     .rongcloud-online{
                         font-size: 12px;
-                        .online{
+                        &.online{
                             color: #f1f1f1;
                         }
-                        .offline{
+                        &.offline{
                             color: #999;
                         }
                     }
@@ -166,10 +180,11 @@
     .rongcloud-right{
         flex: auto;
         border: 1px solid #eee;
+        border-left: 0 !important;
         .rongcloud-rong-pannel{
             height: auto;
             position: relative;
-            padding: 15px 0px;
+            padding: 15px 0px 0 0;
             overflow-x: hidden;
             overflow-y: auto;
         }
@@ -229,7 +244,6 @@
                 margin-bottom: 10px;
                 padding-left: 60px;
                 min-height: 68px;
-               
                 .rongcloud-Message-user{
                     display: inline-block;
                     vertical-align: top;
@@ -309,12 +323,12 @@
                     .rongcloud-Message-text{
                         margin-left: 0;
                         text-align: left;
-                        background-color: #5FB878;
+                        background-color: #28b779;
                         color: #fff;
                         &::after{
                             left: auto;
                             right: -10px;
-                            border-top-color: #5fb878;
+                            border-top-color: #28b779;
                         }
                     }
                    
@@ -327,7 +341,6 @@
             .rongcloud-footer-tools{
                 line-height: 22px;
                 height: 22px;
-                position: relative;
                 margin-top: 10px;
                 margin-left: 10px;
                 margin-right: 10px;
@@ -343,7 +356,7 @@
                     display: block;
                     width: 100%;
                     padding: 5px 0 0 0;
-                    height: 68px;
+                    height: 58px;
                     line-height: 20px;
                     border: none;
                     overflow: auto;
@@ -369,7 +382,7 @@
                         line-height: 32px;
                         margin-left: 5px;
                         padding: 0 20px;
-                        background-color: #5FB878;
+                        background-color: #28b779;
                         color: #fff;
                     }
                 }

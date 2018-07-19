@@ -41,6 +41,17 @@ let MyPlugin = {
                 var viewer = new window.Viewer(el);
             }
         })
+        Vue.directive('download', {
+            bind: function(el, binding, vnode) {
+                el.addEventListener('click', function() {
+                    if (binding.value) {
+                        api.download(binding.value)
+                    } else {
+                        router.back(-1);
+                    }
+                })
+            }
+        })
     }
 };
 

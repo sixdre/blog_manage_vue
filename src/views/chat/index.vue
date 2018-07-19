@@ -2,34 +2,56 @@
     <section class="section">
         <div class="rongcloud-wrapper">
             <div class="rongcloud-left">
-                <ul class="rongcloud-conversation-list" v-if="conversationList.length">
-                    <li class="rongcloud-conversation" @click="changeUser(item)" :class="{'active':targetId==item.targetId}" v-for="(item,index) in conversationList" :key="index">
-                        <div class="avatar">
-                            <img :src="item._target.portrait" alt="">
-                        </div>
-                        <div class="rongcloud-ext">
-                            <div class="rongcloud-attr clearfix">
-                                <span class="rongcloud-badge" v-show="item.unreadMessageCount>0">{{item.unreadMessageCount>99?"99+":item.unreadMessageCount}}</span>
-                            </div>
-                        </div>
-                        <div class="rongcloud-user">
-                            <div class="name">
-                                {{item._target.name}}
-                                <p>
-                                    <!-- <i class="rongcloud-online online" v-show="item._target.online=='1'">[在线]</i> -->
-                                    <i class="rongcloud-online offline" v-show="item._target.online=='0'">[离线]</i>
-                                </p>
-                            </div> 
-                            <div class="rongcloud-lasted-msg">
-                                <span v-show="item.latestMessage.content.messageName=='TextMessage'">{{item.latestMessage.content.content}}</span>
-                                <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
-                                <span v-show="item.latestMessage.content.messageName=='FileMessage'">[文件]</span>
-                            </div>
-                        </div>
-                       
-                    </li>
+                <div style="position:absolute;width:100%;top:0;height:42px;text-align:center;border-bottom:1px solid #eee;padding:10px 15px;background:#28b779;">
+                    <span style="font-size:14px;color:#fff;" v-show="!searchState">最近联系人</span>
+                    <input @keyup.enter="searchUser" style="width:110px;height:23px;" v-model="searchUserName" v-show="searchState" type="text">
+                    <i v-show="searchState" @click="searchState=0" style="float:right;margin-top:3px;color:#fff;cursor:pointer;margin-left:5px;" class="el-icon-error"></i>
+                    <i style="float:right;margin-top:3px;color:#fff;cursor:pointer;" @click="searchUser" class="el-icon-search"></i>
+                </div>
+                <div class="scroll" style="position:absolute;top:42px;bottom:0;width:100%;overflow-y:scroll;">
+                    <div v-show="searchState" style="position:absolute;top:0;bottom:0;left:0;right:0;background:#fff;z-index:2;">
+                        <ul class="rongcloud-conversation-list" v-show="searchUserList.length">
+                            <li class="rongcloud-conversation" @click="toConversation(item)" v-for="(item,index) in searchUserList" :key="index">
+                                <div class="avatar">
+                                    <img :src="item.avatar" alt="">
+                                </div>
+                                <div class="rongcloud-user">
+                                    <div class="name">
+                                        {{item.username}}
+                                    </div> 
+                                </div>
+                            </li>
+                        </ul>
+                        <p v-show="!hasSearchUser" style="text-align:center;">没有找到相关用户</p>
+                    </div>
 
-                </ul>
+                    <ul class="rongcloud-conversation-list" v-if="conversationList.length">
+                        <li class="rongcloud-conversation" @click="changeUser(item)" :class="{'active':targetId==item.targetId}" v-for="(item,index) in conversationList" :key="index">
+                            <div class="avatar">
+                                <img :class="{'offline':item._target.online=='0'}" :src="item._target.portrait" alt="">
+                            </div>
+                            <div class="rongcloud-ext">
+                                <div class="rongcloud-attr clearfix">
+                                    <span class="rongcloud-badge" v-show="item.unreadMessageCount>0">{{item.unreadMessageCount>99?"99+":item.unreadMessageCount}}</span>
+                                </div>
+                            </div>
+                            <div class="rongcloud-user">
+                                <div class="name">
+                                    {{item._target.name}}
+                                    <p>
+                                        <!-- <i class="rongcloud-online online" v-show="item._target.online=='1'">[在线]</i> -->
+                                        <i class="rongcloud-online offline" v-show="item._target.online=='0'">[离线]</i>
+                                    </p>
+                                </div> 
+                                <div class="rongcloud-lasted-msg" v-if="item.latestMessage">
+                                    <span v-show="item.latestMessage.content.messageName=='TextMessage'" :title="item.latestMessage.content.content">{{item.latestMessage.content.content}}</span>
+                                    <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
+                                    <span v-show="item.latestMessage.content.messageName=='FileMessage'">[文件]</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="rongcloud-right" v-show="targetId" v-loading="loading" element-loading-background="transparent" element-loading-text="加载中...">
                 <div class="rongcloud-rong-pannel layim-chat-main">
@@ -56,7 +78,8 @@
                                         </cite>
                                     </div>
                                     <div class="rongcloud-Message-body" >
-                                        <div v-if="item.messageType=='TextMessage'" class="rongcloud-Message-text" v-html="item._content">
+                                        <div v-if="item.messageType=='TextMessage'" class="rongcloud-Message-text" >
+                                            <pre v-html="item._content"></pre>
                                         </div>
                                         <div v-if="item.messageType=='ImageMessage'">
                                             <img v-preview class="pointer" :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;">
@@ -64,7 +87,7 @@
                                         <div class="rongcloud-Message-file" v-if="item.messageType=='FileMessage'">
                                             <div class="rongcloud-sprite rongcloud-file-icon"></div>
                                             <div class="rongcloud-file-name">{{item.content.name}}</div>
-                                            <div class="rongcloud-file-size">{{item.content.size}}</div>
+                                            <div class="rongcloud-file-name">{{handleFileSize(item.content.size)}}</div>
                                             <a class="rongcloud-sprite rongcloud-file-download" :href="item.content.fileUrl"></a>
                                         </div>
                                     </div>
@@ -85,12 +108,12 @@
                                 </div>
                             </div>
                             <div class="rongcloud-MessageForm-tool">
-                                <i class="iconfont-upload pointer">
-                                    <input @change="uploadImg($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                <i class="iconfont-image pointer">
+                                    <input accept="image/*" @change="uploadImg($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
                             </div>
                              <div class="rongcloud-MessageForm-tool">
-                                 <i class="iconfont-upload pointer">
+                                 <i class="iconfont-file pointer">
                                     <input @change="uploadFile($event)" type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
                             </div>
@@ -127,6 +150,10 @@ export default {
     data() {
         return {
             loading:false,
+            searchUserName:'',
+            searchState:0,
+            searchUserList:[],
+            hasSearchUser:true,
             conversationList:[],
             messages:{
                 list:[],
@@ -151,6 +178,51 @@ export default {
         })
     },
     methods: {
+        handleFileSize(size){
+			let kb = size/1024;
+			if(kb<1024){
+				return kb.toFixed(2)+'KB';
+			}else{
+				return (kb/1024).toFixed(2)+'MB'
+			}
+        },
+        async searchUser(){
+            this.searchState = 1;
+            var searchUserName = this.searchUserName
+            if(!searchUserName){
+                return ;
+            }
+            let res= await this.$Api.searchUser(searchUserName);
+            if (res.data.code === 1) {
+				this.searchUserList = res.data.data;
+                if(!this.searchUserList.length){
+                    this.hasSearchUser = false;
+                }else{
+                    this.hasSearchUser = true;
+                }
+			} else {
+				alert(res.data.message);
+			}
+        },
+        toConversation(item){
+            let newconversation= {};
+            let conversation = this.conversationList.find(con=>con.targetId===item.id);
+            if(!conversation){
+                newconversation={
+                    targetId:item.id,
+                    _target:{
+                        name:item.username,
+                        portrait:item.avatar
+                    }
+                }
+                this.conversationList.push(newconversation)
+            }else{
+                newconversation = conversation;
+            } 
+            this.targetId = item.id;
+            this.searchState=0;
+            this.changeUser(newconversation)
+        },
         async getRongToken(){
             let res= await this.$Api.getRongToken();
             if (res.data.code === 1) {
@@ -447,11 +519,6 @@ var getThumbnail = function(file, opts, callback) {
 
 <style lang="less" scoped>
 @import './index.less';
-.clearfix:after {
-    content: '';
-    display: table;
-    clear: both;
-}
 
 .iconfont-emoji{
     display: inline-block;
@@ -460,13 +527,19 @@ var getThumbnail = function(file, opts, callback) {
     background: url('../../assets/images/icon/emoji.png');
     cursor: pointer;
 }
-.iconfont-upload{
+.iconfont-image{
     display: inline-block;
     width: 26px;
     height: 20px;
     background: url('../../assets/images/icon/image.png');
     cursor: pointer;
 }
-
+.iconfont-file{
+    display: inline-block;
+    width: 22px;
+    height: 20px;
+    background: url('../../assets/images/icon/file.png');
+    cursor: pointer;
+}
 </style>
 
