@@ -35,6 +35,10 @@ module.exports = {
             '/sys': {
                 target: 'http://127.0.0.1:7893',
                 changeOrigin: true
+            },
+            '/chat': {
+                target: 'http://127.0.0.1:7893',
+                changeOrigin: true
             }
         },
         // CSS Sourcemaps off by default because relative paths are "buggy"

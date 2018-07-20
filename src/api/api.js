@@ -6,7 +6,7 @@ export default {
         return $http.get('/sys/graph');
     },
     getRongToken(id) {
-        return $http.get(`/api/chat/userToken`);
+        return $http.get(`/chat/userToken`);
     },
     getUserInfoById(id) {
         return $http.get(`/api/users/${id}/info`);

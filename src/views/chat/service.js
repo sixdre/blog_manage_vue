@@ -6,6 +6,8 @@ var emoji = RongIMLib.RongIMEmoji;
 var IMLib = null,
     IMClient = null,
     imInstance = null;
+var terminal;
+var supportNot = false; //页面是否支持notification
 
 
 var Logger = {
@@ -107,7 +109,7 @@ var User = {
     _Cache: {},
     ajax: function(params, callback) {
         var ids = params.ids;
-        var GET_USER_INFO_URL = $config.baseUrl + `/api/chat/${ids}/info`;
+        var GET_USER_INFO_URL = $config.baseUrl + `/chat/users/${ids}/info`;
         $.ajax({
             url: GET_USER_INFO_URL,
             type: 'GET', //GET
@@ -184,7 +186,29 @@ var textMessageFormat = function(content) {
     return emoji.symbolToHTML(content);
 }
 
+//显示Notification通知
+var pushMessage = function(msg) {
+    if (window.Notification && Notification.permission !== "denied") {
+        var title = (msg._sender && msg._sender.name) ? msg._sender.name + ' 回复了你' : '消息提醒';
+        var options = {
+            body: "您有一条新消息，请及时回复",
+            icon: (msg._sender && msg._sender.portrait) ? msg._sender.portrait : "",
+        };
+        var notification = new Notification(title, options);
 
+        notification.onclick = function(event) {
+            window.focus();
+            notification.close();
+        }
+        notification.onshow = function() {
+            setTimeout(function() {
+                notification.close();
+            }, 3000);
+        };
+    }
+}
+
+//解析内容类型
 var getMessageContent = function(message) {
     var content = '[暂未解析此类型消息]';
     var messageMap = {
@@ -196,6 +220,7 @@ var getMessageContent = function(message) {
     return messageMap[messageType] || content;
 };
 
+//格式化内容返回符合的内容
 var formartMessage = function(message) {
     var sender = User.get({
         id: message.senderUserId
@@ -235,7 +260,7 @@ Conversation.get = function(callback) {
                 var userIds = conversationList.map(function(item) {
                     return item.targetId
                 })
-                if(userIds.length){
+                if (userIds.length) {
                     User.getMulti(userIds.join(','));
                 }
             }
@@ -344,6 +369,7 @@ Emitter.on('onconversation', function(conversation) {
 var Message = {};
 var messageWatcher = new Watcher();
 
+//获取历史消息
 Message.get = function(conversation, callback) {
     var type = conversation.type;
     var targetId = conversation.targetId;
@@ -435,11 +461,11 @@ Message.watch = function(watcher) {
     messageWatcher.add(watcher);
 };
 Emitter.on('onmessage', function(message) {
+    if (message.messageDirection != 1 && supportNot) {
+        pushMessage(message);
+    }
     messageWatcher.notify(message);
 });
-
-
-
 
 
 var setListener = function() {
@@ -519,6 +545,30 @@ var connect = function(token, callback) {
     protobuf: protobuf
     };
 */
+
+//设置是否开启桌面通知
+var setNotification = function() {
+    utils.browserRedirect(function(phoneOrPc) {
+        terminal = phoneOrPc;
+    });
+    if (terminal == 'pc') {
+        if (Notification.permission === "granted") {
+            supportNot = true;
+        }
+        // Otherwise, we need to ask the user for permission
+        else if (Notification.permission !== "denied") {
+            Notification.requestPermission(function(permission) {
+                // If the user accepts, let's create a notification
+                if (permission === "granted") {
+                    supportNot = true;
+                }
+            });
+        }
+    }
+}
+
+
+
 var init = function(options, callback, modules) {
     IMLib = modules.RongIMLib;
     IMClient = IMLib.RongIMClient;
@@ -527,6 +577,7 @@ var init = function(options, callback, modules) {
     IMClient.init(appKey, null, sdk);
     imInstance = IMClient.getInstance();
     setListener();
+    setNotification();
     var token = options.token;
     connect(token, callback);
 };

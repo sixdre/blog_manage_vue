@@ -34,6 +34,14 @@ var routes = [{
             },
             component: r => require.ensure([], () => r(require('@/views/chat/index')), 'chat'),
         },
+        {
+            path: '/chatTest',
+            name: 'chatTest',
+            meta: {
+                permission: []
+            },
+            component: r => require.ensure([], () => r(require('@/views/chat/chat')), 'chat'),
+        },
 
     ]
 }, {
