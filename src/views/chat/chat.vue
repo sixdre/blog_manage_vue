@@ -47,29 +47,20 @@
                         </div>
                         <ul class="rong-message-list">
                             <li class="rongcloud-Message" :class="{'rongcloud-Message-send':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
-                                <!-- <div class="clearfix">
+                                <div class="clearfix">
                                     <div class="rongcloud-Message-user">
-                                        <img :src="item._sender.portrait" :alt="item._sender.name">
+                                        <img :src="item.sender.avatar" :alt="item.sender.username">
                                         <cite>
-                                            <i>{{item._sentTime}}</i>
-                                            <span>{{item._sender.name}}</span>
+                                            <i>{{item.sendTime}}</i>
+                                            <span>{{item.sender.username}}</span>
                                         </cite>
                                     </div>
                                     <div class="rongcloud-Message-body" >
-                                        <div v-if="item.messageType=='TextMessage'" class="rongcloud-Message-text" >
-                                            <pre v-html="item._content"></pre>
-                                        </div>
-                                        <div v-if="item.messageType=='ImageMessage'">
-                                            <img v-preview class="pointer" :src="item.content.imageUri" style="max-width: 230px;max-height: 250px;">
-                                        </div>
-                                        <div class="rongcloud-Message-file" v-if="item.messageType=='FileMessage'">
-                                            <div class="rongcloud-sprite rongcloud-file-icon"></div>
-                                            <div class="rongcloud-file-name">{{item.content.name}}</div>
-                                            <div class="rongcloud-file-name">{{handleFileSize(item.content.size)}}</div>
-                                            <a class="rongcloud-sprite rongcloud-file-download" :href="item.content.fileUrl"></a>
+                                        <div v-if="item.type=='Text'" class="rongcloud-Message-text" >
+                                            <pre v-html="item.content"></pre>
                                         </div>
                                     </div>
-                                </div> -->
+                                </div>
                             </li>
                         </ul>
                     </div>
@@ -101,7 +92,7 @@
                     </div>
                     <div class="rongcloud-MessageForm-bottom">
                         <div class="rongcloud-MessageForm-send">
-                            <span class="rongcloud-MessageForm-send-btn">发送</span>
+                            <span class="rongcloud-MessageForm-send-btn" @click="sendMessage">发送</span>
                         </div>
                     </div>
                 </div>
@@ -113,27 +104,7 @@
 </template>
 
 <script>
-import socket from './socket';
-socket.on('connect', async () => {
-    
-});
-socket.on('disconnect', () => {
-    
-});
-
-
-socket.on('tip', function(msg){
-    alert(msg)
-});
-socket.emit('sendMessage', {to:'5ae449a30b382d220c3042ef',type:'Text',content:'11111'},function(err,res){
-    console.log(res)
-});
-
-// socket.on('sendMessage', function(res,dd){
-//     console.log(res,dd)
-// });
-
-
+import RC from './chatService';
 
 export default {
     data() {
@@ -147,61 +118,70 @@ export default {
                 list:[],
                 hasMsg:false
             },
-            targetId:null,
+            targetId:'5ae449a30b382d220c3042ef',
             currentUser:{
 
             },
-
-
-
-            form:{
-                name:''
-            },
-            chatList:[{
-                data:'1111',
-                time:new Date()
-            }],
-            msg:''
         };
     },
     mounted() {
-        this.onserverMessage()
+
     },
     created() {
-        socket.on('connectNum', function (num) {
-            console.log("连接数：" + num);
-            if(num===1){
-                alert()
-            }
-        });
+        this.init();
 	},
     methods: {
-        loadHisMessages(){
-
+        init(){
+            RC.init({
+                token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YWU0NDlhMzBiMzgyZDIyMGMzMDQyZWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiIxMjNAcXEuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNTMyMTM1NDk4LCJleHAiOjE1MzIyMjE4OTh9.RryQMVXbVv6TVXjh-SnnlvU4ksSZCH_GXt6wkzEQlQc'
+            },(currentUser)=>{
+                console.log(currentUser)
+                setTimeout(()=>{
+                    this.getHistoryMessages()
+                })
+                
+            })
         },
-
-
-
-
-
-
-
-        onRegister(){
-            var from = this.form.name;
-            socket.emit('setName', from);
-            //sessionStorage.setItem('name', from);
+        scrollBottom(ref="messageList"){
+            this.$nextTick(()=>{
+                this.$refs[ref].scrollTop = this.$refs[ref].scrollHeight;
+            })
         },
-        sendMsg(){
-            socket.emit('client message', this.msg);
-            console.log(this.msg)
+        getHistoryMessages() {
+            var targetId = this.targetId;
+            this.messages.list = [];
+            this.messages.hasMsg = true;
+            RC.Message.getHistoryMessages({
+                targetId: targetId,
+            }, (error, data)=> {
+                if (error) {
+                    console.error('Conversation.get Error: %s', error);
+                    return;
+                }
+                this.messages.list = data;
+                console.log(data)
+            });
+        },
+        sendMessage() {
+            var content = this.content;
+            var targetId = this.targetId;
+            if (content) {
+                RC.Message.send({
+                    content: content,
+                    type:"Text",
+                    to:targetId
+                }, (error, message)=> {
+                    console.log(message)
+                    this.messages.list.push(message);
+                    this.content = '';
+                    this.$nextTick(()=>{
+                        this.scrollBottom()
+                    })
+                });
+            }
         },
         onserverMessage(){
-            socket.on('server message', (data)=> {
-                this.chatList.push({
-                    data:data,
-                    time:new Date()
-                })
-            })
+           
         }
     }
 }
