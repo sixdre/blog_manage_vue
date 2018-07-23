@@ -4,9 +4,9 @@
             <div class="rongcloud-left">
                 <div class="scroll" style="position:absolute;top:42px;bottom:0;width:100%;overflow-y:scroll;">
                     <ul class="rongcloud-conversation-list" v-if="conversationList.length">
-                        <li class="rongcloud-conversation"  :class="{'active':targetId==item.targetId}" v-for="(item,index) in conversationList" :key="index">
+                        <li class="rongcloud-conversation" @click="changeUser(item)"  :class="{'active':targetId==item.userId}" v-for="(item,index) in conversationList" :key="index">
                             <div class="avatar">
-                                <img :class="{'offline':item._target.online=='0'}" :src="item._target.portrait" alt="">
+                                <img :class="{'offline':item.online=='0'}" :src="item.avatar" alt="">
                             </div>
                             <div class="rongcloud-ext">
                                 <div class="rongcloud-attr clearfix">
@@ -15,17 +15,17 @@
                             </div>
                             <div class="rongcloud-user">
                                 <div class="name">
-                                    {{item._target.name}}
+                                    {{item.username}}
                                     <p>
                                         <!-- <i class="rongcloud-online online" v-show="item._target.online=='1'">[在线]</i> -->
-                                        <i class="rongcloud-online offline" v-show="item._target.online=='0'">[离线]</i>
+                                        <i class="rongcloud-online offline" v-show="item.online=='0'">[离线]</i>
                                     </p>
                                 </div> 
-                                <div class="rongcloud-lasted-msg" v-if="item.latestMessage">
+                                <!-- <div class="rongcloud-lasted-msg" v-if="item.latestMessage">
                                     <span v-show="item.latestMessage.content.messageName=='TextMessage'" :title="item.latestMessage.content.content">{{item.latestMessage.content.content}}</span>
                                     <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
                                     <span v-show="item.latestMessage.content.messageName=='FileMessage'">[文件]</span>
-                                </div>
+                                </div> -->
                             </div>
                         </li>
                     </ul>
@@ -35,13 +35,13 @@
                 <div class="rongcloud-rong-pannel layim-chat-main">
                     <div class="rongcloud-rong-header">
                          <div class="rongcloud-infoBar">
-                            <img :src="currentUser.portrait">
-                            <span socket-event="">{{currentUser.name}}</span>
+                            <img :src="currentUser.avatar">
+                            <span socket-event="">{{currentUser.username}}</span>
                         </div>
                     </div>
                     <div ref="messageList" class="rcs-message-list">
                         <div class="rongcloud-Messages-history">
-                            <span v-show="messages.list.length&&messages.hasMsg" @click="loadHisMessages">
+                            <span v-show="messages.list.length&&messages.hasMsg">
                                 查看历史消息
                             </span>
                         </div>
@@ -105,14 +105,31 @@
 
 <script>
 import RC from './chatService';
-
+var isActive = function(message, ctx){
+    var id = ctx.targetId;
+    return (message.senderUserId == id);
+};
+function messageWatch(ctx){
+    RC.Message.watch(function(message){
+        if (isActive(message, ctx)) {
+           ctx.messages.list.push(message);
+           ctx.scrollBottom()
+        }
+    });
+};
 export default {
     data() {
         return {
             conversationList:[{
-                _target:{
-                    name:'张三'
-                }
+                userId:'5ae449a30b382d220c3042ee',
+                username:'admin',
+                avatar:'http://osf6cl53d.bkt.clouddn.com/01d2f582-8d88-4d70-a87e-ea4985c2c754.png',
+                unreadMessageCount:0
+            },{
+                userId:'5ae449a30b382d220c3042ef',
+                username:'test',
+                avatar:'https://gravatar.com/avatar/d9e8e7d540309dfa1ca67e804ad92b52?size=48',
+                unreadMessageCount:0
             }],
             messages:{
                 list:[],
@@ -127,20 +144,28 @@ export default {
     mounted() {
 
     },
+    computed:{
+        token(){
+            return this.$store.state.user.token
+        }
+    },
     created() {
         this.init();
 	},
     methods: {
         init(){
             RC.init({
-                token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YWU0NDlhMzBiMzgyZDIyMGMzMDQyZWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiIxMjNAcXEuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNTMyMTM1NDk4LCJleHAiOjE1MzIyMjE4OTh9.RryQMVXbVv6TVXjh-SnnlvU4ksSZCH_GXt6wkzEQlQc'
+                token:this.token,
             },(currentUser)=>{
                 console.log(currentUser)
-                setTimeout(()=>{
-                    this.getHistoryMessages()
-                })
-                
+                messageWatch(this);
+                this.getHistoryMessages()
             })
+        },
+        changeUser(item){
+            this.targetId = item.userId;
+            this.currentUser = item;
+            this.getHistoryMessages()
         },
         scrollBottom(ref="messageList"){
             this.$nextTick(()=>{
@@ -159,7 +184,6 @@ export default {
                     return;
                 }
                 this.messages.list = data;
-                console.log(data)
             });
         },
         sendMessage() {
