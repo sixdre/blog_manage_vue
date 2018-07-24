@@ -1,6 +1,8 @@
 import socket from './socket';
 import utils from './utils';
 
+var emoji = RongIMLib.RongIMEmoji;
+
 var Logger = {
     warn: console.warn,
     log: console.log
@@ -140,6 +142,29 @@ var pushMessage = function(msg) {
 }
 
 
+//内容格式化
+var textMessageFormat = function(message) {
+    var content = message.content;
+    if (!content || content.length === 0) {
+        return '';
+    }
+    if (message.type == "Text") {
+        content = utils.encodeHtmlStr(content);
+        content = utils.replaceUri(content, function(uri, protocol) {
+            var link = uri;
+            if (!protocol) {
+                link = 'http://' + uri;
+            }
+            return '<a class="rong-link-site" target="_blank" href="' + link + '">' + uri + '</a>';
+        });
+        content = utils.replaceEmail(content, function(email) {
+            return '<a class="rong-link-email" href="mailto:' + email + '">' + email + '<a>';
+        });
+        // content = emoji.symbolToHTML(content);
+    }
+    return emoji.symbolToHTML(content);
+}
+
 socket.on('disconnect', () => {
 
 });
@@ -160,6 +185,7 @@ Message.send = function(message, callback) {
             callback(err, message)
             return;
         }
+        message.content = textMessageFormat(message)
         callback(null, message)
     });
 };
@@ -176,6 +202,12 @@ Message.getHistoryMessages = function(conversation, callback) {
             callback(err, data)
             return;
         }
+        data.list = data.list.map(function(item) {
+            return {
+                ...item,
+                content: textMessageFormat(item)
+            }
+        })
         callback(null, data)
     });
 };
@@ -248,9 +280,10 @@ Emitter.on('onconversation', function(conversation) {
 
 var setListener = function() {
     socket.on('receiveMessage', function(message) {
+        message.content = textMessageFormat(message);
         Emitter.fire('onmessage', message);
         Emitter.fire('onconversation');
-        console.log(message)
+        // console.log(message, 111111111111)
     });
 };
 

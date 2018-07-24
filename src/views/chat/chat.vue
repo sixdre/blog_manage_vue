@@ -100,6 +100,13 @@
                     <div class="chat-footer-con">
                         <div class="rongcloud-footer-tools">
                             <div class="rongcloud-MessageForm-tool">
+                                <i class="iconfont-emoji pointer" @click="toggleEmoji"></i>
+                                <div class="rongcloud-expressionWrap" v-show="showEmoji">
+                                    <span class="fl pointer" style="padding:5px;" @click="clickEmoji(item)" :title="item.symbol" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="rongcloud-MessageForm-tool">
                                 <i class="iconfont-image pointer">
                                     <input accept="image/*" @change="uploadImg($event)"  type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
@@ -117,6 +124,7 @@
                             placeholder="请输入内容"
                             v-model="content"
                             ref="content"
+                            @keyup.enter="sendMessage"
                            > 
                         </textarea>
                     </div>
@@ -166,7 +174,10 @@ export default {
                 list:[],
                 hasMore:false
             },
+            emojiList:[],
+            showEmoji:false,
             targetId:'',
+            content:'',
             currentUser:{
 
             },
@@ -181,6 +192,7 @@ export default {
         }
     },
     created() {
+        this.emojiList = RongIMLib.RongIMEmoji.list;
         this.init();
 	},
     methods: {
@@ -370,7 +382,14 @@ export default {
                 })
             }
         },
-       
+        clickEmoji(item){
+            this.content = this.content + item.symbol;
+            this.toggleEmoji()
+            this.$refs['content'].focus()
+        },
+        toggleEmoji(){
+            this.showEmoji = !this.showEmoji;
+        }
     }
 }
 </script>
