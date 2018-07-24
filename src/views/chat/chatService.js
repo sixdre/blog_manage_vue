@@ -5,6 +5,8 @@ var Logger = {
     warn: console.warn,
     log: console.log
 };
+var terminal;
+var supportNot = false; //页面是否支持notification
 
 var Emitter = (function() {
     var events = {};
@@ -95,7 +97,47 @@ function Watcher() {
     };
 }
 
+//设置是否开启桌面通知
+var setNotification = function() {
+        utils.browserRedirect(function(phoneOrPc) {
+            terminal = phoneOrPc;
+        });
+        if (terminal == 'pc') {
+            if (Notification.permission === "granted") {
+                supportNot = true;
+            }
+            // Otherwise, we need to ask the user for permission
+            else if (Notification.permission !== "denied") {
+                Notification.requestPermission(function(permission) {
+                    // If the user accepts, let's create a notification
+                    if (permission === "granted") {
+                        supportNot = true;
+                    }
+                });
+            }
+        }
+    }
+    //显示Notification通知
+var pushMessage = function(msg) {
+    if (window.Notification && Notification.permission !== "denied") {
+        var title = (msg.sender && msg.sender.username) ? msg.sender.username + ' 回复了你' : '消息提醒';
+        var options = {
+            body: "您有一条新消息，请及时回复",
+            icon: (msg.sender && msg.sender.avatar) ? msg.sender.avatar : "",
+        };
+        var notification = new Notification(title, options);
 
+        notification.onclick = function(event) {
+            window.focus();
+            notification.close();
+        }
+        notification.onshow = function() {
+            setTimeout(function() {
+                notification.close();
+            }, 3000);
+        };
+    }
+}
 
 
 socket.on('disconnect', () => {
@@ -110,7 +152,7 @@ var messageWatcher = new Watcher();
 Message.send = function(message, callback) {
     callback = callback || utils.noop;
     var type = message.type
-    var to = message.to;
+    var to = message.targetId;
     var content = message.content;
     socket.emit('sendMessage', { to, type, content }, function(err, message) {
         if (err) {
@@ -124,10 +166,11 @@ Message.send = function(message, callback) {
 
 
 Message.getHistoryMessages = function(conversation, callback) {
+    var page = conversation.page || 1;
     var targetId = conversation.targetId;
     var limit = conversation.limit || 20;
     // 获取历史消息起始时间，0 表示从最近的一条消息开始向前获取 20 条, 
-    socket.emit('getHistoryMessages', { targetId, limit }, function(err, data) {
+    socket.emit('getHistoryMessages', { targetId, page, limit }, function(err, data) {
         if (err) {
             Logger.log(err)
             callback(err, data)
@@ -141,11 +184,63 @@ Message.watch = function(watcher) {
     messageWatcher.add(watcher);
 };
 Emitter.on('onmessage', function(message) {
-    // if (message.messageDirection != 1 && supportNot) {
-    //     pushMessage(message);
-    // }
+    if (message.messageDirection != 1 && supportNot) {
+        pushMessage(message);
+    }
     messageWatcher.notify(message);
 });
+
+
+
+
+var conversationWatcher = new Watcher();
+
+var Conversation = {};
+
+//获取会话列表
+Conversation.get = function(callback) {
+    callback = callback || utils.noop;
+    socket.emit('getConversationList', function(err, data) {
+        if (err) {
+            Logger.log(err)
+            callback(err, data)
+            return;
+        }
+        callback(null, data)
+    });
+
+};
+
+//清除会话未读数
+Conversation.clearUnreadCount = function(params, callback) {
+    callback = callback || utils.noop;
+    var targetId = params.targetId;
+    socket.emit('clearUnreadCount', { targetId: targetId }, function(err, data) {
+        if (err) {
+            Logger.log(err)
+            callback(err, data)
+            return;
+        }
+        callback(null, data)
+    });
+}
+
+
+
+
+Conversation.watch = function(watcher) {
+    conversationWatcher.add(watcher);
+};
+
+Emitter.on('onconversation', function(conversation) {
+    Conversation.get(function(err, conversationList) {
+        if (!err) {
+            conversationWatcher.notify(conversationList);
+        }
+    });
+});
+
+
 
 
 
@@ -154,6 +249,7 @@ Emitter.on('onmessage', function(message) {
 var setListener = function() {
     socket.on('receiveMessage', function(message) {
         Emitter.fire('onmessage', message);
+        Emitter.fire('onconversation');
         console.log(message)
     });
 };
@@ -177,9 +273,11 @@ var connect = function(token, callback) {
 var init = function(options, callback) {
     var token = options.token;
     connect(token, callback);
+    setNotification();
 };
 
 export default {
     init,
-    Message
+    Message,
+    Conversation
 }

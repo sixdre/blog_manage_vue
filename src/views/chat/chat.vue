@@ -2,9 +2,30 @@
     <section class="section">
         <div class="rongcloud-wrapper">
             <div class="rongcloud-left">
+                <div style="position:absolute;width:100%;top:0;height:42px;text-align:center;border-bottom:1px solid #eee;padding:10px 15px;background:#28b779;">
+                    <span style="font-size:14px;color:#fff;" v-show="!searchState">最近联系人</span>
+                    <input @keyup.enter="searchUser" style="width:110px;height:23px;" v-model="searchUserName" v-show="searchState" type="text">
+                    <i v-show="searchState" @click="searchState=0" style="float:right;margin-top:3px;color:#fff;cursor:pointer;margin-left:5px;" class="el-icon-error"></i>
+                    <i style="float:right;margin-top:3px;color:#fff;cursor:pointer;" @click="searchUser" class="el-icon-search"></i>
+                </div>
                 <div class="scroll" style="position:absolute;top:42px;bottom:0;width:100%;overflow-y:scroll;">
+                    <div v-show="searchState" style="position:absolute;top:0;bottom:0;left:0;right:0;background:#fff;z-index:2;">
+                        <ul class="rongcloud-conversation-list" v-show="searchUserList.length">
+                            <li class="rongcloud-conversation" @click="toConversation(item)" v-for="(item,index) in searchUserList" :key="index">
+                                <div class="avatar">
+                                    <img :src="item.avatar" alt="">
+                                </div>
+                                <div class="rongcloud-user">
+                                    <div class="name">
+                                        {{item.username}}
+                                    </div> 
+                                </div>
+                            </li>
+                        </ul>
+                        <p v-show="!hasSearchUser" style="text-align:center;">没有找到相关用户</p>
+                    </div>
                     <ul class="rongcloud-conversation-list" v-if="conversationList.length">
-                        <li class="rongcloud-conversation" @click="changeUser(item)"  :class="{'active':targetId==item.userId}" v-for="(item,index) in conversationList" :key="index">
+                        <li class="rongcloud-conversation" @click="changeUser(item,index)"  :class="{'active':targetId==item.userId}" v-for="(item,index) in conversationList" :key="index">
                             <div class="avatar">
                                 <img :class="{'offline':item.online=='0'}" :src="item.avatar" alt="">
                             </div>
@@ -21,11 +42,11 @@
                                         <i class="rongcloud-online offline" v-show="item.online=='0'">[离线]</i>
                                     </p>
                                 </div> 
-                                <!-- <div class="rongcloud-lasted-msg" v-if="item.latestMessage">
-                                    <span v-show="item.latestMessage.content.messageName=='TextMessage'" :title="item.latestMessage.content.content">{{item.latestMessage.content.content}}</span>
-                                    <span v-show="item.latestMessage.content.messageName=='ImageMessage'">[图片]</span>
-                                    <span v-show="item.latestMessage.content.messageName=='FileMessage'">[文件]</span>
-                                </div> -->
+                                <div class="rongcloud-lasted-msg" v-if="item.latestMessage">
+                                    <span v-show="item.latestMessage.type=='Text'" :title="item.latestMessage.content">{{item.latestMessage.content}}</span>
+                                    <span v-show="item.latestMessage.type=='Image'">[图片]</span>
+                                    <span v-show="item.latestMessage.type=='File'">[文件]</span>
+                                </div>
                             </div>
                         </li>
                     </ul>
@@ -41,7 +62,7 @@
                     </div>
                     <div ref="messageList" class="rcs-message-list">
                         <div class="rongcloud-Messages-history">
-                            <span v-show="messages.list.length&&messages.hasMsg">
+                            <span v-show="messages.list.length&&messages.hasMore" @click="loadHisMessages">
                                 查看历史消息
                             </span>
                         </div>
@@ -59,6 +80,15 @@
                                         <div v-if="item.type=='Text'" class="rongcloud-Message-text" >
                                             <pre v-html="item.content"></pre>
                                         </div>
+                                        <div v-if="item.type=='Image'">
+                                            <img v-preview class="pointer" :src="item.content" style="max-width: 230px;max-height: 250px;">
+                                        </div>
+                                        <div class="rongcloud-Message-file" v-if="item.type=='File'">
+                                            <div class="rongcloud-sprite rongcloud-file-icon"></div>
+                                            <div class="rongcloud-file-name">{{transformJsonContent(item.content).fileName}}</div>
+                                            <div class="rongcloud-file-name">{{handleFileSize(transformJsonContent(item.content).fileSize)}}</div>
+                                            <a class="rongcloud-sprite rongcloud-file-download" :href="transformJsonContent(item.content).fileUrl"></a>
+                                        </div>
                                     </div>
                                 </div>
                             </li>
@@ -71,12 +101,12 @@
                         <div class="rongcloud-footer-tools">
                             <div class="rongcloud-MessageForm-tool">
                                 <i class="iconfont-image pointer">
-                                    <input accept="image/*"  type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                    <input accept="image/*" @change="uploadImg($event)"  type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
                             </div>
                              <div class="rongcloud-MessageForm-tool">
                                  <i class="iconfont-file pointer">
-                                    <input  type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                    <input  type="file" @change="uploadFile($event)" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
                                 </i>
                             </div>
                         </div>
@@ -117,25 +147,26 @@ function messageWatch(ctx){
         }
     });
 };
+function conversationWatch(ctx){
+    RC.Conversation.watch(()=> {
+       ctx.getConversationList()
+    });
+};
 export default {
     data() {
         return {
-            conversationList:[{
-                userId:'5ae449a30b382d220c3042ee',
-                username:'admin',
-                avatar:'http://osf6cl53d.bkt.clouddn.com/01d2f582-8d88-4d70-a87e-ea4985c2c754.png',
-                unreadMessageCount:0
-            },{
-                userId:'5ae449a30b382d220c3042ef',
-                username:'test',
-                avatar:'https://gravatar.com/avatar/d9e8e7d540309dfa1ca67e804ad92b52?size=48',
-                unreadMessageCount:0
-            }],
+            loading:false,
+            page:1,
+            searchUserName:'',
+            searchState:0,
+            searchUserList:[],
+            hasSearchUser:true,
+            conversationList:[],
             messages:{
                 list:[],
-                hasMsg:false
+                hasMore:false
             },
-            targetId:'5ae449a30b382d220c3042ef',
+            targetId:'',
             currentUser:{
 
             },
@@ -158,19 +189,87 @@ export default {
                 token:this.token,
             },(currentUser)=>{
                 console.log(currentUser)
+                this.getConversationList()
+                // this.getHistoryMessages()
                 messageWatch(this);
-                this.getHistoryMessages()
+                conversationWatch(this);
             })
         },
-        changeUser(item){
+        handleFileSize(size){
+			let kb = size/1024;
+			if(kb<1024){
+				return kb.toFixed(2)+'KB';
+			}else{
+				return (kb/1024).toFixed(2)+'MB'
+			}
+        },
+        transformJsonContent(content){
+            return JSON.parse(content)
+        },
+        async searchUser(){
+            this.searchState = 1;
+            var searchUserName = this.searchUserName
+            if(!searchUserName){
+                return ;
+            }
+            let res= await this.$Api.searchUser(searchUserName);
+            if (res.data.code === 1) {
+				this.searchUserList = res.data.data;
+                if(!this.searchUserList.length){
+                    this.hasSearchUser = false;
+                }else{
+                    this.hasSearchUser = true;
+                }
+			} else {
+				alert(res.data.message);
+			}
+        },
+        toConversation(item){
+            let newconversation= {};
+            let conversation = this.conversationList.find(con=>con.userId===item._id);
+            if(!conversation){
+                newconversation={
+                    username:item.username,
+                    userId:item._id,
+                    avatar:item.avatar
+                }
+                this.conversationList.push(newconversation)
+            }else{
+                newconversation = conversation;
+            } 
+            this.targetId = item._id;
+            this.searchState=0;
+            this.changeUser(newconversation)
+        },
+        changeUser(item,index){
+            this.page=1;
             this.targetId = item.userId;
             this.currentUser = item;
+            RC.Conversation.clearUnreadCount({
+                targetId:item.userId
+            },(err,data)=>{
+                if(!err){
+                    if(index!==undefined||index!==null){
+                        this.$set(this.conversationList,index,{...item,unreadMessageCount:0})
+                    } 
+                }
+            });
             this.getHistoryMessages()
         },
         scrollBottom(ref="messageList"){
             this.$nextTick(()=>{
                 this.$refs[ref].scrollTop = this.$refs[ref].scrollHeight;
             })
+        },
+        getConversationList(){
+            RC.Conversation.get((error, data)=> {
+                if (error) {
+                    console.error('Conversation.get Error: %s', error);
+                    return;
+                }
+                console.log(data)
+                this.conversationList = data;
+            });
         },
         getHistoryMessages() {
             var targetId = this.targetId;
@@ -183,17 +282,43 @@ export default {
                     console.error('Conversation.get Error: %s', error);
                     return;
                 }
-                this.messages.list = data;
+                var {list,hasMore} = data;
+                this.messages.list = list;
+                this.messages.hasMore = hasMore;
+                this.scrollBottom()
             });
         },
-        sendMessage() {
-            var content = this.content;
+        loadHisMessages(){
+            this.loading = true;
+            this.page++;
+            var targetId = this.targetId;
+            RC.Message.getHistoryMessages({
+                targetId: targetId,
+                page:this.page
+            }, (error, data)=> {
+                if (error) {
+                    console.error('message.get Error: %s', error);
+                    return;
+                }
+                // console.log(data)
+                var oldHeight = this.$refs['messageList'].scrollHeight;
+                var {list,hasMore} = data;
+                this.messages.hasMore = hasMore;
+                this.messages.list = [...list,...this.messages.list];
+                this.$nextTick(()=>{
+                    var newHeight = this.$refs['messageList'].scrollHeight;
+                    this.$refs['messageList'].scrollTop = newHeight-oldHeight;
+                    this.loading = false;
+                })
+            })
+        },
+        send(content,type="Text"){
             var targetId = this.targetId;
             if (content) {
                 RC.Message.send({
                     content: content,
-                    type:"Text",
-                    to:targetId
+                    type:type,
+                    targetId:targetId
                 }, (error, message)=> {
                     console.log(message)
                     this.messages.list.push(message);
@@ -204,9 +329,48 @@ export default {
                 });
             }
         },
-        onserverMessage(){
-           
-        }
+        sendMessage() {
+            var content = this.content;
+            this.send(content)
+        },
+        uploadImg(e){
+            var files = e.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var formData = new FormData();
+                var file = files[i];
+                formData.append('file', file);
+                this.$Api.addFile(formData).then((res)=> {
+                    if (res.data.code == 1) {
+                        let data = res.data;
+                        this.send(data.url,'Image')
+                    } else {
+                        alert(res.data.message);
+                    }
+                })
+            }
+        },
+        uploadFile(e){
+            var files = e.target.files;
+            for (var i = 0; i < files.length; i++) {
+                var formData = new FormData();
+                var file = files[i];
+                formData.append('file', file);
+                this.$Api.addFile(formData).then((res)=> {
+                    if (res.data.code == 1) {
+                        let data = res.data;
+                        let content = JSON.stringify({
+                            fileName: file.name,
+                            fileSize: file.size,
+                            fileUrl: data.url
+                        }) 
+                        this.send(content,'File')
+                    } else {
+                        alert(res.data.message);
+                    }
+                })
+            }
+        },
+       
     }
 }
 </script>
