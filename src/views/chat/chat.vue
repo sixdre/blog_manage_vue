@@ -143,9 +143,13 @@
 
 <script>
 import RC from './chatService';
+
+//conversationType    1 私聊  2 群聊
+
+
 var isActive = function(message, ctx){
     var id = ctx.targetId;
-    if(ctx.conversationType=='group'){
+    if(ctx.conversationType==2){
         return message.target == id;
     }
     return (message.senderUserId == id);
@@ -180,7 +184,7 @@ export default {
             emojiList:[],
             showEmoji:false,
             targetId:'5b58251db4031514b096680c',
-            conversationType:'group',
+            conversationType:2,
             content:'',
             currentUser:{
 
@@ -196,6 +200,7 @@ export default {
         }
     },
     created() {
+        console.log(this.$route.query.conversationType)
         this.emojiList = RongIMLib.RongIMEmoji.list;
         this.init();
 	},
@@ -261,7 +266,7 @@ export default {
             this.page=1;
             this.targetId = item.userId;
             this.currentUser = item;
-            this.conversationType = 'private';
+            this.conversationType = 1;
             RC.Conversation.clearUnreadCount({
                 targetId:item.userId
             },(err,data)=>{
@@ -311,9 +316,11 @@ export default {
             this.loading = true;
             this.page++;
             var targetId = this.targetId;
+            var conversationType = this.conversationType;
             RC.Message.getHistoryMessages({
                 targetId: targetId,
-                page:this.page
+                page:this.page,
+                conversationType
             }, (error, data)=> {
                 if (error) {
                     console.error('message.get Error: %s', error);

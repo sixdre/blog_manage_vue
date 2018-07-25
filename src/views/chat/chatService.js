@@ -179,7 +179,7 @@ Message.send = function(message, callback) {
     var type = message.type
     var to = message.targetId;
     var content = message.content;
-    var conversationType = message.conversationType || 'private';
+    var conversationType = message.conversationType;
     socket.emit('sendMessage', { to, conversationType, type, content }, function(err, message) {
         if (err) {
             Logger.log(err)
