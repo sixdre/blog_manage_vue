@@ -245,19 +245,33 @@ Conversation.get = function(callback) {
 
 //清除会话未读数
 Conversation.clearUnreadCount = function(params, callback) {
+        callback = callback || utils.noop;
+        var targetId = params.targetId;
+        socket.emit('clearUnreadCount', { targetId: targetId }, function(err, data) {
+            if (err) {
+                Logger.log(err)
+                callback(err, data)
+                return;
+            }
+            callback(null, data)
+        });
+    }
+    //监听用户在线状态
+Conversation.watchOnline = function(callback) {
     callback = callback || utils.noop;
-    var targetId = params.targetId;
-    socket.emit('clearUnreadCount', { targetId: targetId }, function(err, data) {
-        if (err) {
-            Logger.log(err)
-            callback(err, data)
-            return;
-        }
-        callback(null, data)
+    socket.on('online', function(data) {
+        callback(data)
+            // Emitter.fire('onconversation');
     });
-}
-
-
+};
+//监听用户在线状态
+Conversation.watchOffline = function(callback) {
+    callback = callback || utils.noop;
+    socket.on('offline', function(data) {
+        callback(data)
+            // Emitter.fire('onconversation');
+    });
+};
 
 
 Conversation.watch = function(watcher) {
@@ -300,6 +314,16 @@ var connect = function(token, callback) {
             }
             callback(res);
         });
+
+        socket.on('online', function(data) {
+            // console.log(data, 'online')
+            Emitter.fire('onconversation');
+        });
+        socket.on('offline', function(data) {
+            // console.log(data, 'offline')
+            Emitter.fire('onconversation');
+        });
+
     });
 };
 
