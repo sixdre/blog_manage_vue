@@ -145,6 +145,9 @@
 import RC from './chatService';
 var isActive = function(message, ctx){
     var id = ctx.targetId;
+    if(ctx.conversationType=='group'){
+        return message.target == id;
+    }
     return (message.senderUserId == id);
 };
 function messageWatch(ctx){
@@ -176,7 +179,8 @@ export default {
             },
             emojiList:[],
             showEmoji:false,
-            targetId:'',
+            targetId:'5b58251db4031514b096680c',
+            conversationType:'group',
             content:'',
             currentUser:{
 
@@ -202,7 +206,7 @@ export default {
             },(currentUser)=>{
                 console.log(currentUser)
                 this.getConversationList()
-                // this.getHistoryMessages()
+                this.getHistoryMessages()
                 messageWatch(this);
                 conversationWatch(this);
             })
@@ -257,6 +261,7 @@ export default {
             this.page=1;
             this.targetId = item.userId;
             this.currentUser = item;
+            this.conversationType = 'private';
             RC.Conversation.clearUnreadCount({
                 targetId:item.userId
             },(err,data)=>{
@@ -285,10 +290,12 @@ export default {
         },
         getHistoryMessages() {
             var targetId = this.targetId;
+            var conversationType = this.conversationType;
             this.messages.list = [];
             this.messages.hasMsg = true;
             RC.Message.getHistoryMessages({
                 targetId: targetId,
+                conversationType,
             }, (error, data)=> {
                 if (error) {
                     console.error('Conversation.get Error: %s', error);
@@ -326,11 +333,13 @@ export default {
         },
         send(content,type="Text"){
             var targetId = this.targetId;
+            var conversationType = this.conversationType;
             if (content) {
                 RC.Message.send({
                     content: content,
                     type:type,
-                    targetId:targetId
+                    targetId:targetId,
+                    conversationType:conversationType
                 }, (error, message)=> {
                     console.log(message)
                     this.messages.list.push(message);

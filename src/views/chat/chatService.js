@@ -179,7 +179,8 @@ Message.send = function(message, callback) {
     var type = message.type
     var to = message.targetId;
     var content = message.content;
-    socket.emit('sendMessage', { to, type, content }, function(err, message) {
+    var conversationType = message.conversationType || 'private';
+    socket.emit('sendMessage', { to, conversationType, type, content }, function(err, message) {
         if (err) {
             Logger.log(err)
             callback(err, message)
@@ -195,8 +196,9 @@ Message.getHistoryMessages = function(conversation, callback) {
     var page = conversation.page || 1;
     var targetId = conversation.targetId;
     var limit = conversation.limit || 20;
+    var conversationType = conversation.conversationType;
     // 获取历史消息起始时间，0 表示从最近的一条消息开始向前获取 20 条, 
-    socket.emit('getHistoryMessages', { targetId, page, limit }, function(err, data) {
+    socket.emit('getHistoryMessages', { conversationType, targetId, page, limit }, function(err, data) {
         if (err) {
             Logger.log(err)
             callback(err, data)
@@ -208,6 +210,7 @@ Message.getHistoryMessages = function(conversation, callback) {
                 content: textMessageFormat(item)
             }
         })
+        console.log(data)
         callback(null, data)
     });
 };
@@ -297,7 +300,7 @@ var setListener = function() {
         message.content = textMessageFormat(message);
         Emitter.fire('onmessage', message);
         Emitter.fire('onconversation');
-        // console.log(message, 111111111111)
+        console.log(message, 'receiveMessage')
     });
 };
 
