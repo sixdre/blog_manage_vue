@@ -121,10 +121,11 @@ var setNotification = function() {
     }
     //显示Notification通知
 var pushMessage = function(msg) {
+    console.log(msg)
     if (window.Notification && Notification.permission !== "denied") {
         var title = (msg.sender && msg.sender.username) ? msg.sender.username + ' 回复了你' : '消息提醒';
         var options = {
-            body: "您有一条新消息，请及时回复",
+            body: msg.type == "Text" ? msg.content : "您有一条新消息，请及时回复",
             icon: (msg.sender && msg.sender.avatar) ? msg.sender.avatar : "",
         };
         var notification = new Notification(title, options);
@@ -219,9 +220,6 @@ Message.watch = function(watcher) {
     messageWatcher.add(watcher);
 };
 Emitter.on('onmessage', function(message) {
-    if (message.messageDirection != 1 && supportNot) {
-        pushMessage(message);
-    }
     messageWatcher.notify(message);
 });
 
@@ -297,6 +295,9 @@ Emitter.on('onconversation', function(conversation) {
 
 var setListener = function() {
     socket.on('receiveMessage', function(message) {
+        if (message.messageDirection != 1 && supportNot) {
+            pushMessage(message);
+        }
         message.content = textMessageFormat(message);
         Emitter.fire('onmessage', message);
         Emitter.fire('onconversation');

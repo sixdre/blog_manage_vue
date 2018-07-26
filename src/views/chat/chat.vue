@@ -1,6 +1,6 @@
 <template>
     <section class="section">
-        <div class="rongcloud-wrapper">
+        <div class="rongcloud-wrapper" style="margin:50px auto 0 auto;">
             <div class="rongcloud-left">
                 <div style="position:absolute;width:100%;top:0;height:42px;text-align:center;border-bottom:1px solid #eee;padding:10px 15px;background:#28b779;">
                     <span style="font-size:14px;color:#fff;" v-show="!searchState">最近联系人</span>
@@ -125,6 +125,7 @@
                             v-model="content"
                             ref="content"
                             @keyup.enter="sendMessage"
+                            @paste="handlePaste"
                            > 
                         </textarea>
                     </div>
@@ -183,8 +184,8 @@ export default {
             },
             emojiList:[],
             showEmoji:false,
-            targetId:'5b58251db4031514b096680c',
-            conversationType:2,
+            targetId:'',
+            conversationType:1,
             content:'',
             currentUser:{
 
@@ -200,7 +201,8 @@ export default {
         }
     },
     created() {
-        console.log(this.$route.query.conversationType)
+        this.conversationType = this.$route.query.conversationType ||1;
+        this.targetId = this.$route.query.targetId;
         this.emojiList = RongIMLib.RongIMEmoji.list;
         this.init();
 	},
@@ -277,6 +279,13 @@ export default {
                 }
             });
             this.getHistoryMessages()
+            this.$router.push({
+                path:'/chatTest',
+                query:{
+                    conversationType:this.conversationType,
+                    targetId:this.targetId
+                }
+            })
         },
         scrollBottom(ref="messageList"){
             this.$nextTick(()=>{
@@ -294,6 +303,7 @@ export default {
             });
         },
         getHistoryMessages() {
+            this.loading = true;
             var targetId = this.targetId;
             var conversationType = this.conversationType;
             this.messages.list = [];
@@ -309,6 +319,7 @@ export default {
                 var {list,hasMore} = data;
                 this.messages.list = list;
                 this.messages.hasMore = hasMore;
+                this.loading = false;
                 this.scrollBottom()
             });
         },
@@ -349,54 +360,75 @@ export default {
                     conversationType:conversationType
                 }, (error, message)=> {
                     console.log(message)
-                    this.messages.list.push(message);
-                    this.content = '';
-                    this.$nextTick(()=>{
-                        this.scrollBottom()
-                    })
+                    if(!error){
+                        this.messages.list.push(message);
+                        this.content = '';
+                        this.$nextTick(()=>{
+                            this.scrollBottom()
+                        })
+                    }
                 });
             }
         },
         sendMessage() {
             var content = this.content;
-            this.send(content)
+            this.send(content,'Text')
+        },
+        sendImageMessage(file){
+            var formData = new FormData();
+            formData.append('file', file);
+            this.$Api.addFile(formData).then((res)=> {
+                if (res.data.code == 1) {
+                    let data = res.data;
+                    this.send(data.url,'Image')
+                } else {
+                    alert(res.data.message);
+                }
+            })
+        },
+        sendFileMessage(file){
+            var formData = new FormData();
+            formData.append('file', file);
+            this.$Api.addFile(formData).then((res)=> {
+                if (res.data.code == 1) {
+                    let data = res.data;
+                    let content = JSON.stringify({
+                        fileName: file.name,
+                        fileSize: file.size,
+                        fileUrl: data.url
+                    }) 
+                    this.send(content,'File')
+                } else {
+                    alert(res.data.message);
+                }
+            })
         },
         uploadImg(e){
             var files = e.target.files;
             for (var i = 0; i < files.length; i++) {
-                var formData = new FormData();
                 var file = files[i];
-                formData.append('file', file);
-                this.$Api.addFile(formData).then((res)=> {
-                    if (res.data.code == 1) {
-                        let data = res.data;
-                        this.send(data.url,'Image')
-                    } else {
-                        alert(res.data.message);
-                    }
-                })
+                this.sendImageMessage(file)
             }
         },
         uploadFile(e){
             var files = e.target.files;
             for (var i = 0; i < files.length; i++) {
-                var formData = new FormData();
                 var file = files[i];
-                formData.append('file', file);
-                this.$Api.addFile(formData).then((res)=> {
-                    if (res.data.code == 1) {
-                        let data = res.data;
-                        let content = JSON.stringify({
-                            fileName: file.name,
-                            fileSize: file.size,
-                            fileUrl: data.url
-                        }) 
-                        this.send(content,'File')
-                    } else {
-                        alert(res.data.message);
-                    }
-                })
+                this.sendFileMessage(file)
             }
+        },
+        handlePaste(event) {
+            console.log(event)
+            var data = event.clipboardData;
+            if (typeof data !== 'object') {
+                return;
+            }
+            [...data.items].forEach((item, index)=>{
+                    if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+                    var blob = item.getAsFile();
+                    this.sendImageMessage(blob);
+                }
+            })
         },
         clickEmoji(item){
             this.content = this.content + item.symbol;
