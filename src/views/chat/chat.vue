@@ -1,6 +1,6 @@
 <template>
-    <section class="section">
-        <div class="rongcloud-wrapper" style="margin:50px auto 0 auto;">
+    <section class="section" id="chat_section">
+        <div class="rongcloud-wrapper" style="margin:0 auto;">
             <div class="rongcloud-left">
                 <div style="position:absolute;width:100%;top:0;height:42px;text-align:center;border-bottom:1px solid #eee;padding:10px 15px;background:#28b779;">
                     <span style="font-size:14px;color:#fff;" v-show="!searchState">最近联系人</span>
@@ -466,4 +466,16 @@ export default {
     background: url('../../assets/images/icon/file.png');
     cursor: pointer;
 }
+#chat_section{
+    // background: url('../../assets/images/chat_background.jpg');
+    // background-size: 1920px 1080px;
+    // background-repeat: no-repeat;
+}
+
+
+
+
+
+
+
 </style>
