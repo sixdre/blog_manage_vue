@@ -80,7 +80,7 @@
                                         <div v-if="item.type=='Text'" class="rongcloud-Message-text" >
                                             <pre v-html="item.content"></pre>
                                         </div>
-                                        <div v-if="item.type=='Image'">
+                                        <div v-if="item.type=='Image'" class="rongcloud-Message-text">
                                             <img v-preview class="pointer" :src="item.content" style="max-width: 230px;max-height: 250px;">
                                         </div>
                                         <div class="rongcloud-Message-file" v-if="item.type=='File'">

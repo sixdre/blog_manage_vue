@@ -1,5 +1,52 @@
 <template>
-	<section class="section">
+	<section class="section" id="main_section">
+        <el-row :gutter="20">
+            <el-col :span="6">
+                <el-card shadow="hover">
+                    <div class="card-item">
+                        <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
+                        <div class="card-right">
+                            <p class="title">访问人次</p>
+                            <span style="font-size: 25px;">3,501</span>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="hover">
+                    <div class="card-item">
+                        <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
+                        <div class="card-right">
+                            <p class="title">文章数量</p>
+                            <span style="font-size: 25px;">{{indexData.articleCount}}</span>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="hover">
+                    <div class="card-item">
+                        <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
+                        <div class="card-right">
+                            <p class="title">用户数量</p>
+                            <span style="font-size: 25px;">{{indexData.userCount}}</span>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="hover">
+                    <div class="card-item">
+                        <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
+                        <div class="card-right">
+                            <p class="title">评论数量</p>
+                            <span style="font-size: 25px;">{{indexData.commentCount}}</span>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+        </el-row>
+        
         <div style="width:800px;height:500px" ref="chart1"></div>
 
         <div style="width:800px;height:500px" ref="chart2"></div>
@@ -93,7 +140,7 @@ function initChart(dom){
 export default {
 	data() {
 		return {
-			
+			indexData:{}
 		}
 	},
 	created(){
@@ -126,6 +173,7 @@ export default {
         async getData(){
             let res = await this.$Api.graph();
             if (res.data.code === 1) {
+                this.indexData = res.data.data;
                 let categoryData = res.data.data.cateGroup;
                 let tagData = res.data.data.tagGroup;
                 initChart(this.$refs.chart1).setOption(this.setCategoryData(categoryData));
@@ -139,5 +187,18 @@ export default {
 </script>
 
 <style lang="less" scoped>
-
+#main_section{
+    .card-item {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-pack: start;
+        justify-content: flex-start;
+        -ms-flex-align: center;
+        align-items: center;
+        height: 55px;
+        .card-right {
+            margin-left: 20px;
+        }
+    }
+}
 </style>

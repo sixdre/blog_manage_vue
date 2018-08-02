@@ -38,7 +38,11 @@ let MyPlugin = {
         //图片预览
         Vue.directive('preview', {
             bind: function(el, binding, vnode) {
-                var viewer = new window.Viewer(el);
+                var viewer = new window.Viewer(el, {
+                    // hidden: function() {
+                    //     viewer.destroy()
+                    // }
+                });
             }
         })
         Vue.directive('download', {
