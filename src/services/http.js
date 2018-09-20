@@ -1,5 +1,5 @@
 import axios from 'axios'
-import $config from '@/config/env'
+import $config from '@/config/index'
 import Auth from './auth'
 import router from '@/router'
 import { Message  } from 'element-ui'

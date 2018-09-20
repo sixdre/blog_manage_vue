@@ -1,4 +1,4 @@
-import setting from '@/config/setting'
+import setting from '@/config/index'
 
 export default {
     login(data) {

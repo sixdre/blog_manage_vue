@@ -1,5 +1,5 @@
 import utils from './utils';
-import $config from '@/config/env'
+import $config from '@/config/index'
 
 var emoji = RongIMLib.RongIMEmoji;
 

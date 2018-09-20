@@ -19,7 +19,6 @@
                     </div>
                 </el-dropdown-menu>
             </el-dropdown>
-            <span class="logout" @click="logout">退出</span>
         </div>
     </el-row>
 </template>
@@ -87,7 +86,8 @@ export default {
     padding: 0 20px;
     line-height: 70px;
     background: #fff;
-    box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0, 0, 0, 0.05);
+    // box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
     .logo{
         vertical-align: middle;
     }

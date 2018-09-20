@@ -1,7 +1,7 @@
 <template>
-	<div style="height: 100%;">
+	<div class="app-aside bg-dark">
 		<div class="logo_div">
-			<h1 class="title">后台管理系统</h1>
+			<router-link class="title" to="/">后台管理系统</router-link>
 		</div>
 		<el-menu class="app_menu" 
 			:router="true"  
@@ -58,15 +58,18 @@ export default {
 
 <style lang="less">
 @import url('../../assets/css/mixin.less');
-	.logo_div{
+.app-aside{
+	  max-width: 212px !important;
+	  height: 100%;
+  	.logo_div{
 		height: 70px;
 		line-height: 70px;
-		background-color: @info_color;
 		position: fixed;
 		top: 0;
 		left: 0;
 		width: 210px;
 		z-index: 2;
+		background-color: inherit;
 		.logo{
 			width: 32px;
 			height: auto;
@@ -78,15 +81,16 @@ export default {
 			font-size: 20px;
 			font-weight: bold;
 			text-align: center;
+			display: block;
 		}
 	}
 	.app_menu{
 		height: 100%;
-		background-color:#fff;
 		padding-top: 70px;
-		box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+		// box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 		overflow-y: scroll;
 		padding-top: 70px;
+		background-color: inherit;
 		.el-menu-item{
 			color: @txt_color !important; 
 			font-size: 16px;
@@ -144,5 +148,8 @@ export default {
 			}
 		}
 	}
+}
+
+	
 </style>
 

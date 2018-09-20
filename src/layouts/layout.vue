@@ -45,7 +45,5 @@ export default {
   color: #333;
   padding:10px 30px;
 }
-.app-aside{
-  max-width: 212px !important;
-}
+
 </style>
