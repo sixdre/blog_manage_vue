@@ -7,7 +7,7 @@
                         <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
                         <div class="card-right">
                             <p class="title">访问人次</p>
-                            <span style="font-size: 25px;">3,501</span>
+                            <span style="font-size: 25px;">{{indexData.allPv}}</span>
                         </div>
                     </div>
                 </el-card>
@@ -47,9 +47,9 @@
             </el-col>
         </el-row>
         
-        <div style="width:800px;height:500px" ref="chart1"></div>
+        <div style="width:100%;height:500px" ref="chart1"></div>
 
-        <div style="width:800px;height:500px" ref="chart2"></div>
+        <div style="width:100%;height:500px" ref="chart2"></div>
 	</section>
 </template>
 

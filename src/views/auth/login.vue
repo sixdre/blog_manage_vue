@@ -77,7 +77,7 @@
                                 if(backUrl){
                                     this.$router.push(backUrl)
                                 }else{
-                                    this.$router.push('/chatTest')
+                                    this.$router.push('/')
                                 }
                             }else{
                                 this.$message.error(res.data.message);
