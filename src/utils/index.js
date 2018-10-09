@@ -44,3 +44,8 @@ export const hasPermission = function(data) {
     })
     return flag;
 }
+
+//格式化数字为3位相间逗号分隔符
+export const formatNum =  function (num_s) {
+    return parseFloat(num_s).toLocaleString()
+}

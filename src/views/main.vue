@@ -7,7 +7,7 @@
                         <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
                         <div class="card-right">
                             <p class="title">访问人次</p>
-                            <span style="font-size: 25px;">{{indexData.allPv}}</span>
+                            <span style="font-size: 25px;">{{formatNum(indexData.allPv)}}</span>
                         </div>
                     </div>
                 </el-card>
@@ -18,7 +18,7 @@
                         <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
                         <div class="card-right">
                             <p class="title">文章数量</p>
-                            <span style="font-size: 25px;">{{indexData.articleCount}}</span>
+                            <span style="font-size: 25px;">{{formatNum(indexData.articleCount)}}</span>
                         </div>
                     </div>
                 </el-card>
@@ -29,7 +29,7 @@
                         <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
                         <div class="card-right">
                             <p class="title">用户数量</p>
-                            <span style="font-size: 25px;">{{indexData.userCount}}</span>
+                            <span style="font-size: 25px;">{{formatNum(indexData.userCount)}}</span>
                         </div>
                     </div>
                 </el-card>
@@ -40,7 +40,7 @@
                         <i class="anticon anticon-team icon" style="color: rgb(112, 236, 154);"></i>
                         <div class="card-right">
                             <p class="title">评论数量</p>
-                            <span style="font-size: 25px;">{{indexData.commentCount}}</span>
+                            <span style="font-size: 25px;">{{formatNum(indexData.commentCount)}}</span>
                         </div>
                     </div>
                 </el-card>
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-
+import {formatNum} from '@/utils';
 import echarts from 'echarts';
 var barOption = {
     title: {
@@ -140,7 +140,12 @@ function initChart(dom){
 export default {
 	data() {
 		return {
-			indexData:{}
+			indexData:{
+                allPv:0,
+                articleCount:0,
+                userCount:0,
+                commentCount:0
+            }
 		}
 	},
 	created(){
@@ -152,6 +157,9 @@ export default {
         })
     },
 	methods: { 
+        formatNum(val){
+            return formatNum(val)
+        },
         setCategoryData(data){
             let op = JSON.parse(JSON.stringify(pieOption));
             op.title.text = '文章类型统计';
