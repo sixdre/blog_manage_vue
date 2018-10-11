@@ -18,6 +18,7 @@
 		width: 100%;
 		height: auto;
 		min-height: 100%;
+		background-color: #f1f1f1;
 		
 	}
 </style>

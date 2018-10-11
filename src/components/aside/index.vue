@@ -92,7 +92,7 @@ export default {
 		padding-top: 70px;
 		background-color: inherit;
 		.el-menu-item{
-			color: @txt_color !important; 
+			color: #999 !important; 
 			font-size: 16px;
 			&.is-active{
 				background-color:#f7fcfa !important;
@@ -100,11 +100,12 @@ export default {
 				border-left: 4px solid @info_color;
 			}
 			&>a{
-				color: @txt_color !important; 
+				color: #999 !important; 
 				font-size: 16px;
 			}
 		}
 		.el-menu{
+			background: transparent;
 			.el-menu-item{
 				&.is-active{
 					border-left: 0;
@@ -116,7 +117,7 @@ export default {
 		}
 		.el-submenu__title{
 			span{
-				color: @txt_color; 
+				color: #999; 
 			}
 			font-size: 16px;
 		}
@@ -126,23 +127,21 @@ export default {
 			}
 			&.is-active{
 				.el-submenu__title{
-					border-left: 4px solid @info_color;
-					background-color:#f7fcfa !important;
+					background-color: #3eacff;
 					&>span{
-						color: #28b779 !important;
-						font-weight: bold;
+						color: #fff !important;
 					}
 				}
 				&>ul{
 					li{
-						background-color: #eef9f4 !important;
+						background-color: #2b2e33 !important;
 					}
 				}
 			}
 			&>ul{
 				li{
 					a.active{
-						color: #28b779 !important;
+						color: #fff !important;
 					}
 				}
 			}

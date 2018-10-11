@@ -91,6 +91,10 @@ export default {
     removeTag(id) {
         return $http.delete('/api/tags/' + id);
     },
+    //文件管理统计
+    getFileIndex(){
+        return $http.get('/sys/files/graph');
+    },
     getFileList(params) {
         return $http.get('/sys/allFiles', { params });
     },

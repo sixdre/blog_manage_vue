@@ -81,6 +81,7 @@
 export default {
 	data() {
 		return {
+			
 			fileList:[],
 			listApi:'getFileList',
 			removeApi: 'removeArticle',		//删除api
