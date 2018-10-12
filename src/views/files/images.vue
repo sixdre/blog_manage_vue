@@ -22,7 +22,7 @@
                                     </div>
                                     <div class="file-name">
                                         <p class="m-b-5 text-muted">{{item.filename}}</p>
-                                        <small>Size: {{handleFileSize(item.filesize)}}
+                                        <small>Size: {{bytesToSize(item.filesize)}}
                                              <span class="date text-muted">{{item.create_time | moment}}</span>
                                         </small>
                                     </div>
@@ -73,14 +73,6 @@ export default {
             }else{
                 this.$message.error(res.data.message);
             }
-        },
-        handleFileSize(size){
-			let kb = size/1024;
-			if(kb<1024){
-				return kb.toFixed(2)+'KB';
-			}else{
-				return (kb/1024).toFixed(2)+'MB'
-			}
         },
         transformIconClass(filename){
             let s = filename.split('.');

@@ -17,12 +17,16 @@
                                     <el-button type="danger" icon="el-icon-delete" circle></el-button>
                                 </div>
                                 <a href="javascript:void(0);">
-                                    <div class="icon">
-                                        <i :class="transformIconClass(item.filetype)"></i>
+                                    <div class="video">
+                                        <video style="max-width:100%;height:auto;" :src="item.filepath" controls="controls">
+                                        </video>
                                     </div>
+                                    <!-- <div class="icon">
+                                        <i :class="transformIconClass(item.filetype)"></i>
+                                    </div> -->
                                     <div class="file-name">
                                         <p class="m-b-5 text-muted">{{item.filename}}</p>
-                                        <small>Size: {{handleFileSize(item.filesize)}}
+                                        <small>Size: {{bytesToSize(item.filesize)}}
                                              <span class="date text-muted">{{item.create_time | moment}}</span>
                                         </small>
                                     </div>
@@ -73,14 +77,6 @@ export default {
                 this.$message.error(res.data.message);
             }
         },
-        handleFileSize(size){
-			let kb = size/1024;
-			if(kb<1024){
-				return kb.toFixed(2)+'KB';
-			}else{
-				return (kb/1024).toFixed(2)+'MB'
-			}
-        },
         transformIconClass(filetype){
             let s = filetype.split('/');
             let type = s[0];
@@ -110,7 +106,7 @@ export default {
         border-radius: .55rem;
         position: relative;
         overflow: hidden;
-        .image,.icon {
+        .image,.icon,.video {
             max-height: 180px;
             overflow: hidden;
             background-size: cover;

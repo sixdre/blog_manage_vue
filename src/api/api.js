@@ -68,8 +68,8 @@ export default {
         return $http.put(`/api/articles/${id}/recover/`);
     },
     //获取分类列表
-    getCategoryList() {
-        return $http.get('/api/categories');
+    getCategoryList(params) {
+        return $http.get('/api/categories', { params });
     },
     //添加分类
     createCategory(name) {
@@ -92,7 +92,7 @@ export default {
         return $http.delete('/api/tags/' + id);
     },
     //文件管理统计
-    getFileIndex(){
+    getFileIndex() {
         return $http.get('/sys/files/graph');
     },
     getFileList(params) {

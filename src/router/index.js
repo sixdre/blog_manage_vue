@@ -35,6 +35,14 @@ var routes = [{
             component: r => require.ensure([], () => r(require('@/views/chat/index')), 'chat'),
         },
         {
+            path: '/article/index',
+            name: 'articleIndex',
+            meta: {
+                permission: []
+            },
+            component: r => require.ensure([], () => r(require('@/views/article/index'))),
+        },
+        {
             path: '/files/dashboard',
             name: 'filesdashboard',
             meta: {
@@ -65,6 +73,14 @@ var routes = [{
                 permission: []
             },
             component: r => require.ensure([], () => r(require('@/views/files/media'))),
+        },
+        {
+            path: '/chat2',
+            name: 'chat2',
+            meta: {
+                permission: []
+            },
+            component: r => require.ensure([], () => r(require('@/views/chat/chat2'))),
         },
 
     ]

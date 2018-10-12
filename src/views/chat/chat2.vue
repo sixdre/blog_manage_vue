@@ -1,143 +1,139 @@
 <template>
     <section class="section" id="chat_section">
-        <div class="rongcloud-wrapper" style="margin:0 auto;">
-            <div class="rongcloud-left">
-                <div style="position:absolute;width:100%;top:0;height:42px;text-align:center;border-bottom:1px solid #eee;padding:10px 15px;background:#28b779;">
-                    <span style="font-size:14px;color:#fff;" v-show="!searchState">最近联系人</span>
-                    <input @keyup.enter="searchUser" style="width:110px;height:23px;" v-model="searchUserName" v-show="searchState" type="text">
-                    <i v-show="searchState" @click="searchState=0" style="float:right;margin-top:3px;color:#fff;cursor:pointer;margin-left:5px;" class="el-icon-error"></i>
-                    <i style="float:right;margin-top:3px;color:#fff;cursor:pointer;" @click="searchUser" class="el-icon-search"></i>
-                </div>
-                <div class="scroll" style="position:absolute;top:42px;bottom:0;width:100%;overflow-y:scroll;">
-                    <div v-show="searchState" style="position:absolute;top:0;bottom:0;left:0;right:0;background:#fff;z-index:2;">
-                        <ul class="rongcloud-conversation-list" v-show="searchUserList.length">
-                            <li class="rongcloud-conversation" @click="toConversation(item)" v-for="(item,index) in searchUserList" :key="index">
-                                <div class="avatar">
-                                    <img :src="item.avatar" alt="">
-                                </div>
-                                <div class="rongcloud-user">
-                                    <div class="name">
-                                        {{item.username}}
-                                    </div> 
-                                </div>
-                            </li>
-                        </ul>
-                        <p v-show="!hasSearchUser" style="text-align:center;">没有找到相关用户</p>
-                    </div>
-                    <ul class="rongcloud-conversation-list" v-if="conversationList.length">
-                        <li class="rongcloud-conversation" @click="changeUser(item,index)"  :class="{'active':targetId==item.userId}" v-for="(item,index) in conversationList" :key="index">
-                            <div class="avatar">
-                                <img :class="{'offline':item.online=='0'}" :src="item.avatar" alt="">
-                            </div>
-                            <div class="rongcloud-ext">
-                                <div class="rongcloud-attr clearfix">
-                                    <span class="rongcloud-badge" v-show="item.unreadMessageCount>0">{{item.unreadMessageCount>99?"99+":item.unreadMessageCount}}</span>
-                                </div>
-                            </div>
-                            <div class="rongcloud-user">
-                                <div class="name">
-                                    {{item.username}}
-                                    <p>
-                                        <!-- <i class="rongcloud-online online" v-show="item._target.online=='1'">[在线]</i> -->
-                                        <i class="rongcloud-online offline" v-show="item.online=='0'">[离线]</i>
-                                    </p>
-                                </div> 
-                                <div class="rongcloud-lasted-msg" v-if="item.latestMessage">
-                                    <span v-show="item.latestMessage.type=='Text'" :title="item.latestMessage.content">{{item.latestMessage.content}}</span>
-                                    <span v-show="item.latestMessage.type=='Image'">[图片]</span>
-                                    <span v-show="item.latestMessage.type=='File'">[文件]</span>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
+        <div class="">
+            <div class="block-header">
+                <div class="row">
+                    <div class="col-lg-5 col-md-8 col-sm-12">                        
+                        <h2>Chat</h2>
+                    </div>            
                 </div>
             </div>
-            <div class="rongcloud-right" v-show="targetId" v-loading="loading" element-loading-background="transparent" element-loading-text="加载中...">
-                <div class="rongcloud-rong-pannel layim-chat-main">
-                    <div class="rongcloud-rong-header">
-                         <div class="rongcloud-infoBar">
-                            <img :src="currentUser.avatar">
-                            <span socket-event="">{{currentUser.username}}</span>
-                        </div>
-                    </div>
-                    <div ref="messageList" class="rcs-message-list">
-                        <div class="rongcloud-Messages-history">
-                            <span v-show="messages.list.length&&messages.hasMore" @click="loadHisMessages">
-                                查看历史消息
-                            </span>
-                        </div>
-                        <ul class="rong-message-list">
-                            <li class="rongcloud-Message" :class="{'rongcloud-Message-send':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
-                                <div class="clearfix">
-                                    <div class="rongcloud-Message-user">
-                                        <img :src="item.sender.avatar" :alt="item.sender.username">
-                                        <cite>
-                                            <i>{{item.sendTime}}</i>
-                                            <span>{{item.sender.username}}</span>
-                                        </cite>
-                                    </div>
-                                    <div class="rongcloud-Message-body" >
-                                        <div v-if="item.type=='Text'" class="rongcloud-Message-text" >
-                                            <pre v-html="item.content"></pre>
+            <div class="row clearfix">
+                <div class="col-lg-12">
+                    <div class="chat-app">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-4">
+                                <div class="hidden-xs">
+                                    <div id="plist" class="people-list">
+                                        <div class="input-group p-3 bg-white border-bottom">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fa fa-search"></i></span>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder="Search...">
                                         </div>
-                                        <div v-if="item.type=='Image'" class="rongcloud-Message-text">
-                                            <img v-preview class="pointer" :src="item.content" style="max-width: 230px;max-height: 250px;">
-                                        </div>
-                                        <div class="rongcloud-Message-file" v-if="item.type=='File'">
-                                            <div class="rongcloud-sprite rongcloud-file-icon"></div>
-                                            <div class="rongcloud-file-name">{{transformJsonContent(item.content).fileName}}</div>
-                                            <div class="rongcloud-file-name">{{handleFileSize(transformJsonContent(item.content).fileSize)}}</div>
-                                            <a class="rongcloud-sprite rongcloud-file-download" :href="transformJsonContent(item.content).fileUrl"></a>
+                                        <div class="slimScrollDiv" style="position: relative; overflow-y: scroll; width: auto; height: calc(100vh - 220px);">
+                                            <ul v-if="conversationList.length" class="list-unstyled chat-list mt-2 mb-0">
+                                                <li @click="changeUser(item,index)" 
+                                                :class="{'active':targetId==item.userId}" v-for="(item,index) in conversationList" :key="index" class="clearfix">
+                                                    <div class="float-left list-left">
+                                                        <div class="img-preview">
+                                                            <img :src="item.avatar" alt="avatar">
+                                                            <div class="status" v-if="item.online==1"><i class="fa fa-circle online"></i></div>
+                                                        </div>
+                                                        <div class="about">
+                                                            <div class="name">{{item.username}}</div>
+                                                            <div class="msg">
+                                                                <span v-if="item.latestMessage&&item.latestMessage.type=='Text'" :title="item.latestMessage.content">{{item.latestMessage.content}}</span>
+                                                                <span v-if="item.latestMessage&&item.latestMessage.type=='Image'">[图片]</span>
+                                                                <span v-if="item.latestMessage&&item.latestMessage.type=='File'">[文件]</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <!-- <div class="time">latestMessage</div> -->
+                                                        <div class="badge badge-danger bg-danger text-white" v-if="item.unreadMessageCount>0">{{item.unreadMessageCount>99?"99+":item.unreadMessageCount}}</div>
+                                                    </div>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
-                            </li>
-                        </ul>
-                    </div>
-                    
-                </div>
-                <div class="rongcloud-rong-footer">
-                    <div class="chat-footer-con">
-                        <div class="rongcloud-footer-tools">
-                            <div class="rongcloud-MessageForm-tool">
-                                <i class="iconfont-emoji pointer" @click="toggleEmoji"></i>
-                                <div class="rongcloud-expressionWrap" v-show="showEmoji">
-                                    <span class="fl pointer" style="padding:5px;" @click="clickEmoji(item)" :title="item.symbol" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
-                                    </span>
+                            </div>
+                            <div class="col-lg-9 col-md-8" v-if="targetId">
+                                <div id="chat-left" class="chat bg-white">
+                                    <div class="chat-header clearfix">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <a href="javascript:void(0);">
+                                                    <img :src="currentUser.avatar" alt="avatar">
+                                                </a>
+                                                <div class="chat-about">
+                                                    <h6 class="m-b-0">{{currentUser.username}}</h6>
+                                                    <small>Last seen: 2 hours ago</small>
+                                                </div>
+                                            </div>
+                                           
+                                        </div>
+                                    </div>
+                                    <div class="chat-history" ref="messageList" style="position: relative; overflow-y: scroll; width: auto; height: calc(100vh - 380px);">
+                                        <div class="chat-Messages-history">
+                                            <span v-show="messages.list.length&&messages.hasMore" @click="loadHisMessages">
+                                                查看历史消息
+                                            </span>
+                                        </div>
+                                        <ul class="chat-history-list">
+                                            <li class="chat-Message-item" :class="{'chat-Message-item-send':item.messageDirection==1}"  v-for="(item,index) in messages.list" :key="index">
+                                                <div class="clearfix">
+                                                    <div class="chat-Message-item-user">
+                                                        <img :src="item.sender.avatar" :alt="item.sender.username">
+                                                        <cite>
+                                                            <i>{{item.sendTime}}</i>
+                                                        </cite>
+                                                    </div>
+                                                    <div class="chat-Message-item-body" >
+                                                        <div v-if="item.type=='Text'" class="chat-Message-item-text" >
+                                                            <pre v-html="item.content"></pre>
+                                                        </div>
+                                                        <div v-if="item.type=='Image'" class="chat-Message-item-text">
+                                                            <img v-preview class="pointer" :src="item.content" style="max-width: 230px;max-height: 250px;">
+                                                        </div>
+                                                        <div class="chat-Message-item-file" v-if="item.type=='File'">
+                                                            <div class="chat-sprite chat-file-icon"></div>
+                                                            <div class="chat-file-name">{{transformJsonContent(item.content).fileName}}</div>
+                                                            <div class="chat-file-name">{{handleFileSize(transformJsonContent(item.content).fileSize)}}</div>
+                                                            <a class="chat-sprite chat-file-download" :href="transformJsonContent(item.content).fileUrl"></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="chat-message clearfix">
+                                        <div class="chat-footer-tools">
+                                            <div class="chat-MessageForm-tool">
+                                                <i class="iconfont-emoji pointer" @click="toggleEmoji"></i>
+                                                <div class="chat-expressionWrap" v-show="showEmoji">
+                                                    <span class="fl pointer" style="padding:5px;" @click="clickEmoji(item)" :title="item.symbol" v-for="(item,index) in emojiList" :key="index" v-html="item.node.outerHTML">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="chat-MessageForm-tool">
+                                                <i class="iconfont-image pointer">
+                                                    <input accept="image/*" @change="uploadImg($event)"  type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                                </i>
+                                            </div>
+                                            <div class="chat-MessageForm-tool">
+                                                <i class="iconfont-file pointer">
+                                                    <input  type="file" @change="uploadFile($event)" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
+                                                </i>
+                                            </div>
+                                        </div>
+                                        <div class="input-group mb-0">
+                                            <textarea type="textarea" v-model="content" ref="content"
+                                            @keyup.enter="sendMessage"
+                                            @paste="handlePaste" class="form-control" placeholder="Enter text here..."/>
+                                            <div class="input-group-append"  @click="sendMessage">
+                                                <span class="input-group-text"><i class="fa fa-paper-plane"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="rongcloud-MessageForm-tool">
-                                <i class="iconfont-image pointer">
-                                    <input accept="image/*" @change="uploadImg($event)"  type="file" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
-                                </i>
-                            </div>
-                             <div class="rongcloud-MessageForm-tool">
-                                 <i class="iconfont-file pointer">
-                                    <input  type="file" @change="uploadFile($event)" style="position:absolute;width:100%;height:100%;opacity:0; cursor: pointer;">
-                                </i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="rongcloud-footer-textarea">
-                         <textarea
-                            type="textarea"
-                            placeholder="请输入内容"
-                            v-model="content"
-                            ref="content"
-                            @keyup.enter="sendMessage"
-                            @paste="handlePaste"
-                           > 
-                        </textarea>
-                    </div>
-                    <div class="rongcloud-MessageForm-bottom">
-                        <div class="rongcloud-MessageForm-send">
-                            <span class="rongcloud-MessageForm-send-btn" @click="sendMessage">发送</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-      
 
     </section>
 </template>
@@ -187,7 +183,6 @@ export default {
             targetId:'',
             conversationType:1,
             content:'',
-            
         };
     },
     mounted() {
@@ -282,7 +277,7 @@ export default {
             });
             this.getHistoryMessages()
             this.$router.push({
-                path:'/chatTest',
+                path:'/chat2',
                 query:{
                     conversationType:this.conversationType,
                     targetId:this.targetId
@@ -445,8 +440,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import './index.less';
-
+@import './chat.less';
 .iconfont-emoji{
     display: inline-block;
     width: 20px;
@@ -468,16 +462,4 @@ export default {
     background: url('../../assets/images/icon/file.png');
     cursor: pointer;
 }
-#chat_section{
-    // background: url('../../assets/images/chat_background.jpg');
-    // background-size: 1920px 1080px;
-    // background-repeat: no-repeat;
-}
-
-
-
-
-
-
-
 </style>

@@ -12,31 +12,31 @@
                 <div class="col-lg-3 col-md-5 col-sm-12">
                     <div class="card">
                         <div class="body">
-                            <h4>1TB <i class="fa fa-server float-right"></i></h4>
-                            <p class="mb-0">Storage <small class="text-muted float-right">of 1Tb</small></p>                            
-                            <el-progress :percentage="30" :show-text="false"></el-progress>
+                            <h4>{{bytesToSize(dataInfo.totalSize)}} <i class="fa fa-server float-right"></i></h4>
+                            <p class="mb-0">Storage <small class="text-muted float-right">of {{bytesToSize(dataInfo.allSize)}}</small></p>                            
+                            <el-progress :percentage="dataInfo.totalPercent" :show-text="false"></el-progress>
                         </div>
                     </div>
                     <div class="card modal-open m-b-5">
                         <div class="body">
-                            <h6>{{handleFileSize(dataInfo.docSize)}}</h6>
-                            <p class="mb-0">文档 <small class="text-muted float-right">of 1Tb</small></p>
+                            <h6>{{bytesToSize(dataInfo.docSize)}}</h6>
+                            <p class="mb-0">文档 <small class="text-muted float-right">of {{bytesToSize(dataInfo.docTotal)}}</small></p>
                         </div>
-                       
+                        <el-progress :percentage="dataInfo.docPercent" :show-text="false" color="#0E9BE2"></el-progress>
                     </div>
                     <div class="card modal-open m-b-5">
                         <div class="body">
-                            <h6>{{handleFileSize(dataInfo.mediaSize)}}</h6>
-                            <p class="mb-0">音/视频 <small class="text-muted float-right">of 1Tb</small></p>
+                            <h6>{{bytesToSize(dataInfo.mediaSize)}}</h6>
+                            <p class="mb-0">音/视频 <small class="text-muted float-right">of {{bytesToSize(dataInfo.mediaTotal)}}</small></p>
                         </div>
-                       
+                        <el-progress :percentage="dataInfo.mediaPercent" :show-text="false" color="#AB7DF6"></el-progress>
                     </div>
                     <div class="card modal-open">
                         <div class="body">
-                            <h6>{{handleFileSize(dataInfo.imageSize)}}</h6>
-                            <p class="mb-0">图片 <small class="text-muted float-right">of 1Tb</small></p>
+                            <h6>{{bytesToSize(dataInfo.imageSize)}}</h6>
+                            <p class="mb-0">图片 <small class="text-muted float-right">of {{bytesToSize(dataInfo.imageTotal)}}</small></p>
                         </div>
-                       
+                        <el-progress :percentage="dataInfo.imagePercent" :show-text="false" color="#7CAC25"></el-progress>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-7 col-sm-12">
@@ -52,7 +52,9 @@
 export default {
 	data() {
 		return {
-            dataInfo:{}
+            dataInfo:{
+                
+            }
 		}
 	},
 	created(){
@@ -62,18 +64,20 @@ export default {
         async getData(){
             let res = await this.$Api.getFileIndex();
             if(res.data.code==1){
-               this.dataInfo = res.data.data;
+                let retData = res.data.data;
+                let {docSize,mediaSize,imageSize,allSize} = retData;
+                this.dataInfo = {
+                   ...retData,
+                   totalSize:docSize+mediaSize+imageSize,
+                   totalPercent:(docSize+mediaSize+imageSize)/allSize*100,
+                   docPercent:docSize/retData.docTotal*100,
+                   mediaPercent:mediaSize/retData.mediaTotal*100,
+                   imagePercent:imageSize/retData.imageTotal*100,
+
+                }
             }else{
                 this.$message.error(res.data.message);
             }
-        },
-        handleFileSize(size){
-			let kb = size/1024;
-			if(kb<1024){
-				return kb.toFixed(2)+'KB';
-			}else{
-				return (kb/1024).toFixed(2)+'MB'
-			}
         },
 	}
 }

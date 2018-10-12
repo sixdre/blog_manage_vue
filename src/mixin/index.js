@@ -1,4 +1,4 @@
-import { hasPermission } from '@/utils';
+import { hasPermission, bytesToSize } from '@/utils';
 const common = {
     data() {
         return {
@@ -42,6 +42,9 @@ const common = {
 
     },
     methods: {
+        bytesToSize(size) {
+            return bytesToSize(size)
+        },
         hasPermission(data) {
             hasPermission(data)
         },

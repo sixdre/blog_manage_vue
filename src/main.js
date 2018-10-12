@@ -6,6 +6,7 @@ import App from './App'
 import router from './router'
 import api from './api/api'
 import store from './store'
+import '@/assets/css/frame.css';
 import 'font-awesome/css/font-awesome.min.css';
 import { MessageBox } from 'element-ui';
 import { formValidate, timeFormat } from '@/utils';
