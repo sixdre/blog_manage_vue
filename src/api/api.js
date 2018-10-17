@@ -33,7 +33,7 @@ export default {
     },
     //获取文章列表
     getArticleList(params) {
-        return $http.get('/api/articles', { params });
+        return $http.get('/sys/articles', { params });
     },
     //获取文章详情
     getArticleInfo(id) {

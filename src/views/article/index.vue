@@ -61,7 +61,7 @@
                                 <h2>Inbox</h2>
                                 <form class="ml-auto">
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Search Mail" aria-label="Search Mail" aria-describedby="search-mail">
+                                        <input type="text" class="form-control" placeholder="搜索文章标题或者作者">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="search-mail"><i class="icon-magnifier"></i></span>
                                         </div>
@@ -70,47 +70,19 @@
                             </div>
                             <div class="mail-action clearfix">
                                 <div class="pull-left">
-                                    <div class="fancy-checkbox d-inline-block">
-                                        <label>
-                                            <input class="select-all" type="checkbox" name="checkbox">
-                                            <span></span>
-                                        </label>
-                                    </div>
                                     <div class="btn-group">
-                                        <a href="javascript:void(0);" class="btn btn-outline-secondary btn-sm hidden-sm" @click="test">Refresh</a>
-                                        <a href="javascript:void(0);" class="btn btn-outline-secondary btn-sm hidden-sm">Archive</a>
-                                        <a href="javascript:void(0);" class="btn btn-outline-secondary btn-sm">Trash</a>
+                                        <a href="javascript:void(0);" class="btn btn-outline-secondary btn-sm hidden-sm" >刷新</a>
                                     </div>
-                                    <div class="btn-group">
-                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tags</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="javascript:void(0);">Tag 1</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Tag 2</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Tag 3</a>
-                                        </div>
-                                    </div>
-                                    <div class="btn-group">
-                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="javascript:void(0);">Mark as read</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Mark as unread</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Spam</a>
-                                            <div role="separator" class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="pull-right ml-auto">
-                                    <div class="pagination-email d-flex">
-                                        <p>1-50/295</p>
-                                        <div class="btn-group m-l-20">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm"><i class="fa fa-angle-left"></i></button>
-                                            <button type="button" class="btn btn-outline-secondary btn-sm"><i class="fa fa-angle-right"></i></button>
-                                        </div>
-                                    </div>
+                                    <el-dropdown>
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button">操作</button>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <div class="el-dropdown-menu__item" @click="onRemoveMulti">删除</div>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
                                 </div>
                             </div>
                             <div class="mail-list">
+                                <div class="text-center m-b-20" v-if="!dataList.length">暂无数据</div>
                                 <ul class="list-unstyled">
                                     <li class="clearfix" v-for="(item,index) in dataList" :key="index">
                                         <div class="mail-detail-left">
@@ -128,7 +100,7 @@
                                         </div>
                                         <div class="hover-action">
                                             <a class="btn btn-warning mr-2" href="javascript:void(0);"><i class="fa fa-archive"></i></a>
-                                            <button type="button" data-type="confirm" class="btn btn-danger js-sweetalert" title="Delete"><i class="fa fa-trash-o"></i></button>
+                                            <button type="button" @click="handleRemove(item._id)" data-type="confirm" class="btn btn-danger js-sweetalert" title="Delete"><i class="fa fa-trash-o"></i></button>
                                         </div>
                                     </li>
                                  
@@ -137,6 +109,17 @@
                             
                         </div>
                     </div>
+                    <div :span="24" class="page_toolbar">
+                        <el-pagination 
+                            layout="total, sizes,prev, pager, next,jumper"
+                            background
+                            @size-change="pageSizeChange"
+                            @current-change="pageChange" 
+                            :current-page.sync="pageParams.page"
+                            :page-size="pageParams.limit" 
+                            :total="pageParams.count" style="float:right;">
+                        </el-pagination>
+                    </div>	
                 </div>
             </div>            
         </div>
@@ -156,7 +139,7 @@ export default{
                 type:'',
                 author:'',
                 categoryId:'',
-                flag:2,
+                flag:3,
                 startTime:'',
                 endTime:''
             },
@@ -190,15 +173,43 @@ export default{
                 this.$message.error(res.data.message);
             }
         },
-        test(){
-            console.log(this.selectRows)
-        },
         changeTab(val,name){
             this.searchForm.type = '';
             this.searchForm[name] = val;
             this.pageParams.page=1;
             this.getData()
-        }
+        },
+        async removeData(ids) {
+            let res = await this.$Api['removeArticle'](ids);
+            if (res.data.code === 1) {
+                this.$message.success(res.data.message);
+                this.getData();
+            } else {
+                this.$message.error(res.data.message);
+            }
+        },
+        //删除
+        handleRemove(id) {
+            this.$removeDialog(() => {
+                this.removeData(id)
+            })
+        },
+        //批量删除
+        onRemoveMulti() {
+            if (!this.selectRows.length) {
+                return this.$message.warning('请选择所要删除的数据');
+            }
+            let params = this.selectRows.toString();
+            this.handleRemove(params);
+        },
+        pageChange(val) {
+            this.pageParams.page = val;
+            this.getData();
+        },
+        pageSizeChange(val) {
+            this.pageParams.limit = val;
+            this.getData();
+        },
 	}
 }
 
