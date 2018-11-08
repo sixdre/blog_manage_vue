@@ -144,7 +144,7 @@ export default {
 				content: '',
 				is_private:false,
 				allow_comment:true,
-				top:false,
+				top:0,
 				good:false,
 				img:''
 			},

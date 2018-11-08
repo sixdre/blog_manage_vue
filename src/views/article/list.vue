@@ -14,8 +14,8 @@
 						<el-option v-for="(item,index) in categories" :label="item.name" :value="item._id" :key="index"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="状态" prop="flag">
-					<el-select class="my_input" v-model="searchForm.flag" clearable placeholder="状态">
+				<el-form-item label="状态" prop="status">
+					<el-select class="my_input" v-model="searchForm.status" clearable placeholder="状态">
 						<el-option label="有效" :value="2"></el-option>
 						<el-option label="草稿" :value="1"></el-option>
 						<el-option label="已删除" :value="0"></el-option>
@@ -101,7 +101,7 @@ export default{
                 title:'',
                 author:'',
                 categoryId:'',
-                flag:2,
+                status:2,
                 startTime:'',
                 endTime:''
 			},

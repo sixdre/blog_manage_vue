@@ -139,7 +139,7 @@ export default{
                 type:'',
                 author:'',
                 categoryId:'',
-                flag:3,
+                status:3,
                 startTime:'',
                 endTime:''
             },
